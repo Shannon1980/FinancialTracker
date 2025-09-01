@@ -216,79 +216,53 @@ class SEASFinancialTracker:
         employees_df = st.session_state.employees
         
         if not employees_df.empty:
-            # Create metric cards
-            metric_cards = []
+            # Create metric cards using Streamlit columns
+            col1, col2, col3, col4 = st.columns(4)
             
             total_employees = len(employees_df)
             active_employees = len(employees_df[employees_df['Status'] == 'Active'])
             total_salary = employees_df['Current_Salary'].sum()
             avg_salary = employees_df['Current_Salary'].mean()
             
-            metric_cards.append(create_metric_card("Total Employees", total_employees, "+2 this month"))
-            metric_cards.append(create_metric_card("Active Employees", active_employees))
-            metric_cards.append(create_metric_card("Total Salary", f"${total_salary:,.0f}"))
-            metric_cards.append(create_metric_card("Avg Salary", f"${avg_salary:,.0f}"))
+            with col1:
+                st.metric("Total Employees", total_employees, "+2 this month")
+            with col2:
+                st.metric("Active Employees", active_employees)
+            with col3:
+                st.metric("Total Salary", f"${total_salary:,.0f}")
+            with col4:
+                st.metric("Avg Salary", f"${avg_salary:,.0f}")
             
-            # Create grid of metric cards
-            grid_html = f'''
-            <div class="section-grid">
-                {''.join(metric_cards)}
-            </div>
-            '''
+            # Add breakdown summary using Streamlit columns
+            st.markdown("### 📊 Employee Breakdown")
+            col1, col2, col3 = st.columns(3)
             
-            # Add breakdown summary
             employee_type_counts = employees_df['Employee_Type'].value_counts()
             status_counts = employees_df['Status'].value_counts()
             company_counts = employees_df['Company'].value_counts()
             
-            breakdown_html = '''
-            <div style="margin-top: 1.5rem;">
-                <div class="section-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div>
-                        <h4>👥 Employee Types</h4>
-            '''
+            with col1:
+                st.markdown("#### 👥 Employee Types")
+                for emp_type, count in employee_type_counts.items():
+                    type_icon = "👨‍💼" if emp_type == 'Employee' else "🏢"
+                    st.write(f"{type_icon} {emp_type}: {count}")
             
-            for emp_type, count in employee_type_counts.items():
-                type_icon = "👨‍💼" if emp_type == 'Employee' else "🏢"
-                breakdown_html += f'<p>{type_icon} {emp_type}: {count}</p>'
+            with col2:
+                st.markdown("#### 📊 Status")
+                for status, count in status_counts.items():
+                    status_icon = "🟢" if status == 'Active' else "🔴"
+                    st.write(f"{status_icon} {status}: {count}")
             
-            breakdown_html += '''
-                    </div>
-                    <div>
-                        <h4>📊 Status</h4>
-            '''
-            
-            for status, count in status_counts.items():
-                status_icon = "🟢" if status == 'Active' else "🔴"
-                breakdown_html += f'<p>{status_icon} {status}: {count}</p>'
-            
-            breakdown_html += '''
-                    </div>
-                    <div>
-                        <h4>🏢 Companies</h4>
-            '''
-            
-            for company, count in company_counts.items():
-                breakdown_html += f'<p>• {company}: {count}</p>'
-            
-            breakdown_html += '''
-                    </div>
-                </div>
-            </div>
-            '''
-            
-            return grid_html + breakdown_html
+            with col3:
+                st.markdown("#### 🏢 Companies")
+                for company, count in company_counts.items():
+                    st.write(f"• {company}: {count}")
         else:
-            return '<p>📝 No employees added yet. Use the sections below to add employees or upload data.</p>'
+            st.info("📝 No employees added yet. Use the sections below to add employees or upload data.")
     
     def _create_template_download_content(self):
         """Create content for template download section"""
-        content_html = '''
-        <div class="section-with-sidebar">
-            <div class="section-main">
-                <h4>📥 Download Employee Templates</h4>
-                <p>Choose from our professionally designed templates to ensure consistent data entry and maintain all required fields.</p>
-        '''
+        st.markdown("Choose from our professionally designed templates to ensure consistent data entry and maintain all required fields.")
         
         # Add template options using Streamlit
         col1, col2 = st.columns(2)
@@ -327,28 +301,23 @@ class SEASFinancialTracker:
                 except Exception as e:
                     st.error(f"Error generating template: {e}")
         
-        return '''
-            </div>
-            <div class="section-sidebar">
-                <h4>📋 Template Features</h4>
-                <ul>
-                    <li><strong>Standardized Format:</strong> Consistent data structure</li>
-                    <li><strong>Data Validation:</strong> Built-in field validation</li>
-                    <li><strong>Monthly Tracking:</strong> 24 monthly periods included</li>
-                    <li><strong>Professional Design:</strong> QuickBooks-inspired layout</li>
-                    <li><strong>Easy Import:</strong> Direct upload compatibility</li>
-                </ul>
-                
-                <h4>🎯 Best Practices</h4>
-                <ul>
-                    <li>Use consistent naming conventions</li>
-                    <li>Fill all required fields</li>
-                    <li>Validate salary ranges</li>
-                    <li>Check for duplicate entries</li>
-                </ul>
-            </div>
-        </div>
-        '''
+        # Template features
+        st.markdown("### 📋 Template Features")
+        st.markdown("""
+        - **Standardized Format:** Consistent data structure
+        - **Data Validation:** Built-in field validation
+        - **Monthly Tracking:** 24 monthly periods included
+        - **Professional Design:** QuickBooks-inspired layout
+        - **Easy Import:** Direct upload compatibility
+        """)
+        
+        st.markdown("### 🎯 Best Practices")
+        st.markdown("""
+        - Use consistent naming conventions
+        - Fill all required fields
+        - Validate salary ranges
+        - Check for duplicate entries
+        """)
     
     def _create_upload_content(self):
         """Create content for data upload section"""
@@ -734,67 +703,45 @@ class SEASFinancialTracker:
         sub_df = st.session_state.subcontractors
         
         if not sub_df.empty:
-            # Create metric cards
-            metric_cards = []
+            # Create metric cards using Streamlit columns
+            col1, col2, col3, col4 = st.columns(4)
             
             total_subcontractors = len(sub_df)
             total_hourly_rate = sub_df['Hourly_Rate'].sum()
             avg_hourly_rate = sub_df['Hourly_Rate'].mean()
             total_companies = len(sub_df['Company'].unique())
             
-            metric_cards.append(create_metric_card("Total Subcontractors", total_subcontractors))
-            metric_cards.append(create_metric_card("Total Hourly Rate", f"${total_hourly_rate:,.2f}"))
-            metric_cards.append(create_metric_card("Avg Hourly Rate", f"${avg_hourly_rate:,.2f}"))
-            metric_cards.append(create_metric_card("Unique Companies", total_companies))
+            with col1:
+                st.metric("Total Subcontractors", total_subcontractors)
+            with col2:
+                st.metric("Total Hourly Rate", f"${total_hourly_rate:,.2f}")
+            with col3:
+                st.metric("Avg Hourly Rate", f"${avg_hourly_rate:,.2f}")
+            with col4:
+                st.metric("Unique Companies", total_companies)
             
-            # Create grid of metric cards
-            grid_html = f'''
-            <div class="section-grid">
-                {''.join(metric_cards)}
-            </div>
-            '''
+            # Add breakdown summary using Streamlit columns
+            st.markdown("### 📊 Subcontractor Breakdown")
+            col1, col2 = st.columns(2)
             
-            # Add breakdown summary
             company_counts = sub_df['Company'].value_counts()
             lcat_counts = sub_df['LCAT'].value_counts()
             
-            breakdown_html = '''
-            <div style="margin-top: 1.5rem;">
-                <div class="section-grid" style="grid-template-columns: repeat(2, 1fr);">
-                    <div>
-                        <h4>🏢 Companies</h4>
-            '''
+            with col1:
+                st.markdown("#### 🏢 Companies")
+                for company, count in company_counts.items():
+                    st.write(f"• {company}: {count}")
             
-            for company, count in company_counts.items():
-                breakdown_html += f'<p>• {company}: {count}</p>'
-            
-            breakdown_html += '''
-                    </div>
-                    <div>
-                        <h4>🎯 LCATs</h4>
-            '''
-            
-            for lcat, count in lcat_counts.items():
-                breakdown_html += f'<p>• {lcat}: {count}</p>'
-            
-            breakdown_html += '''
-                    </div>
-                </div>
-            </div>
-            '''
-            
-            return grid_html + breakdown_html
+            with col2:
+                st.markdown("#### 📋 LCATs")
+                for lcat, count in lcat_counts.items():
+                    st.write(f"• {lcat}: {count}")
         else:
-            return '<p>📝 No subcontractors added yet. Use the sections below to add subcontractors.</p>'
+            st.info("📝 No subcontractors added yet. Use the sections below to add subcontractors.")
     
     def _create_add_subcontractor_content(self):
         """Create content for add new subcontractor section"""
-        content_html = '''
-        <div class="section-with-sidebar">
-            <div class="section-main">
-                <h4>➕ Add New Subcontractor</h4>
-                <p>Enter subcontractor information to add them to your project.</p>
-        '''
+        st.markdown("Enter subcontractor information to add them to your project.")
         
         # Add form using Streamlit
         col1, col2, col3 = st.columns(3)
@@ -824,26 +771,21 @@ class SEASFinancialTracker:
                 st.success(f"Added {new_name} to subcontractor list")
                 st.rerun()
         
-        return '''
-            </div>
-            <div class="section-sidebar">
-                <h4>📋 Required Fields</h4>
-                <ul>
-                    <li><strong>Name:</strong> Subcontractor's full name</li>
-                    <li><strong>Company:</strong> Company or organization</li>
-                    <li><strong>LCAT:</strong> Labor category or role</li>
-                    <li><strong>Hourly Rate:</strong> Rate per hour</li>
-                </ul>
-                
-                <h4>💡 Tips</h4>
-                <ul>
-                    <li>Use consistent naming conventions</li>
-                    <li>Verify hourly rates are accurate</li>
-                    <li>Include all required information</li>
-                </ul>
-            </div>
-        </div>
-        '''
+        # Required fields and tips
+        st.markdown("### 📋 Required Fields")
+        st.markdown("""
+        - **Name:** Subcontractor's full name
+        - **Company:** Company or organization
+        - **LCAT:** Labor category or role
+        - **Hourly Rate:** Rate per hour
+        """)
+        
+        st.markdown("### 💡 Tips")
+        st.markdown("""
+        - Use consistent naming conventions
+        - Verify hourly rates are accurate
+        - Include all required information
+        """)
     
     def _create_subcontractor_management_content(self):
         """Create content for subcontractor management section"""
@@ -1178,231 +1120,94 @@ class SEASFinancialTracker:
     def create_direct_labor_tab(self):
         """Create direct labor management tab with modular design"""
         
-        # Section 1: Employee Summary - Info Section
-        create_section(
-            title="📊 Employee Summary",
-            content=self._create_employee_summary_content(),
-            section_type="info",
-            status="active",
-            footer_content="Data refreshes automatically",
-            actions=[
-                {"type": "primary", "label": "Refresh Data"},
-                {"type": "secondary", "label": "Export Report"}
-            ]
-        )
+        # Section 1: Employee Summary
+        st.markdown("## 📊 Employee Summary")
+        self._create_employee_summary_content()
         
-        create_section_divider()
+        st.markdown("---")
         
-        # Section 2: Template Download - Success Section
-        create_section(
-            title="📋 Download Templates",
-            content=self._create_template_download_content(),
-            section_type="success",
-            status="ready"
-        )
+        # Section 2: Template Download
+        st.markdown("## 📋 Download Templates")
+        self._create_template_download_content()
         
-        create_section_divider()
+        st.markdown("---")
         
-        # Section 3: Data Upload - Warning Section
-        create_section(
-            title="📁 Data Upload",
-            content=self._create_upload_content(),
-            section_type="warning",
-            status="needs_review"
-        )
+        # Section 3: Data Upload
+        st.markdown("## 📁 Data Upload")
+        self._create_upload_content()
         
-        create_section_divider()
+        st.markdown("---")
         
-        # Section 4: Employee Management - Info Section
-        create_section(
-            title="👥 Employee Management",
-            content=self._create_employee_management_content(),
-            section_type="info",
-            status="active",
-            actions=[
-                {"type": "primary", "label": "Add Employee"},
-                {"type": "secondary", "label": "Bulk Edit"}
-            ]
-        )
+        # Section 4: Employee Management
+        st.markdown("## 👥 Employee Management")
+        self._create_employee_management_content()
         
-        create_section_divider()
+        st.markdown("---")
         
-        # Section 5: Employee Detail View - Info Section
-        create_section(
-            title="👁️ Employee Detail View",
-            content=self._create_employee_detail_content(),
-            section_type="info",
-            status="active"
-        )
-        
-        # Duplicate detection and management
-
-        
-
-        
-
+        # Section 5: Employee Detail View
+        st.markdown("## 👁️ Employee Detail View")
+        self._create_employee_detail_content()
         
         # Update calculations
         self.update_employee_calculations()
 
-        
-
-        
-
-
     def create_subcontractor_tab(self):
         """Create subcontractor management tab with modular design"""
         
-        # Get ODC data
-        odc_df = st.session_state.odc_costs
+        # Section 1: Subcontractor Summary
+        st.markdown("## 📊 Subcontractor Summary")
+        self._create_subcontractor_summary_content()
         
-        # Section 1: Subcontractor Summary - Info Section
-        create_section(
-            title="📊 Subcontractor Summary",
-            content=self._create_subcontractor_summary_content(),
-            section_type="info",
-            status="active",
-            footer_content="Data refreshes automatically",
-            actions=[
-                {"type": "primary", "label": "Refresh Data"},
-                {"type": "secondary", "label": "Export Report"}
-            ]
-        )
+        st.markdown("---")
         
-        create_section_divider()
+        # Section 2: Add New Subcontractor
+        st.markdown("## ➕ Add New Subcontractor")
+        self._create_add_subcontractor_content()
         
-        # Section 2: Add New Subcontractor - Success Section
-        create_section(
-            title="➕ Add New Subcontractor",
-            content=self._create_add_subcontractor_content(),
-            section_type="success",
-            status="ready"
-        )
+        st.markdown("---")
         
-        create_section_divider()
+        # Section 3: Subcontractor Management
+        st.markdown("## 👥 Subcontractor Management")
+        self._create_subcontractor_management_content()
         
-        # Section 3: Subcontractor Management - Info Section
-        create_section(
-            title="👥 Subcontractor Management",
-            content=self._create_subcontractor_management_content(),
-            section_type="info",
-            status="active",
-            actions=[
-                {"type": "primary", "label": "Edit Data"},
-                {"type": "secondary", "label": "Bulk Operations"}
-            ]
-        )
+        st.markdown("---")
         
-        create_section_divider()
+        # Section 4: Monthly Hours Management
+        st.markdown("## 📅 Monthly Hours Management")
+        self._create_subcontractor_hours_content()
         
-        # Section 4: Monthly Hours - Warning Section
-        create_section(
-            title="📅 Monthly Hours Management",
-            content=self._create_subcontractor_hours_content(),
-            section_type="warning",
-            status="needs_review"
-        )
+        st.markdown("---")
         
-        create_section_divider()
-        
-        # Section 5: ODC Management - Info Section
-        create_section(
-            title="🏗️ Other Direct Costs (ODC)",
-            content=self._create_odc_management_content(),
-            section_type="info",
-            status="active"
-        )
-        
-        # ODC removal section
-        st.markdown('<div class="subheader">🗑️ Remove ODC Entries</div>', unsafe_allow_html=True)
-        
-        if not odc_df.empty:
-            st.write("Select ODC entries to remove from the project:")
-            
-            # Create columns for better layout
-            col1, col2, col3 = st.columns([2, 1, 1])
-            
-            with col1:
-                # ODC selection dropdown
-                selected_odc = st.selectbox(
-                    "Choose ODC entry to remove:",
-                    options=[f"{row['Period']} - ${row['Amount']:,.2f}" for _, row in odc_df.iterrows()],
-                    key="odc_removal_select"
-                )
-            
-            with col2:
-                # Show ODC details
-                if selected_odc:
-                    period = selected_odc.split(" - ")[0]
-                    odc_data = odc_df[odc_df['Period'] == period].iloc[0]
-                    st.write(f"**Period:** {odc_data['Period']}")
-                    st.write(f"**Amount:** ${odc_data['Amount']:,.2f}")
-                    st.write(f"**Description:** {odc_data['Description']}")
-            
-            with col3:
-                # Remove button with confirmation
-                if selected_odc:
-                    if st.button("🗑️ Remove ODC", type="secondary", key="remove_odc_btn"):
-                        # Remove the ODC entry
-                        period = selected_odc.split(" - ")[0]
-                        st.session_state.odc_costs = st.session_state.odc_costs[
-                            st.session_state.odc_costs['Period'] != period
-                        ]
-                        st.success(f"✅ ODC entry for {period} has been removed from the project.")
-                        st.rerun()
-            
-            # Show current ODC count
-            st.info(f"📊 **Current ODC Entries:** {len(st.session_state.odc_costs)}")
-            
-            # Bulk removal section
-            st.markdown("---")
-            st.markdown("**Bulk Operations:**")
-            
-            # Clear all ODC entries (with confirmation)
-            if st.button("🗑️ Clear All ODC Entries", type="secondary", key="clear_all_odc_btn"):
-                st.warning("⚠️ This will remove ALL ODC entries from the project. This action cannot be undone.")
-                if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_odc_btn"):
-                    odc_count = len(st.session_state.odc_costs)
-                    st.session_state.odc_costs = pd.DataFrame(columns=st.session_state.odc_costs.columns)
-                    st.success(f"✅ Cleared all {odc_count} ODC entries from the project.")
-                    st.rerun()
-        else:
-            st.warning("⚠️ No ODC entries to remove.")
+        # Section 5: ODC Management
+        st.markdown("## 🏗️ Other Direct Costs (ODC)")
+        self._create_odc_management_content()
+
+
 
     def create_analysis_tab(self):
         """Create analysis and visualization tab with modular design"""
         
-        # Section 1: Revenue Trends - Success Section
-        create_section(
-            title="📈 Monthly Revenue Trends",
-            content=self._create_revenue_trends_content(),
-            section_type="success",
-            status="active"
-        )
+        # Section 1: Revenue Trends
+        st.markdown("## 📈 Monthly Revenue Trends")
+        self._create_revenue_trends_content()
         
-        # Section 2: Employee Utilization - Info Section
-        create_section(
-            title="🔥 Employee Hours Heatmap",
-            content=self._create_employee_heatmap_content(),
-            section_type="info",
-            status="active"
-        )
+        st.markdown("---")
         
-        # Section 3: Cost Analysis - Warning Section
-        create_section(
-            title="💰 Cost Analysis by Labor Category",
-            content=self._create_lcat_cost_analysis_content(),
-            section_type="warning",
-            status="active"
-        )
+        # Section 2: Employee Utilization
+        st.markdown("## 🔥 Employee Hours Heatmap")
+        self._create_employee_heatmap_content()
         
-        # Section 4: Burn Rate Analysis - Error Section
-        create_section(
-            title="⚡ Project Burn Rate Analysis",
-            content=self._create_burn_rate_content(),
-            section_type="error",
-            status="active"
-        )
+        st.markdown("---")
+        
+        # Section 3: Cost Analysis
+        st.markdown("## 💰 Cost Analysis by Labor Category")
+        self._create_lcat_cost_analysis_content()
+        
+        st.markdown("---")
+        
+        # Section 4: Burn Rate Analysis
+        st.markdown("## ⚡ Project Burn Rate Analysis")
+        self._create_burn_rate_content()
 
     def _create_revenue_trends_content(self):
         """Create content for revenue trends section"""
@@ -1545,37 +1350,27 @@ class SEASFinancialTracker:
     def create_tasks_tab(self):
         """Create task management tab with modular design"""
         
-        # Section 1: Add New Task - Success Section
-        create_section(
-            title="➕ Add New Task",
-            content=self._create_add_task_content(),
-            section_type="success",
-            status="active"
-        )
+        # Section 1: Add New Task
+        st.markdown("## ➕ Add New Task")
+        self._create_add_task_content()
         
-        # Section 2: Task Management - Info Section
-        create_section(
-            title="📝 Task Details & Management",
-            content=self._create_task_management_content(),
-            section_type="info",
-            status="active"
-        )
+        st.markdown("---")
         
-        # Section 3: Task Removal - Warning Section
-        create_section(
-            title="🗑️ Remove Tasks",
-            content=self._create_task_removal_content(),
-            section_type="warning",
-            status="active"
-        )
+        # Section 2: Task Management
+        st.markdown("## 📝 Task Details & Management")
+        self._create_task_management_content()
         
-        # Section 4: Task Summary & Analysis - Error Section
-        create_section(
-            title="📊 Task Summary & Analysis",
-            content=self._create_task_summary_content(),
-            section_type="error",
-            status="active"
-        )
+        st.markdown("---")
+        
+        # Section 3: Task Removal
+        st.markdown("## 🗑️ Remove Tasks")
+        self._create_task_removal_content()
+        
+        st.markdown("---")
+        
+        # Section 4: Task Summary & Analysis
+        st.markdown("## 📊 Task Summary & Analysis")
+        self._create_task_summary_content()
 
     def _create_add_task_content(self):
         """Create content for add new task section"""
