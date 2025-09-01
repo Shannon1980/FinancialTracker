@@ -545,6 +545,203 @@ class SEASFinancialTracker:
         
         return ""
 
+    def _create_editable_employee_profile_content(self):
+        """Create editable employee profile view"""
+        employees_df = st.session_state.employees
+        
+        if not employees_df.empty:
+            # Employee selector
+            selected_employee = st.selectbox(
+                "Select Employee to Edit:",
+                options=employees_df['Name'].tolist(),
+                key="editable_employee_selector"
+            )
+            
+            if selected_employee:
+                # Get employee data
+                employee_data = employees_df[employees_df['Name'] == selected_employee].iloc[0]
+                employee_index = employees_df[employees_df['Name'] == selected_employee].index[0]
+                
+                # Initialize session state for editing if not exists
+                if f'editing_employee_{selected_employee}' not in st.session_state:
+                    st.session_state[f'editing_employee_{selected_employee}'] = False
+                
+                # Toggle edit mode
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown(f"### 👤 Editing: {selected_employee}")
+                with col2:
+                    if st.button("✏️ Edit Profile", key=f"edit_btn_{selected_employee}"):
+                        st.session_state[f'editing_employee_{selected_employee}'] = True
+                        st.rerun()
+                
+                if st.session_state[f'editing_employee_{selected_employee}']:
+                    # Editable form
+                    with st.form(f"edit_employee_form_{selected_employee}"):
+                        st.markdown("#### 📋 Basic Information")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            new_name = st.text_input("Name", value=employee_data['Name'], key=f"name_{selected_employee}")
+                            new_lcat = st.selectbox(
+                                "LCAT", 
+                                options=["PM", "SA/Eng Lead", "AI Lead", "HCD Lead", "Scrum Master", "Cloud Data Engineer", "SRE", "Full Stack Dev"],
+                                index=["PM", "SA/Eng Lead", "AI Lead", "HCD Lead", "Scrum Master", "Cloud Data Engineer", "SRE", "Full Stack Dev"].index(employee_data['LCAT']) if employee_data['LCAT'] in ["PM", "SA/Eng Lead", "AI Lead", "HCD Lead", "Scrum Master", "Cloud Data Engineer", "SRE", "Full Stack Dev"] else 0,
+                                key=f"lcat_{selected_employee}"
+                            )
+                            new_employee_type = st.selectbox(
+                                "Employee Type",
+                                options=["Employee", "Subcontractor"],
+                                index=0 if employee_data['Employee_Type'] == 'Employee' else 1,
+                                key=f"employee_type_{selected_employee}"
+                            )
+                        
+                        with col2:
+                            new_company = st.selectbox(
+                                "Company",
+                                options=["Skyward IT Solutions", "BEELINE", "Self Employed", "Aquia", "Friends"],
+                                index=["Skyward IT Solutions", "BEELINE", "Self Employed", "Aquia", "Friends"].index(employee_data['Company']) if employee_data['Company'] in ["Skyward IT Solutions", "BEELINE", "Self Employed", "Aquia", "Friends"] else 0,
+                                key=f"company_{selected_employee}"
+                            )
+                            new_status = st.selectbox(
+                                "Status",
+                                options=["Active", "Inactive"],
+                                index=0 if employee_data['Status'] == 'Active' else 1,
+                                key=f"status_{selected_employee}"
+                            )
+                            new_hours_per_month = st.number_input(
+                                "Hours per Month",
+                                min_value=0,
+                                value=int(employee_data['Hours_Per_Month']),
+                                key=f"hours_per_month_{selected_employee}"
+                            )
+                        
+                        st.markdown("#### 💰 Financial Information")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            new_priced_salary = st.number_input(
+                                "Priced Salary",
+                                min_value=0.0,
+                                value=float(employee_data['Priced_Salary']),
+                                key=f"priced_salary_{selected_employee}"
+                            )
+                        with col2:
+                            new_current_salary = st.number_input(
+                                "Current Salary",
+                                min_value=0.0,
+                                value=float(employee_data['Current_Salary']),
+                                key=f"current_salary_{selected_employee}"
+                            )
+                        
+                        # Calculate new hourly rate
+                        new_hourly_rate = new_current_salary / (new_hours_per_month * 12) if new_hours_per_month > 0 else 0
+                        st.info(f"**Calculated Hourly Rate:** ${new_hourly_rate:.2f}")
+                        
+                        # Form buttons
+                        col1, col2, col3 = st.columns([1, 1, 2])
+                        with col1:
+                            save_clicked = st.form_submit_button("💾 Save Changes", type="primary")
+                        with col2:
+                            cancel_clicked = st.form_submit_button("❌ Cancel")
+                        
+                        if save_clicked:
+                            # Update employee data
+                            st.session_state.employees.at[employee_index, 'Name'] = new_name
+                            st.session_state.employees.at[employee_index, 'LCAT'] = new_lcat
+                            st.session_state.employees.at[employee_index, 'Employee_Type'] = new_employee_type
+                            st.session_state.employees.at[employee_index, 'Company'] = new_company
+                            st.session_state.employees.at[employee_index, 'Status'] = new_status
+                            st.session_state.employees.at[employee_index, 'Hours_Per_Month'] = new_hours_per_month
+                            st.session_state.employees.at[employee_index, 'Priced_Salary'] = new_priced_salary
+                            st.session_state.employees.at[employee_index, 'Current_Salary'] = new_current_salary
+                            st.session_state.employees.at[employee_index, 'Hourly_Rate'] = new_hourly_rate
+                            
+                            # Exit edit mode
+                            st.session_state[f'editing_employee_{selected_employee}'] = False
+                            st.success(f"✅ Successfully updated {new_name}'s profile!")
+                            st.rerun()
+                        
+                        if cancel_clicked:
+                            # Exit edit mode without saving
+                            st.session_state[f'editing_employee_{selected_employee}'] = False
+                            st.rerun()
+                else:
+                    # Read-only view
+                    col1, col2 = st.columns([1, 2])
+                    
+                    with col1:
+                        st.markdown("**📋 Basic Information**")
+                        st.write(f"**Name:** {employee_data['Name']}")
+                        st.write(f"**LCAT:** {employee_data['LCAT']}")
+                        st.write(f"**Employee Type:** {employee_data['Employee_Type']}")
+                        st.write(f"**Company:** {employee_data['Company']}")
+                        st.write(f"**Status:** {employee_data['Status']}")
+                        st.write(f"**Hours/Month:** {employee_data['Hours_Per_Month']}")
+                        
+                        # Status indicator
+                        status_color = "🟢" if employee_data['Status'] == 'Active' else "🔴"
+                        st.markdown(f"{status_color} **Status:** {employee_data['Status']}")
+                        
+                        # Employee type indicator
+                        type_icon = "👨‍💼" if employee_data['Employee_Type'] == 'Employee' else "🏢"
+                        st.markdown(f"{type_icon} **Type:** {employee_data['Employee_Type']}")
+                    
+                    with col2:
+                        st.markdown("**💰 Financial Information**")
+                        st.write(f"**Priced Salary:** ${employee_data['Priced_Salary']:,.2f}")
+                        st.write(f"**Current Salary:** ${employee_data['Current_Salary']:,.2f}")
+                        st.write(f"**Hourly Rate:** ${employee_data['Hourly_Rate']:,.2f}")
+                        
+                        # Salary comparison
+                        salary_diff = employee_data['Current_Salary'] - employee_data['Priced_Salary']
+                        if salary_diff != 0:
+                            diff_color = "🔴" if salary_diff > 0 else "🟢"
+                            st.write(f"{diff_color} **Salary Difference:** ${salary_diff:,.2f}")
+                    
+                    # Time period data
+                    st.markdown("**📅 Time Period Data**")
+                    
+                    # Get all time period columns
+                    hours_cols = [col for col in employees_df.columns if col.startswith('Hours_') and col != 'Hours_Per_Month']
+                    revenue_cols = [col for col in employees_df.columns if col.startswith('Revenue_')]
+                    
+                    if hours_cols:
+                        # Create time period summary
+                        period_data = []
+                        for hours_col in hours_cols:
+                            period_name = hours_col.replace('Hours_', '')
+                            hours = employee_data[hours_col]
+                            revenue = employee_data.get(f'Revenue_{period_name}', 0)
+                            period_data.append({
+                                'Period': period_name,
+                                'Hours': hours,
+                                'Revenue': revenue,
+                                'Rate': revenue / hours if hours > 0 else 0
+                            })
+                        
+                        period_df = pd.DataFrame(period_data)
+                        
+                        # Show summary statistics
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            total_hours = period_df['Hours'].sum()
+                            st.metric("Total Hours", f"{total_hours:.1f}")
+                        with col2:
+                            total_revenue = period_df['Revenue'].sum()
+                            st.metric("Total Revenue", f"${total_revenue:,.2f}")
+                        with col3:
+                            avg_hours = period_df['Hours'].mean()
+                            st.metric("Avg Hours/Period", f"{avg_hours:.1f}")
+                        with col4:
+                            avg_revenue = period_df['Revenue'].mean()
+                            st.metric("Avg Revenue/Period", f"${avg_revenue:,.2f}")
+                        
+                        # Show detailed period data
+                        with st.expander("📊 View All Time Periods"):
+                            st.dataframe(period_df, width='stretch')
+        else:
+            st.info("📝 No employees available for profile editing. Add employees first.")
+
     # ============================================================================
     # Overview Tab Content Helper Methods
     # ============================================================================
@@ -738,6 +935,133 @@ class SEASFinancialTracker:
                     st.write(f"• {lcat}: {count}")
         else:
             st.info("📝 No subcontractors added yet. Use the sections below to add subcontractors.")
+    
+    def _create_editable_subcontractor_profile_content(self):
+        """Create editable subcontractor profile view"""
+        sub_df = st.session_state.subcontractors
+        
+        if not sub_df.empty:
+            # Subcontractor selector
+            selected_subcontractor = st.selectbox(
+                "Select Subcontractor to Edit:",
+                options=sub_df['Name'].tolist(),
+                key="editable_subcontractor_selector"
+            )
+            
+            if selected_subcontractor:
+                # Get subcontractor data
+                sub_data = sub_df[sub_df['Name'] == selected_subcontractor].iloc[0]
+                sub_index = sub_df[sub_df['Name'] == selected_subcontractor].index[0]
+                
+                # Initialize session state for editing if not exists
+                if f'editing_subcontractor_{selected_subcontractor}' not in st.session_state:
+                    st.session_state[f'editing_subcontractor_{selected_subcontractor}'] = False
+                
+                # Toggle edit mode
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown(f"### 🏢 Editing: {selected_subcontractor}")
+                with col2:
+                    if st.button("✏️ Edit Profile", key=f"edit_sub_btn_{selected_subcontractor}"):
+                        st.session_state[f'editing_subcontractor_{selected_subcontractor}'] = True
+                        st.rerun()
+                
+                if st.session_state[f'editing_subcontractor_{selected_subcontractor}']:
+                    # Editable form
+                    with st.form(f"edit_subcontractor_form_{selected_subcontractor}"):
+                        st.markdown("#### 📋 Basic Information")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            new_name = st.text_input("Name", value=sub_data['Name'], key=f"sub_name_{selected_subcontractor}")
+                            new_company = st.text_input("Company", value=sub_data['Company'], key=f"sub_company_{selected_subcontractor}")
+                        
+                        with col2:
+                            new_lcat = st.text_input("LCAT/Role", value=sub_data['LCAT'], key=f"sub_lcat_{selected_subcontractor}")
+                            new_hourly_rate = st.number_input(
+                                "Hourly Rate",
+                                min_value=0.0,
+                                value=float(sub_data['Hourly_Rate']),
+                                key=f"sub_hourly_rate_{selected_subcontractor}"
+                            )
+                        
+                        # Form buttons
+                        col1, col2, col3 = st.columns([1, 1, 2])
+                        with col1:
+                            save_clicked = st.form_submit_button("💾 Save Changes", type="primary")
+                        with col2:
+                            cancel_clicked = st.form_submit_button("❌ Cancel")
+                        
+                        if save_clicked:
+                            # Update subcontractor data
+                            st.session_state.subcontractors.at[sub_index, 'Name'] = new_name
+                            st.session_state.subcontractors.at[sub_index, 'Company'] = new_company
+                            st.session_state.subcontractors.at[sub_index, 'LCAT'] = new_lcat
+                            st.session_state.subcontractors.at[sub_index, 'Hourly_Rate'] = new_hourly_rate
+                            
+                            # Exit edit mode
+                            st.session_state[f'editing_subcontractor_{selected_subcontractor}'] = False
+                            st.success(f"✅ Successfully updated {new_name}'s profile!")
+                            st.rerun()
+                        
+                        if cancel_clicked:
+                            # Exit edit mode without saving
+                            st.session_state[f'editing_subcontractor_{selected_subcontractor}'] = False
+                            st.rerun()
+                else:
+                    # Read-only view
+                    col1, col2 = st.columns([1, 2])
+                    
+                    with col1:
+                        st.markdown("**📋 Basic Information**")
+                        st.write(f"**Name:** {sub_data['Name']}")
+                        st.write(f"**Company:** {sub_data['Company']}")
+                        st.write(f"**LCAT/Role:** {sub_data['LCAT']}")
+                        st.write(f"**Hourly Rate:** ${sub_data['Hourly_Rate']:.2f}")
+                    
+                    with col2:
+                        st.markdown("**📊 Time Period Data**")
+                        
+                        # Get all time period columns
+                        hours_cols = [col for col in sub_df.columns if col.startswith('Hours_')]
+                        revenue_cols = [col for col in sub_df.columns if col.startswith('Revenue_')]
+                        
+                        if hours_cols:
+                            # Create time period summary
+                            period_data = []
+                            for hours_col in hours_cols:
+                                period_name = hours_col.replace('Hours_', '')
+                                hours = sub_data[hours_col]
+                                revenue = sub_data.get(f'Revenue_{period_name}', 0)
+                                period_data.append({
+                                    'Period': period_name,
+                                    'Hours': hours,
+                                    'Revenue': revenue,
+                                    'Rate': revenue / hours if hours > 0 else 0
+                                })
+                            
+                            period_df = pd.DataFrame(period_data)
+                            
+                            # Show summary statistics
+                            col1, col2, col3, col4 = st.columns(4)
+                            with col1:
+                                total_hours = period_df['Hours'].sum()
+                                st.metric("Total Hours", f"{total_hours:.1f}")
+                            with col2:
+                                total_revenue = period_df['Revenue'].sum()
+                                st.metric("Total Revenue", f"${total_revenue:,.2f}")
+                            with col3:
+                                avg_hours = period_df['Hours'].mean()
+                                st.metric("Avg Hours/Period", f"{avg_hours:.1f}")
+                            with col4:
+                                avg_revenue = period_df['Revenue'].mean()
+                                st.metric("Avg Revenue/Period", f"${avg_revenue:,.2f}")
+                            
+                            # Show detailed period data
+                            with st.expander("📊 View All Time Periods"):
+                                st.dataframe(period_df, width='stretch')
+        else:
+            st.info("📝 No subcontractors available for profile editing. Add subcontractors first.")
     
     def _create_add_subcontractor_content(self):
         """Create content for add new subcontractor section"""
@@ -1148,6 +1472,12 @@ class SEASFinancialTracker:
         st.markdown("## 👁️ Employee Detail View")
         self._create_employee_detail_content()
         
+        st.markdown("---")
+        
+        # Section 6: Editable Employee Profiles
+        st.markdown("## ✏️ Editable Employee Profiles")
+        self._create_editable_employee_profile_content()
+        
         # Update calculations
         self.update_employee_calculations()
 
@@ -1181,6 +1511,12 @@ class SEASFinancialTracker:
         # Section 5: ODC Management
         st.markdown("## 🏗️ Other Direct Costs (ODC)")
         self._create_odc_management_content()
+        
+        st.markdown("---")
+        
+        # Section 6: Editable Subcontractor Profiles
+        st.markdown("## ✏️ Editable Subcontractor Profiles")
+        self._create_editable_subcontractor_profile_content()
 
 
 
