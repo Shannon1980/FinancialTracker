@@ -404,16 +404,16 @@ class SEASFinancialTracker:
     def create_sample_employees(self) -> pd.DataFrame:
         """Create sample employee data based on SEAS spreadsheet"""
         employees = [
-            {"Name": "Shannon Gueringer", "LCAT": "PM", "Priced_Salary": 160000, "Current_Salary": 200000, "Hours_Per_Month": 173},
-            {"Name": "Drew Hynes", "LCAT": "PM", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
-            {"Name": "Uyen Tran", "LCAT": "SA/Eng Lead", "Priced_Salary": 180000, "Current_Salary": 175000, "Hours_Per_Month": 173},
-            {"Name": "Leo Khan", "LCAT": "SA/Eng Lead", "Priced_Salary": 180000, "Current_Salary": 190000, "Hours_Per_Month": 173},
-            {"Name": "Vitaliy Baklikov", "LCAT": "AI Lead", "Priced_Salary": 200000, "Current_Salary": 250000, "Hours_Per_Month": 173},
-            {"Name": "Kenny Tran/Lynn Stahl", "LCAT": "HCD Lead", "Priced_Salary": 130000, "Current_Salary": 150000, "Hours_Per_Month": 173},
-            {"Name": "Emilio Crocco", "LCAT": "Scrum Master", "Priced_Salary": 110000, "Current_Salary": 110000, "Hours_Per_Month": 173},
-            {"Name": "Robert Melton", "LCAT": "SA/Eng Lead", "Priced_Salary": 230000, "Current_Salary": 225000, "Hours_Per_Month": 173},
-            {"Name": "Nayeema Nageen", "LCAT": "Scrum Master", "Priced_Salary": 140000, "Current_Salary": 140000, "Hours_Per_Month": 173},
-            {"Name": "Daniil Goryachev", "LCAT": "Cloud Data Engineer", "Priced_Salary": 90000, "Current_Salary": 90000, "Hours_Per_Month": 173},
+            {"Name": "Shannon Gueringer", "LCAT": "PM", "Status": "Active", "Priced_Salary": 160000, "Current_Salary": 200000, "Hours_Per_Month": 173},
+            {"Name": "Drew Hynes", "LCAT": "PM", "Status": "Inactive", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
+            {"Name": "Uyen Tran", "LCAT": "SA/Eng Lead", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 175000, "Hours_Per_Month": 173},
+            {"Name": "Leo Khan", "LCAT": "SA/Eng Lead", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 190000, "Hours_Per_Month": 173},
+            {"Name": "Vitaliy Baklikov", "LCAT": "AI Lead", "Status": "Active", "Priced_Salary": 200000, "Current_Salary": 250000, "Hours_Per_Month": 173},
+            {"Name": "Kenny Tran/Lynn Stahl", "LCAT": "HCD Lead", "Status": "Active", "Priced_Salary": 130000, "Current_Salary": 150000, "Hours_Per_Month": 173},
+            {"Name": "Emilio Crocco", "LCAT": "Scrum Master", "Status": "Active", "Priced_Salary": 110000, "Current_Salary": 110000, "Hours_Per_Month": 173},
+            {"Name": "Robert Melton", "LCAT": "SA/Eng Lead", "Status": "Active", "Priced_Salary": 230000, "Current_Salary": 225000, "Hours_Per_Month": 173},
+            {"Name": "Nayeema Nageen", "LCAT": "Scrum Master", "Status": "Active", "Priced_Salary": 140000, "Current_Salary": 140000, "Hours_Per_Month": 173},
+            {"Name": "Daniil Goryachev", "LCAT": "Cloud Data Engineer", "Status": "Active", "Priced_Salary": 90000, "Current_Salary": 90000, "Hours_Per_Month": 173},
         ]
         
         df = pd.DataFrame(employees)
@@ -828,14 +828,29 @@ class SEASFinancialTracker:
             with col1:
                 st.metric("Total Employees", len(employees_df))
             with col2:
-                unique_lcats = employees_df['LCAT'].nunique()
-                st.metric("Unique LCATs", unique_lcats)
+                active_employees = len(employees_df[employees_df['Status'] == 'Active'])
+                st.metric("Active Employees", active_employees)
             with col3:
                 total_salary = employees_df['Current_Salary'].sum()
                 st.metric("Total Salary", f"${total_salary:,.0f}")
             with col4:
                 avg_salary = employees_df['Current_Salary'].mean()
                 st.metric("Avg Salary", f"${avg_salary:,.0f}")
+            
+            # Status breakdown
+            col1, col2 = st.columns(2)
+            with col1:
+                status_counts = employees_df['Status'].value_counts()
+                st.markdown("**📊 Status Breakdown**")
+                for status, count in status_counts.items():
+                    status_icon = "🟢" if status == 'Active' else "🔴"
+                    st.write(f"{status_icon} {status}: {count}")
+            
+            with col2:
+                lcat_counts = employees_df['LCAT'].value_counts()
+                st.markdown("**👥 LCAT Distribution**")
+                for lcat, count in lcat_counts.items():
+                    st.write(f"• {lcat}: {count}")
         else:
             st.info("📝 No employees added yet. Use the form below or upload a template to get started.")
         
@@ -846,6 +861,7 @@ class SEASFinancialTracker:
                 new_name = st.text_input("Name")
                 new_lcat = st.selectbox("LCAT", ["PM", "SA/Eng Lead", "AI Lead", "HCD Lead", 
                                                 "Scrum Master", "Cloud Data Engineer", "SRE", "Full Stack Dev"])
+                new_status = st.selectbox("Status", ["Active", "Inactive"])
             with col2:
                 new_priced_salary = st.number_input("Priced Salary", min_value=0, value=100000)
                 new_current_salary = st.number_input("Current Salary", min_value=0, value=100000)
@@ -861,6 +877,7 @@ class SEASFinancialTracker:
                     new_employee = {
                         "Name": new_name,
                         "LCAT": new_lcat,
+                        "Status": new_status,
                         "Priced_Salary": new_priced_salary,
                         "Current_Salary": new_current_salary,
                         "Hours_Per_Month": new_hours_per_month,
@@ -884,7 +901,7 @@ class SEASFinancialTracker:
         
         # Basic employee info
         st.markdown('<div class="subheader">ℹ️ Employee Information</div>', unsafe_allow_html=True)
-        basic_columns = ["Name", "LCAT", "Priced_Salary", "Current_Salary", "Hours_Per_Month", "Hourly_Rate"]
+        basic_columns = ["Name", "LCAT", "Status", "Priced_Salary", "Current_Salary", "Hours_Per_Month", "Hourly_Rate"]
         
         edited_basic = st.data_editor(
             employees_df[basic_columns],
@@ -900,6 +917,126 @@ class SEASFinancialTracker:
         # Update the main dataframe
         for col in basic_columns:
             st.session_state.employees[col] = edited_basic[col]
+        
+        # Employee detail view
+        st.markdown('<div class="subheader">👁️ Employee Detail View</div>', unsafe_allow_html=True)
+        
+        if not employees_df.empty:
+            # Employee selector
+            selected_employee = st.selectbox(
+                "Select Employee to View Details:",
+                options=employees_df['Name'].tolist(),
+                key="employee_detail_selector"
+            )
+            
+            if selected_employee:
+                # Get employee data
+                employee_data = employees_df[employees_df['Name'] == selected_employee].iloc[0]
+                
+                # Create detail view
+                col1, col2 = st.columns([1, 2])
+                
+                with col1:
+                    st.markdown("**📋 Basic Information**")
+                    st.write(f"**Name:** {employee_data['Name']}")
+                    st.write(f"**LCAT:** {employee_data['LCAT']}")
+                    st.write(f"**Status:** {employee_data['Status']}")
+                    st.write(f"**Hours/Month:** {employee_data['Hours_Per_Month']}")
+                    
+                    # Status indicator
+                    status_color = "🟢" if employee_data['Status'] == 'Active' else "🔴"
+                    st.markdown(f"{status_color} **Status:** {employee_data['Status']}")
+                
+                with col2:
+                    st.markdown("**💰 Financial Information**")
+                    st.write(f"**Priced Salary:** ${employee_data['Priced_Salary']:,.2f}")
+                    st.write(f"**Current Salary:** ${employee_data['Current_Salary']:,.2f}")
+                    st.write(f"**Hourly Rate:** ${employee_data['Hourly_Rate']:,.2f}")
+                    
+                    # Salary comparison
+                    salary_diff = employee_data['Current_Salary'] - employee_data['Priced_Salary']
+                    if salary_diff != 0:
+                        diff_color = "🔴" if salary_diff > 0 else "🟢"
+                        st.write(f"{diff_color} **Salary Difference:** ${salary_diff:,.2f}")
+                
+                # Time period data
+                st.markdown("**📅 Time Period Data**")
+                
+                # Get all time period columns
+                hours_cols = [col for col in employees_df.columns if col.startswith('Hours_') and col != 'Hours_Per_Month']
+                revenue_cols = [col for col in employees_df.columns if col.startswith('Revenue_')]
+                
+                if hours_cols:
+                    # Create time period summary
+                    period_data = []
+                    for hours_col in hours_cols:
+                        period_name = hours_col.replace('Hours_', '')
+                        hours = employee_data[hours_col]
+                        revenue = employee_data.get(f'Revenue_{period_name}', 0)
+                        period_data.append({
+                            'Period': period_name,
+                            'Hours': hours,
+                            'Revenue': revenue,
+                            'Rate': revenue / hours if hours > 0 else 0
+                        })
+                    
+                    period_df = pd.DataFrame(period_data)
+                    
+                    # Show summary statistics
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        total_hours = period_df['Hours'].sum()
+                        st.metric("Total Hours", f"{total_hours:.1f}")
+                    with col2:
+                        total_revenue = period_df['Revenue'].sum()
+                        st.metric("Total Revenue", f"${total_revenue:,.2f}")
+                    with col3:
+                        avg_hours = period_df['Hours'].mean()
+                        st.metric("Avg Hours/Period", f"{avg_hours:.1f}")
+                    with col4:
+                        avg_revenue = period_df['Revenue'].mean()
+                        st.metric("Avg Revenue/Period", f"${avg_revenue:,.2f}")
+                    
+                    # Show detailed period data
+                    with st.expander("📊 View All Time Periods"):
+                        st.dataframe(period_df, use_container_width=True)
+                        
+                        # Create visualization
+                        if not period_df.empty:
+                            fig = go.Figure()
+                            
+                            # Add hours bar chart
+                            fig.add_trace(go.Bar(
+                                x=period_df['Period'],
+                                y=period_df['Hours'],
+                                name='Hours',
+                                yaxis='y',
+                                marker_color='#2E5BBA'
+                            ))
+                            
+                            # Add revenue line chart
+                            fig.add_trace(go.Scatter(
+                                x=period_df['Period'],
+                                y=period_df['Revenue'],
+                                name='Revenue',
+                                yaxis='y2',
+                                line=dict(color='#FF6B35', width=3)
+                            ))
+                            
+                            fig.update_layout(
+                                title=f'Time Period Data for {selected_employee}',
+                                xaxis=dict(title='Period'),
+                                yaxis=dict(title='Hours', side='left'),
+                                yaxis2=dict(title='Revenue ($)', side='right', overlaying='y'),
+                                plot_bgcolor='rgba(0,0,0,0)',
+                                paper_bgcolor='rgba(0,0,0,0)',
+                                font=dict(size=12),
+                                margin=dict(t=50, l=50, r=50, b=50)
+                            )
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("📝 No employees to view. Add employees first to see detailed information.")
         
         # Duplicate detection and management
         st.markdown('<div class="subheader">🔍 Duplicate Detection</div>', unsafe_allow_html=True)
@@ -1689,6 +1826,8 @@ class SEASFinancialTracker:
             df_upload['Priced_Salary'] = df_upload['Current_Salary']
         if 'Hours_Per_Month' not in df_upload.columns:
             df_upload['Hours_Per_Month'] = 173
+        if 'Status' not in df_upload.columns:
+            df_upload['Status'] = 'Active'
         
         # Calculate hourly rates
         df_upload['Hourly_Rate'] = df_upload.apply(

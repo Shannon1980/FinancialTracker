@@ -34,7 +34,8 @@ def _generate_basic_template() -> Tuple[bytes, str]:
         'LCAT': ['PM', 'SA/Eng Lead', 'AI Lead'],
         'Priced_Salary': [150000, 180000, 200000],
         'Current_Salary': [160000, 175000, 250000],
-        'Hours_Per_Month': [173, 173, 173]
+        'Hours_Per_Month': [173, 173, 173],
+        'Status': ['Active', 'Active', 'Active']
     }
     
     df = pd.DataFrame(data)
@@ -64,14 +65,15 @@ def _generate_basic_template() -> Tuple[bytes, str]:
         
         # Add instructions sheet
         instructions = {
-            'Field': ['Name', 'LCAT', 'Priced_Salary', 'Current_Salary', 'Hours_Per_Month'],
-            'Required': ['Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
+            'Field': ['Name', 'LCAT', 'Priced_Salary', 'Current_Salary', 'Hours_Per_Month', 'Status'],
+            'Required': ['Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
             'Description': [
                 'Full name of the employee',
                 'Labor Category (PM, SA/Eng Lead, AI Lead, etc.)',
                 'Original budgeted salary for the project',
                 'Current actual salary being paid',
-                'Standard hours worked per month (typically 173)'
+                'Standard hours worked per month (typically 173)',
+                'Employee status (Active or Inactive)'
             ]
         }
         
@@ -94,6 +96,7 @@ def _generate_comprehensive_template() -> Tuple[bytes, str]:
         'Priced_Salary': [160000, 0, 180000, 180000, 200000],
         'Current_Salary': [200000, 0, 175000, 190000, 250000],
         'Hours_Per_Month': [173, 173, 173, 173, 173],
+        'Status': ['Active', 'Inactive', 'Active', 'Active', 'Active'],
         'Department': ['Management', 'Management', 'Engineering', 'Engineering', 'AI/ML'],
         'Start_Date': ['2024-01-15', '2024-02-01', '2024-01-20', '2024-01-25', '2024-01-10'],
         'Location': ['Remote', 'Remote', 'Remote', 'Remote', 'Remote'],
@@ -129,14 +132,15 @@ def _generate_comprehensive_template() -> Tuple[bytes, str]:
         
         # Instructions sheet
         instructions = {
-            'Field': ['Name', 'LCAT', 'Priced_Salary', 'Current_Salary', 'Hours_Per_Month', 'Department', 'Start_Date', 'Location', 'Manager', 'Skills'],
-            'Required': ['Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'No', 'No', 'No', 'No', 'No'],
+            'Field': ['Name', 'LCAT', 'Priced_Salary', 'Current_Salary', 'Hours_Per_Month', 'Status', 'Department', 'Start_Date', 'Location', 'Manager', 'Skills'],
+            'Required': ['Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'No', 'No', 'No', 'No', 'No'],
             'Description': [
                 'Full name of the employee',
                 'Labor Category (PM, SA/Eng Lead, AI Lead, etc.)',
                 'Original budgeted salary for the project',
                 'Current actual salary being paid',
                 'Standard hours worked per month (typically 173)',
+                'Employee status (Active or Inactive)',
                 'Department or team assignment',
                 'Employee start date (YYYY-MM-DD format)',
                 'Work location (Remote, On-site, Hybrid)',
@@ -149,16 +153,18 @@ def _generate_comprehensive_template() -> Tuple[bytes, str]:
         instructions_df.to_excel(writer, sheet_name='Instructions', index=False)
         
         # Validation options sheet
-        max_length = max(8, 8, 4)  # Max length of the arrays
+        max_length = max(8, 8, 4, 2)  # Max length of the arrays
         
         lcat_options = ['PM', 'SA/Eng Lead', 'AI Lead', 'HCD Lead', 'Scrum Master', 'Cloud Data Engineer', 'SRE', 'Full Stack Dev'] + [''] * (max_length - 8)
         dept_options = ['Management', 'Engineering', 'AI/ML', 'Design', 'Agile', 'Data Engineering', 'DevOps', 'Business'] + [''] * (max_length - 8)
         loc_options = ['Remote', 'On-site', 'Hybrid', 'Travel'] + [''] * (max_length - 4)
+        status_options = ['Active', 'Inactive'] + [''] * (max_length - 2)
         
         validation = {
             'LCAT_Options': lcat_options,
             'Department_Options': dept_options,
-            'Location_Options': loc_options
+            'Location_Options': loc_options,
+            'Status_Options': status_options
         }
         
         validation_df = pd.DataFrame(validation)
