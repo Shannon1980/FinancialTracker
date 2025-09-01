@@ -1182,82 +1182,19 @@ class SEASFinancialTracker:
 
 
         
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown(f"""
-            <div class="financial-card">
-                <h3>💸 Costs Breakdown</h3>
-                <div class="financial-item">
-                    <span>👥 Direct Labor</span>
-                    <strong>${total_direct_labor:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>🏗️ ODC</span>
-                    <strong>${total_odc:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>🤝 Subcontractor</span>
-                    <strong>${total_subcontractor:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>🎯 Fringe</span>
-                    <strong>${indirect_costs['Fringe']:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>🏢 Overhead</span>
-                    <strong>${indirect_costs['Overhead']:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>📈 G&A</span>
-                    <strong>${indirect_costs['G&A']:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>Total Costs</span>
-                    <strong>${total_costs:,.2f}</strong>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with col2:
-            profit_loss = recalculated_revenue - total_costs
-            profit_color = "#27ae60" if profit_loss >= 0 else "#e74c3c"
-            st.markdown(f"""
-            <div class="financial-card">
-                <h3>📊 Revenue Analysis</h3>
-                <div class="financial-item">
-                    <span>💰 Total Transaction Price</span>
-                    <strong>${total_transaction_price:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>📈 Recalculated Revenue</span>
-                    <strong>${recalculated_revenue:,.2f}</strong>
-                </div>
-                <div class="financial-item">
-                    <span>Profit/Loss</span>
-                    <strong style="color: {profit_color};">${profit_loss:,.2f}</strong>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            if recalculated_revenue > 0:
-                margin = (profit_loss / recalculated_revenue) * 100
-                margin_color = "#27ae60" if margin >= 0 else "#e74c3c"
-                st.markdown(f"""
-                <div style="background: #f8f9fa; padding: 1.2rem; border-radius: 8px; margin-top: 1rem; text-align: center; border: 1px solid #e9ecef;">
-                    <div style="font-size: 1.1rem; font-weight: 600; color: {margin_color};">Profit Margin: {margin:.2f}%</div>
-                </div>
-                """, unsafe_allow_html=True)
 
-        # Cost breakdown chart
-        cost_data = {
-            'Category': ['Direct Labor', 'ODC', 'Subcontractor', 'Fringe', 'Overhead', 'G&A'],
-            'Amount': [total_direct_labor, total_odc, total_subcontractor, 
-                      indirect_costs['Fringe'], indirect_costs['Overhead'], indirect_costs['G&A']]
-        }
-        
-        fig = px.pie(pd.DataFrame(cost_data), values='Amount', names='Category', 
-                     title="Cost Breakdown by Category")
-        st.plotly_chart(fig, width='stretch')
+
+
+
+
+
+
+
+
+
+
+
+
 
     def create_direct_labor_tab(self):
         """Create direct labor management tab with modular design"""
@@ -1328,36 +1265,6 @@ class SEASFinancialTracker:
         
         # Update calculations
         self.update_employee_calculations()
-        
-        # Monthly hours input - show in sections
-
-
-        
-        # Option Year 1 hours
-        if len(st.session_state.time_periods) > 12:
-    
-            oy1_periods = st.session_state.time_periods[12:]
-            oy1_columns = [f'Hours_{period}' for period in oy1_periods]
-            
-            if all(col in employees_df.columns for col in oy1_columns):
-                oy1_data = employees_df[["Name"] + oy1_columns].copy()
-                
-                edited_oy1 = st.data_editor(
-                    oy1_data,
-                    column_config={col: st.column_config.NumberColumn(period, format="%.1f") 
-                                  for col, period in zip(oy1_columns, oy1_periods)},
-                    width='stretch',
-                    key="oy1_hours"
-                )
-                
-                # Update main dataframe
-                for col in oy1_columns:
-                    st.session_state.employees[col] = edited_oy1[col]
-        
-        # Final calculations update
-        self.update_employee_calculations()
-        
-        # Data Management section
 
         
 
@@ -1366,6 +1273,9 @@ class SEASFinancialTracker:
 
     def create_subcontractor_tab(self):
         """Create subcontractor management tab with modular design"""
+        
+        # Get ODC data
+        odc_df = st.session_state.odc_costs
         
         # Section 1: Subcontractor Summary - Info Section
         create_section(
@@ -1484,10 +1394,11 @@ class SEASFinancialTracker:
         """Create analysis and visualization tab"""
         st.markdown('<div class="subheader">📊 Financial Analysis & Visualizations</div>', unsafe_allow_html=True)
         
+        # Get employee data
+        employees_df = st.session_state.employees
+        
         # Monthly revenue trends
         st.markdown('<div class="subheader">📈 Monthly Revenue Trends</div>', unsafe_allow_html=True)
-        
-        employees_df = st.session_state.employees
         revenue_by_month = {}
         
         for period in st.session_state.time_periods:
