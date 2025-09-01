@@ -388,7 +388,7 @@ class SEASFinancialTracker:
                         
                         if st.button("🔄 Import Anyway (Replace Duplicates)", key="import_anyway"):
                             # Process and merge with existing data (this will replace duplicates)
-                    st.session_state.employees = self.process_uploaded_employees(df_upload)
+                            st.session_state.employees = self.process_uploaded_employees(df_upload)
                             st.success("Data imported successfully! Duplicates were replaced.")
                             st.rerun()
                     else:
@@ -437,16 +437,16 @@ class SEASFinancialTracker:
                 if new_name.lower() in existing_names:
                     st.error(f"❌ Employee '{new_name}' already exists! Please use a different name or update the existing employee.")
                 else:
-                new_employee = {
-                    "Name": new_name,
-                    "LCAT": new_lcat,
+                    new_employee = {
+                        "Name": new_name,
+                        "LCAT": new_lcat,
                         "Employee_Type": new_employee_type,
                         "Company": new_company,
                         "Status": new_status,
-                    "Priced_Salary": new_priced_salary,
-                    "Current_Salary": new_current_salary,
-                    "Hours_Per_Month": new_hours_per_month,
-                    "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
+                        "Priced_Salary": new_priced_salary,
+                        "Current_Salary": new_current_salary,
+                        "Hours_Per_Month": new_hours_per_month,
+                        "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
                 }
                 
                 # Add columns for time periods
@@ -455,9 +455,9 @@ class SEASFinancialTracker:
                             new_employee[period] = 0.0
                 
                 # Add to dataframe
-                new_row = pd.DataFrame([new_employee])
-                st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
-                                                      ignore_index=True)
+                    new_row = pd.DataFrame([new_employee])
+                    st.session_state.employees = pd.concat([st.session_state.employees, new_row],
+                                                          ignore_index=True)
                     st.success(f"✅ Added {new_name} to employee list")
                     st.rerun()
 
@@ -558,7 +558,7 @@ class SEASFinancialTracker:
                     with col1:
                         total_hours = period_df['Hours'].sum()
                         st.metric("Total Hours", f"{total_hours:.1f}")
-        with col2:
+            with col2:
                 total_revenue = period_df['Revenue'].sum()
                 st.metric("Total Revenue", f"${total_revenue:,.2f}")
             with col3:
@@ -791,31 +791,31 @@ class SEASFinancialTracker:
         '''
         
         # Add form using Streamlit
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                new_name = st.text_input("Subcontractor Name")
-                new_company = st.text_input("Company")
-            with col2:
-                new_lcat = st.text_input("LCAT/Role")
-                new_hourly_rate = st.number_input("Hourly Rate", min_value=0.0, value=100.0)
-            with col3:
-                if st.button("Add Subcontractor") and new_name:
-                    new_sub = {
-                        "Name": new_name,
-                        "Company": new_company,
-                        "LCAT": new_lcat,
-                        "Hourly_Rate": new_hourly_rate
-                    }
-                    
-                    # Add time period columns
-                    for period in st.session_state.time_periods:
-                        new_sub[f'Hours_{period}'] = 0.0
-                        new_sub[f'Revenue_{period}'] = 0.0
-                    
-                    new_row = pd.DataFrame([new_sub])
-                    st.session_state.subcontractors = pd.concat([st.session_state.subcontractors, new_row], 
-                                                              ignore_index=True)
-                    st.success(f"Added {new_name} to subcontractor list")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            new_name = st.text_input("Subcontractor Name")
+            new_company = st.text_input("Company")
+        with col2:
+            new_lcat = st.text_input("LCAT/Role")
+            new_hourly_rate = st.number_input("Hourly Rate", min_value=0.0, value=100.0)
+        with col3:
+            if st.button("Add Subcontractor") and new_name:
+                new_sub = {
+                    "Name": new_name,
+                    "Company": new_company,
+                    "LCAT": new_lcat,
+                    "Hourly_Rate": new_hourly_rate
+                }
+                
+                # Add time period columns
+                for period in st.session_state.time_periods:
+                    new_sub[f'Hours_{period}'] = 0.0
+                    new_sub[f'Revenue_{period}'] = 0.0
+                
+                new_row = pd.DataFrame([new_sub])
+                st.session_state.subcontractors = pd.concat([st.session_state.subcontractors, new_row], 
+                                                          ignore_index=True)
+                st.success(f"Added {new_name} to subcontractor list")
                 st.rerun()
         
         return '''
@@ -1826,7 +1826,7 @@ class SEASFinancialTracker:
             return result_df
         else:
             # No existing employees, just return processed upload
-        return df_upload
+            return df_upload
 
 def main():
     """Main application function"""
