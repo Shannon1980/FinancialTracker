@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import io
+import json
 from typing import Dict, List, Tuple, Optional
 import base64
 
@@ -17,20 +18,347 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Custom CSS for QuickBooks-inspired design
+st.markdown("""
+<style>
+    /* QuickBooks Design System - Professional Business Aesthetic */
+    
+    /* Global styles */
+    .stApp {
+        background: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* QuickBooks-inspired header */
+    .main-header {
+        background: linear-gradient(135deg, #2E5BBA 0%, #1E3A8A 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 0;
+        margin: -2rem -2rem 2rem -2rem;
+        box-shadow: 0 4px 20px rgba(46, 91, 186, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+    }
+    
+    .main-header h1 {
+        color: white;
+        font-size: 2.8rem;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+        letter-spacing: -0.5px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .main-header .subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        text-align: center;
+        margin-top: 0.5rem;
+        font-weight: 400;
+    }
+    
+    /* QuickBooks-style metric cards */
+    .metric-card {
+        background: white;
+        padding: 1.8rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: #2E5BBA;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        border-color: #2E5BBA;
+    }
+    
+    .metric-card .metric-icon {
+        font-size: 2.2rem;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+    }
+    
+    .metric-card .metric-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2E5BBA;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+    
+    .metric-card .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* QuickBooks-style tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0;
+        background: white;
+        border-radius: 8px;
+        padding: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: transparent;
+        border-radius: 6px;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 12px 20px;
+        transition: all 0.2s ease;
+        border: none;
+        font-size: 0.9rem;
+    }
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background: #2E5BBA;
+        color: white;
+        box-shadow: 0 2px 8px rgba(46, 91, 186, 0.3);
+        font-weight: 600;
+    }
+    
+    /* QuickBooks-style sidebar */
+    .css-1d391kg {
+        background: white;
+        border-right: 1px solid #e9ecef;
+    }
+    
+    .css-1d391kg .stMarkdown {
+        color: #495057;
+    }
+    
+    /* QuickBooks-style buttons */
+    .stButton > button {
+        background: #2E5BBA;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(46, 91, 186, 0.2);
+        font-size: 0.9rem;
+    }
+    
+    .stButton > button:hover {
+        background: #1E3A8A;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(46, 91, 186, 0.3);
+    }
+    
+    /* QuickBooks-style data editors */
+    .stDataFrame {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+    }
+    
+    /* QuickBooks-style charts */
+    .stPlotlyChart {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        margin: 1.5rem 0;
+    }
+    
+    /* QuickBooks-style subheaders */
+    .subheader {
+        background: white;
+        color: #2E5BBA;
+        padding: 1.2rem 1.5rem;
+        border-radius: 8px;
+        margin: 2rem 0 1.5rem 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        border-left: 4px solid #2E5BBA;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* QuickBooks-style financial cards */
+    .financial-card {
+        background: white;
+        color: #495057;
+        padding: 1.8rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        margin: 1.5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .financial-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #2E5BBA, #1E3A8A);
+    }
+    
+    .financial-card h3 {
+        color: #2E5BBA;
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .financial-card .financial-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #f8f9fa;
+        font-size: 1rem;
+    }
+    
+    .financial-card .financial-item:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #2E5BBA;
+        padding-top: 1.2rem;
+        border-top: 2px solid #e9ecef;
+    }
+    
+    /* QuickBooks-style upload section */
+    .upload-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .upload-section h3 {
+        color: #2E5BBA;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    /* QuickBooks-style expanders */
+    .streamlit-expanderHeader {
+        background: #f8f9fa !important;
+        border: 1px solid #e9ecef !important;
+        border-radius: 6px !important;
+        color: #2E5BBA !important;
+        font-weight: 500 !important;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        background: #e9ecef !important;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .main-header h1 {
+            font-size: 2.2rem;
+        }
+        
+        .main-header {
+            padding: 2rem 1rem;
+        }
+        
+        .metric-card {
+            padding: 1.5rem;
+        }
+    }
+    
+    /* QuickBooks-style form inputs */
+    .stTextInput > div > div > input {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #2E5BBA;
+        box-shadow: 0 0 0 3px rgba(46, 91, 186, 0.1);
+    }
+    
+    .stNumberInput > div > div > input {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .stNumberInput > div > div > input:focus {
+        border-color: #2E5BBA;
+        box-shadow: 0 0 0 3px rgba(46, 91, 186, 0.1);
+    }
+    
+    .stSelectbox > div > div > div {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .stSelectbox > div > div > div:focus {
+        border-color: #2E5BBA;
+        box-shadow: 0 0 0 3px rgba(46, 91, 186, 0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 class SEASFinancialTracker:
     def __init__(self):
         self.initialize_session_state()
         
     def initialize_session_state(self):
         """Initialize session state variables"""
-        if 'employees' not in st.session_state:
-            st.session_state.employees = self.create_sample_employees()
-        if 'subcontractors' not in st.session_state:
-            st.session_state.subcontractors = self.create_sample_subcontractors()
-        if 'odc_costs' not in st.session_state:
-            st.session_state.odc_costs = self.create_sample_odc()
-        if 'tasks' not in st.session_state:
-            st.session_state.tasks = self.create_sample_tasks()
+        # Initialize time_periods first since other methods depend on it
+        if 'time_periods' not in st.session_state:
+            st.session_state.time_periods = self.generate_time_periods()
+            
         if 'project_params' not in st.session_state:
             st.session_state.project_params = {
                 'current_date': datetime(2025, 9, 1),
@@ -43,8 +371,15 @@ class SEASFinancialTracker:
                 'ga_rate': 0.275,
                 'target_profit': 0.3947
             }
-        if 'time_periods' not in st.session_state:
-            st.session_state.time_periods = self.generate_time_periods()
+            
+        if 'employees' not in st.session_state:
+            st.session_state.employees = self.create_sample_employees()
+        if 'subcontractors' not in st.session_state:
+            st.session_state.subcontractors = self.create_sample_subcontractors()
+        if 'odc_costs' not in st.session_state:
+            st.session_state.odc_costs = self.create_sample_odc()
+        if 'tasks' not in st.session_state:
+            st.session_state.tasks = self.create_sample_tasks()
 
     def generate_time_periods(self) -> List[str]:
         """Generate monthly time periods for Base Year and Option Year 1"""
@@ -172,27 +507,38 @@ class SEASFinancialTracker:
 
     def create_dashboard(self):
         """Create the main dashboard"""
-        st.title("📊 SEAS Project Financial Tracker")
+        # QuickBooks-style header with subtitle
+        st.markdown("""
+        <div class="main-header">
+            <h1>📊 SEAS Project Financial Tracker</h1>
+            <div class="subtitle">Professional Financial Management & Analysis Platform</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Sidebar for project parameters
+        # QuickBooks-style sidebar for project parameters
         with st.sidebar:
-            st.header("Project Parameters")
+            st.markdown("""
+            <div style="background: #2E5BBA; 
+                        padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(46, 91, 186, 0.2);">
+                <h3 style="color: white; margin: 0 0 1rem 0; text-align: center; font-weight: 600;">⚙️ Project Parameters</h3>
+            </div>
+            """, unsafe_allow_html=True)
             
             params = st.session_state.project_params
-            params['current_date'] = st.date_input("Current Date", params['current_date'])
-            params['total_transaction_price'] = st.number_input("Total Transaction Price ($)", 
+            params['current_date'] = st.date_input("📅 Current Date", params['current_date'])
+            params['total_transaction_price'] = st.number_input("💰 Total Transaction Price ($)", 
                                                               value=params['total_transaction_price'], 
                                                               format="%.2f")
-            params['fringe_rate'] = st.number_input("Fringe Rate", value=params['fringe_rate'], 
+            params['fringe_rate'] = st.number_input("🎯 Fringe Rate", value=params['fringe_rate'], 
                                                    format="%.3f", step=0.001)
-            params['overhead_rate'] = st.number_input("Overhead Rate", value=params['overhead_rate'], 
+            params['overhead_rate'] = st.number_input("🏢 Overhead Rate", value=params['overhead_rate'], 
                                                      format="%.3f", step=0.001)
-            params['ga_rate'] = st.number_input("G&A Rate", value=params['ga_rate'], 
+            params['ga_rate'] = st.number_input("📈 G&A Rate", value=params['ga_rate'], 
                                                format="%.3f", step=0.001)
-            params['target_profit'] = st.number_input("Target Profit Margin", value=params['target_profit'], 
+            params['target_profit'] = st.number_input("🎯 Target Profit Margin", value=params['target_profit'], 
                                                      format="%.4f", step=0.0001)
 
-        # Main tabs
+        # Main tabs with modern styling
         tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Overview", "👥 Direct Labor", "🏢 Subcontractors", "📊 Analysis", "📋 Tasks"])
 
         with tab1:
@@ -212,29 +558,55 @@ class SEASFinancialTracker:
 
     def create_overview_tab(self):
         """Create overview dashboard"""
-        st.header("Project Overview")
+        st.markdown('<div class="subheader">📊 Project Overview</div>', unsafe_allow_html=True)
         
-        # Key metrics
+        # Key metrics with modern styling
         params = st.session_state.project_params
         actual_hours = params['actual_hours']
         eac_hours = params['eac_hours']
         non_billable = params['non_billable_hours']
         billable_hours = actual_hours + non_billable
         
+        # Modern metric cards with icons and gradients
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("EAC Hours", f"{eac_hours:,.2f}")
+            st.markdown(f"""
+            <div class="metric-card" style="text-align: center;">
+                <div class="metric-icon">⏱️</div>
+                <div class="metric-value">{eac_hours:,.0f}</div>
+                <div class="metric-label">EAC Hours</div>
+            </div>
+            """, unsafe_allow_html=True)
             
         with col2:
-            st.metric("Actual Hours to Date", f"{actual_hours:,.2f}")
+            st.markdown(f"""
+            <div class="metric-card" style="text-align: center;">
+                <div class="metric-icon">📈</div>
+                <div class="metric-value">{actual_hours:,.0f}</div>
+                <div class="metric-label">Actual Hours</div>
+            </div>
+            """, unsafe_allow_html=True)
             
         with col3:
-            st.metric("Billable Hours", f"{billable_hours:,.2f}")
+            st.markdown(f"""
+            <div class="metric-card" style="text-align: center;">
+                <div class="metric-icon">💼</div>
+                <div class="metric-value">{billable_hours:,.0f}</div>
+                <div class="metric-label">Billable Hours</div>
+            </div>
+            """, unsafe_allow_html=True)
             
         with col4:
             completion_pct = (actual_hours / eac_hours) * 100 if eac_hours > 0 else 0
-            st.metric("Completion %", f"{completion_pct:.1f}%")
+            progress_color = "#27ae60" if completion_pct >= 75 else "#f39c12" if completion_pct >= 50 else "#e74c3c"
+            st.markdown(f"""
+            <div class="metric-card" style="text-align: center;">
+                <div class="metric-icon">🎯</div>
+                <div class="metric-value" style="color: {progress_color};">{completion_pct:.1f}%</div>
+                <div class="metric-label">Completion</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         # Calculate totals
         employees_df = st.session_state.employees
@@ -266,31 +638,74 @@ class SEASFinancialTracker:
         total_transaction_price = params['total_transaction_price']
         recalculated_revenue = (billable_hours / eac_hours) * total_transaction_price if eac_hours > 0 else 0
         
-        # Financial summary
-        st.subheader("Financial Summary")
+        # Financial summary with modern cards
+        st.markdown('<div class="subheader">💰 Financial Summary</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.write("**Costs Breakdown:**")
-            st.write(f"Direct Labor: ${total_direct_labor:,.2f}")
-            st.write(f"ODC: ${total_odc:,.2f}")
-            st.write(f"Subcontractor: ${total_subcontractor:,.2f}")
-            st.write(f"Fringe: ${indirect_costs['Fringe']:,.2f}")
-            st.write(f"Overhead: ${indirect_costs['Overhead']:,.2f}")
-            st.write(f"G&A: ${indirect_costs['G&A']:,.2f}")
-            st.write(f"**Total Costs: ${total_costs:,.2f}**")
+            st.markdown(f"""
+            <div class="financial-card">
+                <h3>💸 Costs Breakdown</h3>
+                <div class="financial-item">
+                    <span>👥 Direct Labor</span>
+                    <strong>${total_direct_labor:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>🏗️ ODC</span>
+                    <strong>${total_odc:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>🤝 Subcontractor</span>
+                    <strong>${total_subcontractor:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>🎯 Fringe</span>
+                    <strong>${indirect_costs['Fringe']:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>🏢 Overhead</span>
+                    <strong>${indirect_costs['Overhead']:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>📈 G&A</span>
+                    <strong>${indirect_costs['G&A']:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>Total Costs</span>
+                    <strong>${total_costs:,.2f}</strong>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
         with col2:
-            st.write("**Revenue Analysis:**")
-            st.write(f"Total Transaction Price: ${total_transaction_price:,.2f}")
-            st.write(f"Recalculated Revenue: ${recalculated_revenue:,.2f}")
             profit_loss = recalculated_revenue - total_costs
-            st.write(f"**Profit/Loss: ${profit_loss:,.2f}**")
+            profit_color = "#27ae60" if profit_loss >= 0 else "#e74c3c"
+            st.markdown(f"""
+            <div class="financial-card">
+                <h3>📊 Revenue Analysis</h3>
+                <div class="financial-item">
+                    <span>💰 Total Transaction Price</span>
+                    <strong>${total_transaction_price:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>📈 Recalculated Revenue</span>
+                    <strong>${recalculated_revenue:,.2f}</strong>
+                </div>
+                <div class="financial-item">
+                    <span>Profit/Loss</span>
+                    <strong style="color: {profit_color};">${profit_loss:,.2f}</strong>
+                </div>
+            """, unsafe_allow_html=True)
             
             if recalculated_revenue > 0:
                 margin = (profit_loss / recalculated_revenue) * 100
-                st.write(f"Profit Margin: {margin:.2f}%")
+                margin_color = "#27ae60" if margin >= 0 else "#e74c3c"
+                st.markdown(f"""
+                <div style="background: #f8f9fa; padding: 1.2rem; border-radius: 8px; margin-top: 1rem; text-align: center; border: 1px solid #e9ecef;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: {margin_color};">Profit Margin: {margin:.2f}%</div>
+                </div>
+                """, unsafe_allow_html=True)
 
         # Cost breakdown chart
         cost_data = {
@@ -305,10 +720,14 @@ class SEASFinancialTracker:
 
     def create_direct_labor_tab(self):
         """Create direct labor management tab"""
-        st.header("Direct Labor Management")
+        st.markdown('<div class="subheader">👥 Direct Labor Management</div>', unsafe_allow_html=True)
         
-        # File upload
-        st.subheader("Upload Employee Data")
+        # QuickBooks-style upload section
+        st.markdown("""
+        <div class="upload-section">
+            <h3>📁 Upload Employee Data</h3>
+        </div>
+        """, unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Choose Excel/CSV file", type=['xlsx', 'csv'])
         
         if uploaded_file is not None:
@@ -329,10 +748,10 @@ class SEASFinancialTracker:
                 st.error(f"Error reading file: {str(e)}")
 
         # Employee data editor
-        st.subheader("Employee Data")
+        st.markdown('<div class="subheader">👤 Employee Data</div>', unsafe_allow_html=True)
         
         # Add new employee
-        with st.expander("Add New Employee"):
+        with st.expander("➕ Add New Employee", expanded=False):
             col1, col2, col3 = st.columns(3)
             with col1:
                 new_name = st.text_input("Name")
@@ -370,7 +789,7 @@ class SEASFinancialTracker:
         employees_df = st.session_state.employees
         
         # Basic employee info
-        st.subheader("Employee Information")
+        st.markdown('<div class="subheader">ℹ️ Employee Information</div>', unsafe_allow_html=True)
         basic_columns = ["Name", "LCAT", "Priced_Salary", "Current_Salary", "Hours_Per_Month", "Hourly_Rate"]
         
         edited_basic = st.data_editor(
@@ -388,11 +807,84 @@ class SEASFinancialTracker:
         for col in basic_columns:
             st.session_state.employees[col] = edited_basic[col]
         
+        # Employee removal section
+        st.markdown('<div class="subheader">🗑️ Remove Employees</div>', unsafe_allow_html=True)
+        
+        # Create a more user-friendly employee removal interface
+        if not employees_df.empty:
+            st.write("Select employees to remove from the project:")
+            
+            # Create columns for better layout
+            col1, col2, col3 = st.columns([2, 1, 1])
+            
+            with col1:
+                # Employee selection dropdown
+                selected_employee = st.selectbox(
+                    "Choose employee to remove:",
+                    options=employees_df['Name'].tolist(),
+                    key="employee_removal_select"
+                )
+            
+            with col2:
+                # Show employee details
+                if selected_employee:
+                    emp_data = employees_df[employees_df['Name'] == selected_employee].iloc[0]
+                    st.write(f"**LCAT:** {emp_data['LCAT']}")
+                    st.write(f"**Current Salary:** ${emp_data['Current_Salary']:,.2f}")
+            
+            with col3:
+                # Remove button with confirmation
+                if selected_employee:
+                    if st.button("🗑️ Remove Employee", type="secondary", key="remove_employee_btn"):
+                        # Remove the employee
+                        st.session_state.employees = st.session_state.employees[
+                            st.session_state.employees['Name'] != selected_employee
+                        ]
+                        st.success(f"✅ {selected_employee} has been removed from the project.")
+                        st.experimental_rerun()
+            
+            # Show current employee count
+            st.info(f"📊 **Current Employee Count:** {len(st.session_state.employees)}")
+            
+            # Bulk removal section
+            st.markdown("---")
+            st.markdown("**Bulk Operations:**")
+            
+            # Bulk remove by LCAT
+            lcat_options = employees_df['LCAT'].unique().tolist()
+            if lcat_options:
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    selected_lcat = st.selectbox(
+                        "Remove all employees by Labor Category:",
+                        options=lcat_options,
+                        key="bulk_lcat_select"
+                    )
+                with col2:
+                    if st.button("🗑️ Remove All by LCAT", type="secondary", key="bulk_remove_lcat_btn"):
+                        lcat_count = len(employees_df[employees_df['LCAT'] == selected_lcat])
+                        st.session_state.employees = st.session_state.employees[
+                            st.session_state.employees['LCAT'] != selected_lcat
+                        ]
+                        st.success(f"✅ Removed {lcat_count} employees with LCAT: {selected_lcat}")
+                        st.experimental_rerun()
+            
+            # Clear all employees (with confirmation)
+            if st.button("🗑️ Clear All Employees", type="secondary", key="clear_all_employees_btn"):
+                st.warning("⚠️ This will remove ALL employees from the project. This action cannot be undone.")
+                if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_btn"):
+                    employee_count = len(st.session_state.employees)
+                    st.session_state.employees = pd.DataFrame(columns=st.session_state.employees.columns)
+                    st.success(f"✅ Cleared all {employee_count} employees from the project.")
+                    st.experimental_rerun()
+        else:
+            st.warning("⚠️ No employees to remove. Add some employees first.")
+        
         # Update calculations
         self.update_employee_calculations()
         
         # Monthly hours input - show in sections
-        st.subheader("Monthly Hours (Base Year)")
+        st.markdown('<div class="subheader">📅 Monthly Hours (Base Year)</div>', unsafe_allow_html=True)
         base_year_periods = st.session_state.time_periods[:12]
         base_year_columns = [f'Hours_{period}' for period in base_year_periods]
         
@@ -435,8 +927,11 @@ class SEASFinancialTracker:
         # Final calculations update
         self.update_employee_calculations()
         
+        # Data Management section
+        st.markdown('<div class="subheader">💾 Data Management</div>', unsafe_allow_html=True)
+        
         # Export functionality
-        st.subheader("Export Data")
+        st.markdown("**📤 Export Data:**")
         col1, col2 = st.columns(2)
         
         with col1:
@@ -462,13 +957,66 @@ class SEASFinancialTracker:
                     file_name="seas_employee_data.csv",
                     mime="text/csv"
                 )
+        
+        # Backup and Restore functionality
+        st.markdown("**🔄 Backup & Restore:**")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("💾 Create Backup"):
+                # Create a comprehensive backup of all data
+                backup_data = {
+                    'employees': st.session_state.employees.to_dict('records'),
+                    'subcontractors': st.session_state.subcontractors.to_dict('records'),
+                    'odc_costs': st.session_state.odc_costs.to_dict('records'),
+                    'tasks': st.session_state.tasks.to_dict('records'),
+                    'project_params': st.session_state.project_params,
+                    'time_periods': st.session_state.time_periods,
+                    'backup_timestamp': datetime.now().isoformat()
+                }
+                
+                backup_json = json.dumps(backup_data, indent=2, default=str)
+                st.download_button(
+                    label="📥 Download Backup",
+                    data=backup_json,
+                    file_name=f"seas_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    mime="application/json"
+                )
+                st.success("✅ Backup created successfully!")
+        
+        with col2:
+            # File upload for restore
+            uploaded_backup = st.file_uploader("Upload backup file to restore", type=['json'], key="backup_restore")
+            if uploaded_backup is not None:
+                if st.button("🔄 Restore from Backup"):
+                    try:
+                        backup_data = json.load(uploaded_backup)
+                        
+                        # Restore all data
+                        if 'employees' in backup_data:
+                            st.session_state.employees = pd.DataFrame(backup_data['employees'])
+                        if 'subcontractors' in backup_data:
+                            st.session_state.subcontractors = pd.DataFrame(backup_data['subcontractors'])
+                        if 'odc_costs' in backup_data:
+                            st.session_state.odc_costs = pd.DataFrame(backup_data['odc_costs'])
+                        if 'tasks' in backup_data:
+                            st.session_state.tasks = pd.DataFrame(backup_data['tasks'])
+                        if 'project_params' in backup_data:
+                            st.session_state.project_params = backup_data['project_params']
+                        if 'time_periods' in backup_data:
+                            st.session_state.time_periods = backup_data['time_periods']
+                        
+                        st.success("✅ Data restored successfully from backup!")
+                        st.experimental_rerun()
+                    except Exception as e:
+                        st.error(f"❌ Error restoring backup: {str(e)}")
 
     def create_subcontractor_tab(self):
         """Create subcontractor management tab"""
-        st.header("Subcontractor Management")
+        st.markdown('<div class="subheader">🏢 Subcontractor Management</div>', unsafe_allow_html=True)
         
         # Add new subcontractor
-        with st.expander("Add New Subcontractor"):
+        with st.expander("➕ Add New Subcontractor", expanded=False):
             col1, col2, col3 = st.columns(3)
             with col1:
                 new_name = st.text_input("Subcontractor Name")
@@ -500,7 +1048,7 @@ class SEASFinancialTracker:
         sub_df = st.session_state.subcontractors
         
         if not sub_df.empty:
-            st.subheader("Subcontractor Information")
+            st.markdown('<div class="subheader">ℹ️ Subcontractor Information</div>', unsafe_allow_html=True)
             basic_columns = ["Name", "Company", "LCAT", "Hourly_Rate"]
             
             edited_basic = st.data_editor(
@@ -516,8 +1064,81 @@ class SEASFinancialTracker:
             for col in basic_columns:
                 st.session_state.subcontractors[col] = edited_basic[col]
             
+            # Subcontractor removal section
+            st.markdown('<div class="subheader">🗑️ Remove Subcontractors</div>', unsafe_allow_html=True)
+            
+            if not sub_df.empty:
+                st.write("Select subcontractors to remove from the project:")
+                
+                # Create columns for better layout
+                col1, col2, col3 = st.columns([2, 1, 1])
+                
+                with col1:
+                    # Subcontractor selection dropdown
+                    selected_subcontractor = st.selectbox(
+                        "Choose subcontractor to remove:",
+                        options=sub_df['Name'].tolist(),
+                        key="subcontractor_removal_select"
+                    )
+                
+                with col2:
+                    # Show subcontractor details
+                    if selected_subcontractor:
+                        sub_data = sub_df[sub_df['Name'] == selected_subcontractor].iloc[0]
+                        st.write(f"**Company:** {sub_data['Company']}")
+                        st.write(f"**LCAT:** {sub_data['LCAT']}")
+                        st.write(f"**Rate:** ${sub_data['Hourly_Rate']:.2f}/hr")
+                
+                with col3:
+                    # Remove button with confirmation
+                    if selected_subcontractor:
+                        if st.button("🗑️ Remove Subcontractor", type="secondary", key="remove_subcontractor_btn"):
+                            # Remove the subcontractor
+                            st.session_state.subcontractors = st.session_state.subcontractors[
+                                st.session_state.subcontractors['Name'] != selected_subcontractor
+                            ]
+                            st.success(f"✅ {selected_subcontractor} has been removed from the project.")
+                            st.experimental_rerun()
+                
+                # Show current subcontractor count
+                st.info(f"📊 **Current Subcontractor Count:** {len(st.session_state.subcontractors)}")
+                
+                # Bulk removal section
+                st.markdown("---")
+                st.markdown("**Bulk Operations:**")
+                
+                # Bulk remove by company
+                company_options = sub_df['Company'].unique().tolist()
+                if company_options:
+                    col1, col2 = st.columns([2, 1])
+                    with col1:
+                        selected_company = st.selectbox(
+                            "Remove all subcontractors by Company:",
+                            options=company_options,
+                            key="bulk_company_select"
+                        )
+                    with col2:
+                        if st.button("🗑️ Remove All by Company", type="secondary", key="bulk_remove_company_btn"):
+                            company_count = len(sub_df[sub_df['Company'] == selected_company])
+                            st.session_state.subcontractors = st.session_state.subcontractors[
+                                st.session_state.subcontractors['Company'] != selected_company
+                            ]
+                            st.success(f"✅ Removed {company_count} subcontractors from company: {selected_company}")
+                            st.experimental_rerun()
+                
+                # Clear all subcontractors (with confirmation)
+                if st.button("🗑️ Clear All Subcontractors", type="secondary", key="clear_all_subcontractors_btn"):
+                    st.warning("⚠️ This will remove ALL subcontractors from the project. This action cannot be undone.")
+                    if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_subcontractors_btn"):
+                        subcontractor_count = len(st.session_state.subcontractors)
+                        st.session_state.subcontractors = pd.DataFrame(columns=st.session_state.subcontractors.columns)
+                        st.success(f"✅ Cleared all {subcontractor_count} subcontractors from the project.")
+                        st.experimental_rerun()
+            else:
+                st.warning("⚠️ No subcontractors to remove.")
+            
             # Monthly hours for subcontractors
-            st.subheader("Subcontractor Monthly Hours")
+            st.markdown('<div class="subheader">📅 Subcontractor Monthly Hours</div>', unsafe_allow_html=True)
             
             # Show fewer periods at a time for better usability
             selected_periods = st.multiselect(
@@ -552,7 +1173,7 @@ class SEASFinancialTracker:
                         st.session_state.subcontractors.at[idx, revenue_col] = hours * hourly_rate
 
         # ODC Management
-        st.subheader("Other Direct Costs (ODC)")
+        st.markdown('<div class="subheader">🏗️ Other Direct Costs (ODC)</div>', unsafe_allow_html=True)
         
         odc_df = st.session_state.odc_costs
         
@@ -566,13 +1187,69 @@ class SEASFinancialTracker:
         )
         
         st.session_state.odc_costs = edited_odc
+        
+        # ODC removal section
+        st.markdown('<div class="subheader">🗑️ Remove ODC Entries</div>', unsafe_allow_html=True)
+        
+        if not odc_df.empty:
+            st.write("Select ODC entries to remove from the project:")
+            
+            # Create columns for better layout
+            col1, col2, col3 = st.columns([2, 1, 1])
+            
+            with col1:
+                # ODC selection dropdown
+                selected_odc = st.selectbox(
+                    "Choose ODC entry to remove:",
+                    options=[f"{row['Period']} - ${row['Amount']:,.2f}" for _, row in odc_df.iterrows()],
+                    key="odc_removal_select"
+                )
+            
+            with col2:
+                # Show ODC details
+                if selected_odc:
+                    period = selected_odc.split(" - ")[0]
+                    odc_data = odc_df[odc_df['Period'] == period].iloc[0]
+                    st.write(f"**Period:** {odc_data['Period']}")
+                    st.write(f"**Amount:** ${odc_data['Amount']:,.2f}")
+                    st.write(f"**Description:** {odc_data['Description']}")
+            
+            with col3:
+                # Remove button with confirmation
+                if selected_odc:
+                    if st.button("🗑️ Remove ODC", type="secondary", key="remove_odc_btn"):
+                        # Remove the ODC entry
+                        period = selected_odc.split(" - ")[0]
+                        st.session_state.odc_costs = st.session_state.odc_costs[
+                            st.session_state.odc_costs['Period'] != period
+                        ]
+                        st.success(f"✅ ODC entry for {period} has been removed from the project.")
+                        st.experimental_rerun()
+            
+            # Show current ODC count
+            st.info(f"📊 **Current ODC Entries:** {len(st.session_state.odc_costs)}")
+            
+            # Bulk removal section
+            st.markdown("---")
+            st.markdown("**Bulk Operations:**")
+            
+            # Clear all ODC entries (with confirmation)
+            if st.button("🗑️ Clear All ODC Entries", type="secondary", key="clear_all_odc_btn"):
+                st.warning("⚠️ This will remove ALL ODC entries from the project. This action cannot be undone.")
+                if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_odc_btn"):
+                    odc_count = len(st.session_state.odc_costs)
+                    st.session_state.odc_costs = pd.DataFrame(columns=st.session_state.odc_costs.columns)
+                    st.success(f"✅ Cleared all {odc_count} ODC entries from the project.")
+                    st.experimental_rerun()
+        else:
+            st.warning("⚠️ No ODC entries to remove.")
 
     def create_analysis_tab(self):
         """Create analysis and visualization tab"""
-        st.header("Financial Analysis & Visualizations")
+        st.markdown('<div class="subheader">📊 Financial Analysis & Visualizations</div>', unsafe_allow_html=True)
         
         # Monthly revenue trends
-        st.subheader("Monthly Revenue Trends")
+        st.markdown('<div class="subheader">📈 Monthly Revenue Trends</div>', unsafe_allow_html=True)
         
         employees_df = st.session_state.employees
         revenue_by_month = {}
@@ -587,12 +1264,19 @@ class SEASFinancialTracker:
                                     columns=['Period', 'Revenue'])
             
             fig = px.line(revenue_df, x='Period', y='Revenue', 
-                         title='Direct Labor Revenue by Month')
-            fig.update_xaxis(tickangle=45)
+                         title='Direct Labor Revenue by Month',
+                         color_discrete_sequence=['#2E5BBA'])
+            fig.update_layout(
+                xaxis_tickangle=45,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(size=12),
+                margin=dict(t=50, l=50, r=50, b=50)
+            )
             st.plotly_chart(fig, use_container_width=True)
         
         # Employee utilization heatmap
-        st.subheader("Employee Hours Heatmap")
+        st.markdown('<div class="subheader">🔥 Employee Hours Heatmap</div>', unsafe_allow_html=True)
         
         hours_columns = [col for col in employees_df.columns if col.startswith('Hours_')]
         if hours_columns:
@@ -606,12 +1290,19 @@ class SEASFinancialTracker:
                            x=period_names,
                            y=heatmap_data.index,
                            aspect="auto",
-                           title="Employee Hours by Month")
-            fig.update_xaxis(tickangle=45)
+                           title="Employee Hours by Month",
+                           color_continuous_scale='Viridis')
+            fig.update_layout(
+                xaxis_tickangle=45,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(size=12),
+                margin=dict(t=50, l=50, r=50, b=50)
+            )
             st.plotly_chart(fig, use_container_width=True)
         
         # Cost analysis by LCAT
-        st.subheader("Cost Analysis by Labor Category")
+        st.markdown('<div class="subheader">💰 Cost Analysis by Labor Category</div>', unsafe_allow_html=True)
         
         lcat_revenue = employees_df.groupby('LCAT').agg({
             col: 'sum' for col in employees_df.columns if col.startswith('Revenue_')
@@ -620,12 +1311,19 @@ class SEASFinancialTracker:
         
         if not lcat_revenue.empty:
             fig = px.bar(lcat_revenue, x='LCAT', y='Total_Revenue',
-                        title='Total Revenue by Labor Category')
-            fig.update_xaxis(tickangle=45)
+                        title='Total Revenue by Labor Category',
+                        color_discrete_sequence=['#2E5BBA'])
+            fig.update_layout(
+                xaxis_tickangle=45,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(size=12),
+                margin=dict(t=50, l=50, r=50, b=50)
+            )
             st.plotly_chart(fig, use_container_width=True)
         
         # Burn rate analysis
-        st.subheader("Project Burn Rate Analysis")
+        st.markdown('<div class="subheader">⚡ Project Burn Rate Analysis</div>', unsafe_allow_html=True)
         
         params = st.session_state.project_params
         actual_hours = params['actual_hours']
@@ -670,19 +1368,25 @@ class SEASFinancialTracker:
             fig.update_xaxes(title_text="Period", tickangle=45)
             fig.update_yaxes(title_text="Hours", secondary_y=False)
             fig.update_yaxes(title_text="Costs ($)", secondary_y=True)
-            fig.update_layout(title_text="Cumulative Hours and Costs")
+            fig.update_layout(
+                title_text="Cumulative Hours and Costs",
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(size=12),
+                margin=dict(t=50, l=50, r=50, b=50)
+            )
             
             st.plotly_chart(fig, use_container_width=True)
 
     def create_tasks_tab(self):
         """Create task management tab"""
-        st.header("Task Breakdown Management")
+        st.markdown('<div class="subheader">📋 Task Breakdown Management</div>', unsafe_allow_html=True)
         
         # Task data editor
         tasks_df = st.session_state.tasks
         
         # Add new task
-        with st.expander("Add New Task"):
+        with st.expander("➕ Add New Task", expanded=False):
             col1, col2, col3 = st.columns(3)
             with col1:
                 new_task_id = st.text_input("Task ID")
@@ -714,7 +1418,7 @@ class SEASFinancialTracker:
 
         # Display and edit tasks
         if not tasks_df.empty:
-            st.subheader("Task Details")
+            st.markdown('<div class="subheader">📝 Task Details</div>', unsafe_allow_html=True)
             
             edited_tasks = st.data_editor(
                 tasks_df,
@@ -728,8 +1432,85 @@ class SEASFinancialTracker:
             
             st.session_state.tasks = edited_tasks
             
+            # Task removal section
+            st.markdown('<div class="subheader">🗑️ Remove Tasks</div>', unsafe_allow_html=True)
+            
+            if not tasks_df.empty:
+                st.write("Select tasks to remove from the project:")
+                
+                # Create columns for better layout
+                col1, col2, col3 = st.columns([2, 1, 1])
+                
+                with col1:
+                    # Task selection dropdown
+                    selected_task = st.selectbox(
+                        "Choose task to remove:",
+                        options=[f"{row['Task_ID']} - {row['Task_Name']}" for _, row in tasks_df.iterrows()],
+                        key="task_removal_select"
+                    )
+                
+                with col2:
+                    # Show task details
+                    if selected_task:
+                        task_id = selected_task.split(" - ")[0]
+                        task_data = tasks_df[tasks_df['Task_ID'] == task_id].iloc[0]
+                        st.write(f"**Task Name:** {task_data['Task_Name']}")
+                        st.write(f"**LCAT:** {task_data['LCAT']}")
+                        st.write(f"**Person:** {task_data['Person']}")
+                        st.write(f"**Hours:** {task_data['Hours']:.2f}")
+                        st.write(f"**Cost:** ${task_data['Cost']:.2f}")
+                
+                with col3:
+                    # Remove button with confirmation
+                    if selected_task:
+                        if st.button("🗑️ Remove Task", type="secondary", key="remove_task_btn"):
+                            # Remove the task
+                            task_id = selected_task.split(" - ")[0]
+                            st.session_state.tasks = st.session_state.tasks[
+                                st.session_state.tasks['Task_ID'] != task_id
+                            ]
+                            st.success(f"✅ Task {task_id} has been removed from the project.")
+                            st.experimental_rerun()
+                
+                # Show current task count
+                st.info(f"📊 **Current Task Count:** {len(st.session_state.tasks)}")
+                
+                # Bulk removal section
+                st.markdown("---")
+                st.markdown("**Bulk Operations:**")
+                
+                # Bulk remove by Task ID
+                task_id_options = tasks_df['Task_ID'].unique().tolist()
+                if task_id_options:
+                    col1, col2 = st.columns([2, 1])
+                    with col1:
+                        selected_task_id = st.selectbox(
+                            "Remove all tasks by Task ID:",
+                            options=task_id_options,
+                            key="bulk_task_id_select"
+                        )
+                    with col2:
+                        if st.button("🗑️ Remove All by Task ID", type="secondary", key="bulk_remove_task_id_btn"):
+                            task_id_count = len(tasks_df[tasks_df['Task_ID'] == selected_task_id])
+                            st.session_state.tasks = st.session_state.tasks[
+                                st.session_state.tasks['Task_ID'] != selected_task_id
+                            ]
+                            st.success(f"✅ Removed {task_id_count} tasks with Task ID: {selected_task_id}")
+                            st.experimental_rerun()
+                
+                # Clear all tasks (with confirmation)
+                if st.button("🗑️ Clear All Tasks", type="secondary", key="clear_all_tasks_btn"):
+                    st.warning("⚠️ This will remove ALL tasks from the project. This action cannot be undone.")
+                    if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_tasks_btn"):
+                        task_count = len(st.session_state.tasks)
+                        st.session_state.tasks = pd.DataFrame(columns=st.session_state.tasks.columns)
+                        st.success(f"✅ Cleared all {task_count} tasks from the project.")
+                        st.experimental_rerun()
+            else:
+                st.warning("⚠️ No tasks to remove.")
+            
             # Task summary by ID
-            st.subheader("Task Summary")
+            st.markdown('<div class="subheader">📊 Task Summary</div>', unsafe_allow_html=True)
             
             task_summary = edited_tasks.groupby(['Task_ID', 'Task_Name']).agg({
                 'Hours': 'sum',
@@ -742,7 +1523,14 @@ class SEASFinancialTracker:
             if not task_summary.empty:
                 fig = px.bar(task_summary, x='Task_ID', y='Cost',
                             title='Cost by Task ID',
-                            hover_data=['Task_Name', 'Hours'])
+                            hover_data=['Task_Name', 'Hours'],
+                            color_discrete_sequence=['#2E5BBA'])
+                fig.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(size=12),
+                    margin=dict(t=50, l=50, r=50, b=50)
+                )
                 st.plotly_chart(fig, use_container_width=True)
 
     def process_uploaded_employees(self, df_upload: pd.DataFrame) -> pd.DataFrame:
