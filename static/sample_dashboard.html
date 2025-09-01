@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEAS Financial Tracker - Dashboard Component</title>
+    <link rel="stylesheet" href="custom.css">
+</head>
+<body>
+    <!-- Skip Link for Keyboard Navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Navigation -->
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link active" aria-current="page">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#employees" class="nav-link">Employees</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#reports" class="nav-link">Reports</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#settings" class="nav-link">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content" role="main">
+        <div class="container">
+            <!-- Page Header -->
+            <header>
+                <h1>SEAS Financial Tracker Dashboard</h1>
+                <p>Monitor and manage your project finances with real-time insights</p>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid" role="region" aria-label="Financial overview">
+                
+                <!-- Summary Cards Row -->
+                <section class="summary-cards" aria-labelledby="summary-heading">
+                    <h2 id="summary-heading" class="visually-hidden">Financial Summary</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Total Budget</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="metric-value" aria-label="Total budget amount">$2,450,000</p>
+                            <p class="metric-change positive" aria-label="Budget change">+5.2% from last month</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Active Employees</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="metric-value" aria-label="Number of active employees">24</p>
+                            <p class="metric-change" aria-label="Employee change">+2 this month</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Project Status</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="metric-value" aria-label="Project completion percentage">78%</p>
+                            <p class="metric-change" aria-label="Project progress">On track</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Employee Management Section -->
+                <section class="employee-management" aria-labelledby="employee-heading">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 id="employee-heading">Employee Management</h3>
+                        </div>
+                        <div class="card-body">
+                            
+                            <!-- Add Employee Form -->
+                            <form class="employee-form" role="form" aria-labelledby="form-heading">
+                                <h4 id="form-heading">Add New Employee</h4>
+                                
+                                <div class="form-group">
+                                    <label for="employee-name" class="form-label">Employee Name *</label>
+                                    <input type="text" id="employee-name" name="employee-name" class="form-input" 
+                                           required aria-required="true" aria-describedby="name-help">
+                                    <div id="name-help" class="form-help">Enter the full name of the employee</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="employee-type" class="form-label">Employee Type *</label>
+                                    <select id="employee-type" name="employee-type" class="form-select" 
+                                            required aria-required="true">
+                                        <option value="">Select employee type</option>
+                                        <option value="employee">Employee</option>
+                                        <option value="subcontractor">Subcontractor</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="company" class="form-label">Company *</label>
+                                    <select id="company" name="company" class="form-select" 
+                                            required aria-required="true">
+                                        <option value="">Select company</option>
+                                        <option value="skyward">Skyward IT Solutions</option>
+                                        <option value="beeline">BEELINE</option>
+                                        <option value="self-employed">Self Employed</option>
+                                        <option value="aquia">Aquia</option>
+                                        <option value="friends">Friends</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="salary" class="form-label">Annual Salary *</label>
+                                    <input type="number" id="salary" name="salary" class="form-input" 
+                                           min="0" step="1000" required aria-required="true" 
+                                           aria-describedby="salary-help">
+                                    <div id="salary-help" class="form-help">Enter the annual salary in dollars</div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="loading" aria-hidden="true"></span>
+                                        <span>Add Employee</span>
+                                    </button>
+                                    <button type="reset" class="btn btn-secondary">Reset Form</button>
+                                </div>
+                            </form>
+
+                            <!-- Employee Table -->
+                            <div class="table-container" role="region" aria-labelledby="table-heading">
+                                <h4 id="table-heading">Current Employees</h4>
+                                <table class="table" role="table" aria-labelledby="table-heading">
+                                    <caption class="visually-hidden">List of current employees with their details</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Company</th>
+                                            <th scope="col">Salary</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Shannon Gueringer</td>
+                                            <td>Employee</td>
+                                            <td>Skyward IT Solutions</td>
+                                            <td>$200,000</td>
+                                            <td><span class="status-badge active" aria-label="Active status">Active</span></td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-sm" aria-label="Edit Shannon Gueringer">Edit</button>
+                                                <button class="btn btn-danger btn-sm" aria-label="Remove Shannon Gueringer">Remove</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Adrien Adams</td>
+                                            <td>Subcontractor</td>
+                                            <td>BEELINE</td>
+                                            <td>$250/hr</td>
+                                            <td><span class="status-badge active" aria-label="Active status">Active</span></td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-sm" aria-label="Edit Adrien Adams">Edit</button>
+                                                <button class="btn btn-danger btn-sm" aria-label="Remove Adrien Adams">Remove</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Financial Summary Section -->
+                <section class="financial-summary" aria-labelledby="financial-heading">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 id="financial-heading">Financial Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" role="img" aria-label="Monthly budget vs actual spending chart">
+                                <!-- Chart placeholder - would be replaced with actual chart -->
+                                <div class="chart-placeholder">
+                                    <p>Monthly Budget vs Actual Spending</p>
+                                    <div class="chart-bars">
+                                        <div class="bar budget" style="height: 80px;" aria-label="March budget: $180,000"></div>
+                                        <div class="bar actual" style="height: 75px;" aria-label="March actual: $168,000"></div>
+                                        <div class="bar budget" style="height: 80px;" aria-label="April budget: $180,000"></div>
+                                        <div class="bar actual" style="height: 82px;" aria-label="April actual: $185,000"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer role="contentinfo">
+        <div class="container">
+            <p>&copy; 2024 SEAS Financial Tracker. Built with accessibility in mind.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Enhanced Accessibility -->
+    <script>
+        // Enhanced keyboard navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Skip link functionality
+            const skipLink = document.querySelector('.skip-link');
+            if (skipLink) {
+                skipLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.focus();
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            }
+
+            // Form validation feedback
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Show loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const loading = submitBtn.querySelector('.loading');
+                    const text = submitBtn.querySelector('span:last-child');
+                    
+                    loading.style.display = 'inline-block';
+                    text.textContent = 'Adding Employee...';
+                    submitBtn.disabled = true;
+                    
+                    // Simulate form submission
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                        text.textContent = 'Employee Added!';
+                        
+                        // Show success message
+                        const alert = document.createElement('div');
+                        alert.className = 'alert alert-success';
+                        alert.setAttribute('role', 'alert');
+                        alert.textContent = 'Employee successfully added to the system.';
+                        
+                        form.parentNode.insertBefore(alert, form);
+                        
+                        // Reset form after delay
+                        setTimeout(() => {
+                            form.reset();
+                            text.textContent = 'Add Employee';
+                            submitBtn.disabled = false;
+                            alert.remove();
+                        }, 2000);
+                    }, 1500);
+                });
+            });
+
+            // Table row focus management
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.setAttribute('tabindex', '0');
+                row.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const editBtn = this.querySelector('.btn-secondary');
+                        if (editBtn) editBtn.click();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
