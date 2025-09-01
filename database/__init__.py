@@ -1,40 +1,45 @@
 """
-Database Package for SEAS Financial Tracker
-Provides database configuration, models, and operations
+Database package for SEAS Financial Tracker
 """
 
+# Core database components
 from .config import DatabaseConfig, get_db, init_database
 from .simple_models import (
-    Base, Category, Transaction, Account, Budget, Goal,
-    ImportExportHistory
+    Base, Category, Transaction, Account, Budget, Goal, ImportExportHistory
 )
 from .simple_operations import SimpleDatabaseOperations
-from .init_db import init_database, reset_database
+from .service import DatabaseService, db_service, DatabaseServiceError, DatabaseConnectionError, DatabaseValidationError
 
+# Database management
+from .init_db import reset_database
+
+# Export main components
 __all__ = [
     # Configuration
     "DatabaseConfig",
-    "get_db",
+    "get_db", 
     "init_database",
     
     # Models
     "Base",
     "Category",
-    "Transaction",
+    "Transaction", 
     "Account",
     "Budget",
     "Goal",
-    "RecurringTransaction",
     "ImportExportHistory",
-    "TransactionResponse",
-    "CategoryResponse",
-    "AccountResponse",
-    "DatabaseIndexes",
     
     # Operations
     "SimpleDatabaseOperations",
     
-    # Initialization
+    # Service Layer
+    "DatabaseService",
+    "db_service",
+    "DatabaseServiceError",
+    "DatabaseConnectionError", 
+    "DatabaseValidationError",
+    
+    # Management
     "reset_database"
 ]
 
