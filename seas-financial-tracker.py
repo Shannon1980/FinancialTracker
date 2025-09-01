@@ -742,7 +742,7 @@ class SEASFinancialTracker:
                     # Process and merge with existing data
                     st.session_state.employees = self.process_uploaded_employees(df_upload)
                     st.success("Data imported successfully!")
-                    st.experimental_rerun()
+                    st.rerun()
                     
             except Exception as e:
                 st.error(f"Error reading file: {str(e)}")
@@ -783,7 +783,7 @@ class SEASFinancialTracker:
                 st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
                                                       ignore_index=True)
                 st.success(f"Added {new_name} to employee list")
-                st.experimental_rerun()
+                st.rerun()
 
         # Display and edit employee data
         employees_df = st.session_state.employees
@@ -841,7 +841,7 @@ class SEASFinancialTracker:
                             st.session_state.employees['Name'] != selected_employee
                         ]
                         st.success(f"✅ {selected_employee} has been removed from the project.")
-                        st.experimental_rerun()
+                        st.rerun()
             
             # Show current employee count
             st.info(f"📊 **Current Employee Count:** {len(st.session_state.employees)}")
@@ -867,7 +867,7 @@ class SEASFinancialTracker:
                             st.session_state.employees['LCAT'] != selected_lcat
                         ]
                         st.success(f"✅ Removed {lcat_count} employees with LCAT: {selected_lcat}")
-                        st.experimental_rerun()
+                        st.rerun()
             
             # Clear all employees (with confirmation)
             if st.button("🗑️ Clear All Employees", type="secondary", key="clear_all_employees_btn"):
@@ -876,7 +876,7 @@ class SEASFinancialTracker:
                     employee_count = len(st.session_state.employees)
                     st.session_state.employees = pd.DataFrame(columns=st.session_state.employees.columns)
                     st.success(f"✅ Cleared all {employee_count} employees from the project.")
-                    st.experimental_rerun()
+                    st.rerun()
         else:
             st.warning("⚠️ No employees to remove. Add some employees first.")
         
@@ -1007,7 +1007,7 @@ class SEASFinancialTracker:
                             st.session_state.time_periods = backup_data['time_periods']
                         
                         st.success("✅ Data restored successfully from backup!")
-                        st.experimental_rerun()
+                        st.rerun()
                     except Exception as e:
                         st.error(f"❌ Error restoring backup: {str(e)}")
 
@@ -1042,7 +1042,7 @@ class SEASFinancialTracker:
                     st.session_state.subcontractors = pd.concat([st.session_state.subcontractors, new_row], 
                                                               ignore_index=True)
                     st.success(f"Added {new_name} to subcontractor list")
-                    st.experimental_rerun()
+                    st.rerun()
 
         # Subcontractor data editor
         sub_df = st.session_state.subcontractors
@@ -1098,7 +1098,7 @@ class SEASFinancialTracker:
                                 st.session_state.subcontractors['Name'] != selected_subcontractor
                             ]
                             st.success(f"✅ {selected_subcontractor} has been removed from the project.")
-                            st.experimental_rerun()
+                            st.rerun()
                 
                 # Show current subcontractor count
                 st.info(f"📊 **Current Subcontractor Count:** {len(st.session_state.subcontractors)}")
@@ -1124,7 +1124,7 @@ class SEASFinancialTracker:
                                 st.session_state.subcontractors['Company'] != selected_company
                             ]
                             st.success(f"✅ Removed {company_count} subcontractors from company: {selected_company}")
-                            st.experimental_rerun()
+                            st.rerun()
                 
                 # Clear all subcontractors (with confirmation)
                 if st.button("🗑️ Clear All Subcontractors", type="secondary", key="clear_all_subcontractors_btn"):
@@ -1133,7 +1133,7 @@ class SEASFinancialTracker:
                         subcontractor_count = len(st.session_state.subcontractors)
                         st.session_state.subcontractors = pd.DataFrame(columns=st.session_state.subcontractors.columns)
                         st.success(f"✅ Cleared all {subcontractor_count} subcontractors from the project.")
-                        st.experimental_rerun()
+                        st.rerun()
             else:
                 st.warning("⚠️ No subcontractors to remove.")
             
@@ -1224,7 +1224,7 @@ class SEASFinancialTracker:
                             st.session_state.odc_costs['Period'] != period
                         ]
                         st.success(f"✅ ODC entry for {period} has been removed from the project.")
-                        st.experimental_rerun()
+                        st.rerun()
             
             # Show current ODC count
             st.info(f"📊 **Current ODC Entries:** {len(st.session_state.odc_costs)}")
@@ -1240,7 +1240,7 @@ class SEASFinancialTracker:
                     odc_count = len(st.session_state.odc_costs)
                     st.session_state.odc_costs = pd.DataFrame(columns=st.session_state.odc_costs.columns)
                     st.success(f"✅ Cleared all {odc_count} ODC entries from the project.")
-                    st.experimental_rerun()
+                    st.rerun()
         else:
             st.warning("⚠️ No ODC entries to remove.")
 
@@ -1414,7 +1414,7 @@ class SEASFinancialTracker:
                 st.session_state.tasks = pd.concat([st.session_state.tasks, new_row], 
                                                   ignore_index=True)
                 st.success(f"Added task {new_task_id}")
-                st.experimental_rerun()
+                st.rerun()
 
         # Display and edit tasks
         if not tasks_df.empty:
@@ -1470,7 +1470,7 @@ class SEASFinancialTracker:
                                 st.session_state.tasks['Task_ID'] != task_id
                             ]
                             st.success(f"✅ Task {task_id} has been removed from the project.")
-                            st.experimental_rerun()
+                            st.rerun()
                 
                 # Show current task count
                 st.info(f"📊 **Current Task Count:** {len(st.session_state.tasks)}")
@@ -1496,7 +1496,7 @@ class SEASFinancialTracker:
                                 st.session_state.tasks['Task_ID'] != selected_task_id
                             ]
                             st.success(f"✅ Removed {task_id_count} tasks with Task ID: {selected_task_id}")
-                            st.experimental_rerun()
+                            st.rerun()
                 
                 # Clear all tasks (with confirmation)
                 if st.button("🗑️ Clear All Tasks", type="secondary", key="clear_all_tasks_btn"):
@@ -1505,7 +1505,7 @@ class SEASFinancialTracker:
                         task_count = len(st.session_state.tasks)
                         st.session_state.tasks = pd.DataFrame(columns=st.session_state.tasks.columns)
                         st.success(f"✅ Cleared all {task_count} tasks from the project.")
-                        st.experimental_rerun()
+                        st.rerun()
             else:
                 st.warning("⚠️ No tasks to remove.")
             
