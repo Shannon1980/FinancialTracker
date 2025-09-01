@@ -32,6 +32,8 @@ def _generate_basic_template() -> Tuple[bytes, str]:
     data = {
         'Name': ['John Smith', 'Jane Doe', 'Bob Johnson'],
         'LCAT': ['PM', 'SA/Eng Lead', 'AI Lead'],
+        'Employee_Type': ['Employee', 'Employee', 'Subcontractor'],
+        'Company': ['Skyward IT Solutions', 'Skyward IT Solutions', 'BEELINE'],
         'Priced_Salary': [150000, 180000, 200000],
         'Current_Salary': [160000, 175000, 250000],
         'Hours_Per_Month': [173, 173, 173],
@@ -65,11 +67,13 @@ def _generate_basic_template() -> Tuple[bytes, str]:
         
         # Add instructions sheet
         instructions = {
-            'Field': ['Name', 'LCAT', 'Priced_Salary', 'Current_Salary', 'Hours_Per_Month', 'Status'],
-            'Required': ['Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
+            'Field': ['Name', 'LCAT', 'Employee_Type', 'Company', 'Priced_Salary', 'Current_Salary', 'Hours_Per_Month', 'Status'],
+            'Required': ['Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
             'Description': [
                 'Full name of the employee',
                 'Labor Category (PM, SA/Eng Lead, AI Lead, etc.)',
+                'Employee type (Employee or Subcontractor)',
+                'Company name (Skyward IT Solutions for employees, BEELINE/Self Employed/Aquia/Friends for subcontractors)',
                 'Original budgeted salary for the project',
                 'Current actual salary being paid',
                 'Standard hours worked per month (typically 173)',
@@ -93,6 +97,8 @@ def _generate_comprehensive_template() -> Tuple[bytes, str]:
     data = {
         'Name': ['Shannon Gueringer', 'Drew Hynes', 'Uyen Tran', 'Leo Khan', 'Vitaliy Baklikov'],
         'LCAT': ['PM', 'PM', 'SA/Eng Lead', 'SA/Eng Lead', 'AI Lead'],
+        'Employee_Type': ['Employee', 'Employee', 'Employee', 'Employee', 'Employee'],
+        'Company': ['Skyward IT Solutions', 'Skyward IT Solutions', 'Skyward IT Solutions', 'Skyward IT Solutions', 'Skyward IT Solutions'],
         'Priced_Salary': [160000, 0, 180000, 180000, 200000],
         'Current_Salary': [200000, 0, 175000, 190000, 250000],
         'Hours_Per_Month': [173, 173, 173, 173, 173],

@@ -404,16 +404,19 @@ class SEASFinancialTracker:
     def create_sample_employees(self) -> pd.DataFrame:
         """Create sample employee data based on SEAS spreadsheet"""
         employees = [
-            {"Name": "Shannon Gueringer", "LCAT": "PM", "Status": "Active", "Priced_Salary": 160000, "Current_Salary": 200000, "Hours_Per_Month": 173},
-            {"Name": "Drew Hynes", "LCAT": "PM", "Status": "Inactive", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
-            {"Name": "Uyen Tran", "LCAT": "SA/Eng Lead", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 175000, "Hours_Per_Month": 173},
-            {"Name": "Leo Khan", "LCAT": "SA/Eng Lead", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 190000, "Hours_Per_Month": 173},
-            {"Name": "Vitaliy Baklikov", "LCAT": "AI Lead", "Status": "Active", "Priced_Salary": 200000, "Current_Salary": 250000, "Hours_Per_Month": 173},
-            {"Name": "Kenny Tran/Lynn Stahl", "LCAT": "HCD Lead", "Status": "Active", "Priced_Salary": 130000, "Current_Salary": 150000, "Hours_Per_Month": 173},
-            {"Name": "Emilio Crocco", "LCAT": "Scrum Master", "Status": "Active", "Priced_Salary": 110000, "Current_Salary": 110000, "Hours_Per_Month": 173},
-            {"Name": "Robert Melton", "LCAT": "SA/Eng Lead", "Status": "Active", "Priced_Salary": 230000, "Current_Salary": 225000, "Hours_Per_Month": 173},
-            {"Name": "Nayeema Nageen", "LCAT": "Scrum Master", "Status": "Active", "Priced_Salary": 140000, "Current_Salary": 140000, "Hours_Per_Month": 173},
-            {"Name": "Daniil Goryachev", "LCAT": "Cloud Data Engineer", "Status": "Active", "Priced_Salary": 90000, "Current_Salary": 90000, "Hours_Per_Month": 173},
+            {"Name": "Shannon Gueringer", "LCAT": "PM", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 160000, "Current_Salary": 200000, "Hours_Per_Month": 173},
+            {"Name": "Drew Hynes", "LCAT": "PM", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Inactive", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
+            {"Name": "Uyen Tran", "LCAT": "SA/Eng Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 175000, "Hours_Per_Month": 173},
+            {"Name": "Leo Khan", "LCAT": "SA/Eng Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 190000, "Hours_Per_Month": 173},
+            {"Name": "Vitaliy Baklikov", "LCAT": "AI Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 200000, "Current_Salary": 250000, "Hours_Per_Month": 173},
+            {"Name": "Kenny Tran/Lynn Stahl", "LCAT": "HCD Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 130000, "Current_Salary": 150000, "Hours_Per_Month": 173},
+            {"Name": "Emilio Crocco", "LCAT": "Scrum Master", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 110000, "Current_Salary": 110000, "Hours_Per_Month": 173},
+            {"Name": "Robert Melton", "LCAT": "SA/Eng Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 230000, "Current_Salary": 225000, "Hours_Per_Month": 173},
+            {"Name": "Nayeema Nageen", "LCAT": "Scrum Master", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 140000, "Current_Salary": 140000, "Hours_Per_Month": 173},
+            {"Name": "Daniil Goryachev", "LCAT": "Cloud Data Engineer", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 90000, "Current_Salary": 90000, "Hours_Per_Month": 173},
+            {"Name": "Adrien Adams", "LCAT": "Data Systems SME", "Employee_Type": "Subcontractor", "Company": "BEELINE", "Status": "Active", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
+            {"Name": "Paulina Fisher", "LCAT": "HCD Researcher", "Employee_Type": "Subcontractor", "Company": "Self Employed", "Status": "Active", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
+            {"Name": "Andrew Sung", "LCAT": "Full Stack Dev", "Employee_Type": "Subcontractor", "Company": "Friends", "Status": "Active", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
         ]
         
         df = pd.DataFrame(employees)
@@ -840,18 +843,29 @@ class SEASFinancialTracker:
                 avg_salary = employees_df['Current_Salary'].mean()
                 st.metric("Avg Salary", f"${avg_salary:,.0f}")
             
-            # Status breakdown
+            # Employee type and company breakdown
             col1, col2 = st.columns(2)
             with col1:
+                employee_type_counts = employees_df['Employee_Type'].value_counts()
+                st.markdown("**👥 Employee Type Breakdown**")
+                for emp_type, count in employee_type_counts.items():
+                    type_icon = "👨‍💼" if emp_type == 'Employee' else "🏢"
+                    st.write(f"{type_icon} {emp_type}: {count}")
+                
+                company_counts = employees_df['Company'].value_counts()
+                st.markdown("**🏢 Company Distribution**")
+                for company, count in company_counts.items():
+                    st.write(f"• {company}: {count}")
+            
+            with col2:
                 status_counts = employees_df['Status'].value_counts()
                 st.markdown("**📊 Status Breakdown**")
                 for status, count in status_counts.items():
                     status_icon = "🟢" if status == 'Active' else "🔴"
                     st.write(f"{status_icon} {status}: {count}")
-            
-            with col2:
+                
                 lcat_counts = employees_df['LCAT'].value_counts()
-                st.markdown("**👥 LCAT Distribution**")
+                st.markdown("**🎯 LCAT Distribution**")
                 for lcat, count in lcat_counts.items():
                     st.write(f"• {lcat}: {count}")
         else:
@@ -864,11 +878,13 @@ class SEASFinancialTracker:
                 new_name = st.text_input("Name")
                 new_lcat = st.selectbox("LCAT", ["PM", "SA/Eng Lead", "AI Lead", "HCD Lead", 
                                                 "Scrum Master", "Cloud Data Engineer", "SRE", "Full Stack Dev"])
-                new_status = st.selectbox("Status", ["Active", "Inactive"])
+                new_employee_type = st.selectbox("Employee Type", ["Employee", "Subcontractor"])
             with col2:
+                new_company = st.selectbox("Company", ["Skyward IT Solutions", "BEELINE", "Self Employed", "Aquia", "Friends"])
+                new_status = st.selectbox("Status", ["Active", "Inactive"])
                 new_priced_salary = st.number_input("Priced Salary", min_value=0, value=100000)
-                new_current_salary = st.number_input("Current Salary", min_value=0, value=100000)
             with col3:
+                new_current_salary = st.number_input("Current Salary", min_value=0, value=100000)
                 new_hours_per_month = st.number_input("Hours per Month", min_value=0, value=173)
                 
             if st.button("Add Employee") and new_name:
@@ -880,6 +896,8 @@ class SEASFinancialTracker:
                     new_employee = {
                         "Name": new_name,
                         "LCAT": new_lcat,
+                        "Employee_Type": new_employee_type,
+                        "Company": new_company,
                         "Status": new_status,
                         "Priced_Salary": new_priced_salary,
                         "Current_Salary": new_current_salary,
@@ -903,7 +921,7 @@ class SEASFinancialTracker:
         
         # Basic employee info
         st.markdown('<div class="subheader">ℹ️ Employee Information</div>', unsafe_allow_html=True)
-        basic_columns = ["Name", "LCAT", "Status", "Priced_Salary", "Current_Salary", "Hours_Per_Month", "Hourly_Rate"]
+        basic_columns = ["Name", "LCAT", "Employee_Type", "Company", "Status", "Priced_Salary", "Current_Salary", "Hours_Per_Month", "Hourly_Rate"]
         
         edited_basic = st.data_editor(
             employees_df[basic_columns],
@@ -942,12 +960,18 @@ class SEASFinancialTracker:
                     st.markdown("**📋 Basic Information**")
                     st.write(f"**Name:** {employee_data['Name']}")
                     st.write(f"**LCAT:** {employee_data['LCAT']}")
+                    st.write(f"**Employee Type:** {employee_data['Employee_Type']}")
+                    st.write(f"**Company:** {employee_data['Company']}")
                     st.write(f"**Status:** {employee_data['Status']}")
                     st.write(f"**Hours/Month:** {employee_data['Hours_Per_Month']}")
                     
                     # Status indicator
                     status_color = "🟢" if employee_data['Status'] == 'Active' else "🔴"
                     st.markdown(f"{status_color} **Status:** {employee_data['Status']}")
+                    
+                    # Employee type indicator
+                    type_icon = "👨‍💼" if employee_data['Employee_Type'] == 'Employee' else "🏢"
+                    st.markdown(f"{type_icon} **Type:** {employee_data['Employee_Type']}")
                 
                 with col2:
                     st.markdown("**💰 Financial Information**")
@@ -1830,6 +1854,10 @@ class SEASFinancialTracker:
             df_upload['Hours_Per_Month'] = 173
         if 'Status' not in df_upload.columns:
             df_upload['Status'] = 'Active'
+        if 'Employee_Type' not in df_upload.columns:
+            df_upload['Employee_Type'] = 'Employee'
+        if 'Company' not in df_upload.columns:
+            df_upload['Company'] = 'Skyward IT Solutions'
         
         # Calculate hourly rates
         df_upload['Hourly_Rate'] = df_upload.apply(
