@@ -309,7 +309,7 @@ class SEASFinancialTracker:
                     )
                 except Exception as e:
                     st.error(f"Error generating template: {e}")
-        
+            
         with col2:
             st.markdown("**Comprehensive Template**")
             st.markdown("10 fields + monthly hours/revenue + instructions")
@@ -399,7 +399,7 @@ class SEASFinancialTracker:
                     
             except Exception as e:
                 st.error(f"Error reading file: {str(e)}")
-        
+
         return '''
         <div class="upload-instructions">
             <h4>📂 Upload Instructions</h4>
@@ -558,19 +558,19 @@ class SEASFinancialTracker:
                     with col1:
                         total_hours = period_df['Hours'].sum()
                         st.metric("Total Hours", f"{total_hours:.1f}")
-                    with col2:
-                        total_revenue = period_df['Revenue'].sum()
-                        st.metric("Total Revenue", f"${total_revenue:,.2f}")
-                    with col3:
-                        avg_hours = period_df['Hours'].mean()
-                        st.metric("Avg Hours/Period", f"{avg_hours:.1f}")
-                    with col4:
-                        avg_revenue = period_df['Revenue'].mean()
-                        st.metric("Avg Revenue/Period", f"${avg_revenue:,.2f}")
-                    
-                    # Show detailed period data
-                    with st.expander("📊 View All Time Periods"):
-                        st.dataframe(period_df, width='stretch')
+            with col2:
+                total_revenue = period_df['Revenue'].sum()
+                st.metric("Total Revenue", f"${total_revenue:,.2f}")
+            with col3:
+                avg_hours = period_df['Hours'].mean()
+                st.metric("Avg Hours/Period", f"{avg_hours:.1f}")
+            with col4:
+                avg_revenue = period_df['Revenue'].mean()
+                st.metric("Avg Revenue/Period", f"${avg_revenue:,.2f}")
+            
+            # Show detailed period data
+            with st.expander("📊 View All Time Periods"):
+                st.dataframe(period_df, width='stretch')
         else:
             return '<p>📝 No employees available for detailed view. Add employees first.</p>'
         
@@ -791,31 +791,31 @@ class SEASFinancialTracker:
         '''
         
         # Add form using Streamlit
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            new_name = st.text_input("Subcontractor Name")
-            new_company = st.text_input("Company")
-        with col2:
-            new_lcat = st.text_input("LCAT/Role")
-            new_hourly_rate = st.number_input("Hourly Rate", min_value=0.0, value=100.0)
-        with col3:
-            if st.button("Add Subcontractor") and new_name:
-                new_sub = {
-                    "Name": new_name,
-                    "Company": new_company,
-                    "LCAT": new_lcat,
-                    "Hourly_Rate": new_hourly_rate
-                }
-                
-                # Add time period columns
-                for period in st.session_state.time_periods:
-                    new_sub[f'Hours_{period}'] = 0.0
-                    new_sub[f'Revenue_{period}'] = 0.0
-                
-                new_row = pd.DataFrame([new_sub])
-                st.session_state.subcontractors = pd.concat([st.session_state.subcontractors, new_row], 
-                                                          ignore_index=True)
-                st.success(f"Added {new_name} to subcontractor list")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                new_name = st.text_input("Subcontractor Name")
+                new_company = st.text_input("Company")
+            with col2:
+                new_lcat = st.text_input("LCAT/Role")
+                new_hourly_rate = st.number_input("Hourly Rate", min_value=0.0, value=100.0)
+            with col3:
+                if st.button("Add Subcontractor") and new_name:
+                    new_sub = {
+                        "Name": new_name,
+                        "Company": new_company,
+                        "LCAT": new_lcat,
+                        "Hourly_Rate": new_hourly_rate
+                    }
+                    
+                    # Add time period columns
+                    for period in st.session_state.time_periods:
+                        new_sub[f'Hours_{period}'] = 0.0
+                        new_sub[f'Revenue_{period}'] = 0.0
+                    
+                    new_row = pd.DataFrame([new_sub])
+                    st.session_state.subcontractors = pd.concat([st.session_state.subcontractors, new_row], 
+                                                              ignore_index=True)
+                    st.success(f"Added {new_name} to subcontractor list")
                 st.rerun()
         
         return '''
@@ -975,7 +975,7 @@ class SEASFinancialTracker:
                         revenue_col = f'Revenue_{period}'
                         hours = row[hours_col] if pd.notna(row[hours_col]) else 0
                         st.session_state.subcontractors.at[idx, revenue_col] = hours * hourly_rate
-                
+
                 st.success("✅ Hours updated and revenues calculated!")
         else:
             return '<p>📝 No subcontractors available for hours management. Add some first.</p>'
@@ -1391,14 +1391,43 @@ class SEASFinancialTracker:
             st.warning("⚠️ No ODC entries to remove.")
 
     def create_analysis_tab(self):
-        """Create analysis and visualization tab"""
-        st.markdown('<div class="subheader">📊 Financial Analysis & Visualizations</div>', unsafe_allow_html=True)
+        """Create analysis and visualization tab with modular design"""
         
-        # Get employee data
+        # Section 1: Revenue Trends - Success Section
+        create_section(
+            title="📈 Monthly Revenue Trends",
+            content=self._create_revenue_trends_content(),
+            section_type="success",
+            status="active"
+        )
+        
+        # Section 2: Employee Utilization - Info Section
+        create_section(
+            title="🔥 Employee Hours Heatmap",
+            content=self._create_employee_heatmap_content(),
+            section_type="info",
+            status="active"
+        )
+        
+        # Section 3: Cost Analysis - Warning Section
+        create_section(
+            title="💰 Cost Analysis by Labor Category",
+            content=self._create_lcat_cost_analysis_content(),
+            section_type="warning",
+            status="active"
+        )
+        
+        # Section 4: Burn Rate Analysis - Error Section
+        create_section(
+            title="⚡ Project Burn Rate Analysis",
+            content=self._create_burn_rate_content(),
+            section_type="error",
+            status="active"
+        )
+
+    def _create_revenue_trends_content(self):
+        """Create content for revenue trends section"""
         employees_df = st.session_state.employees
-        
-        # Monthly revenue trends
-        st.markdown('<div class="subheader">📈 Monthly Revenue Trends</div>', unsafe_allow_html=True)
         revenue_by_month = {}
         
         for period in st.session_state.time_periods:
@@ -1420,12 +1449,15 @@ class SEASFinancialTracker:
                 font=dict(size=12),
                 margin=dict(t=50, l=50, r=50, b=50)
             )
-            st.plotly_chart(fig, width='stretch')
-        
-        # Employee utilization heatmap
-        st.markdown('<div class="subheader">🔥 Employee Hours Heatmap</div>', unsafe_allow_html=True)
-        
+            st.plotly_chart(fig, width='stretch', key="revenue_trends_chart")
+        else:
+            st.info("No revenue data available for visualization.")
+
+    def _create_employee_heatmap_content(self):
+        """Create content for employee heatmap section"""
+        employees_df = st.session_state.employees
         hours_columns = [col for col in employees_df.columns if col.startswith('Hours_')]
+        
         if hours_columns:
             heatmap_data = employees_df[['Name'] + hours_columns].set_index('Name')
             
@@ -1446,11 +1478,13 @@ class SEASFinancialTracker:
                 font=dict(size=12),
                 margin=dict(t=50, l=50, r=50, b=50)
             )
-            st.plotly_chart(fig, width='stretch')
-        
-        # Cost analysis by LCAT
-        st.markdown('<div class="subheader">💰 Cost Analysis by Labor Category</div>', unsafe_allow_html=True)
-        
+            st.plotly_chart(fig, width='stretch', key="employee_heatmap_chart")
+        else:
+            st.info("No hours data available for heatmap visualization.")
+
+    def _create_lcat_cost_analysis_content(self):
+        """Create content for LCAT cost analysis section"""
+        employees_df = st.session_state.employees
         lcat_revenue = employees_df.groupby('LCAT').agg({
             col: 'sum' for col in employees_df.columns if col.startswith('Revenue_')
         }).sum(axis=1).reset_index()
@@ -1467,11 +1501,13 @@ class SEASFinancialTracker:
                 font=dict(size=12),
                 margin=dict(t=50, l=50, r=50, b=50)
             )
-            st.plotly_chart(fig, width='stretch')
-        
-        # Burn rate analysis
-        st.markdown('<div class="subheader">⚡ Project Burn Rate Analysis</div>', unsafe_allow_html=True)
-        
+            st.plotly_chart(fig, width='stretch', key="lcat_cost_chart")
+        else:
+            st.info("No LCAT data available for cost analysis.")
+
+    def _create_burn_rate_content(self):
+        """Create content for burn rate analysis section"""
+        employees_df = st.session_state.employees
         params = st.session_state.project_params
         actual_hours = params['actual_hours']
         eac_hours = params['eac_hours']
@@ -1523,16 +1559,49 @@ class SEASFinancialTracker:
                 margin=dict(t=50, l=50, r=50, b=50)
             )
             
-            st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig, width='stretch', key="burn_rate_chart")
+        else:
+            st.info("No time period data available for burn rate analysis.")
 
     def create_tasks_tab(self):
-        """Create task management tab"""
-        st.markdown('<div class="subheader">📋 Task Breakdown Management</div>', unsafe_allow_html=True)
+        """Create task management tab with modular design"""
         
-        # Task data editor
+        # Section 1: Add New Task - Success Section
+        create_section(
+            title="➕ Add New Task",
+            content=self._create_add_task_content(),
+            section_type="success",
+            status="active"
+        )
+        
+        # Section 2: Task Management - Info Section
+        create_section(
+            title="📝 Task Details & Management",
+            content=self._create_task_management_content(),
+            section_type="info",
+            status="active"
+        )
+        
+        # Section 3: Task Removal - Warning Section
+        create_section(
+            title="🗑️ Remove Tasks",
+            content=self._create_task_removal_content(),
+            section_type="warning",
+            status="active"
+        )
+        
+        # Section 4: Task Summary & Analysis - Error Section
+        create_section(
+            title="📊 Task Summary & Analysis",
+            content=self._create_task_summary_content(),
+            section_type="error",
+            status="active"
+        )
+
+    def _create_add_task_content(self):
+        """Create content for add new task section"""
         tasks_df = st.session_state.tasks
         
-        # Add new task
         with st.expander("➕ Add New Task", expanded=False):
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -1563,10 +1632,11 @@ class SEASFinancialTracker:
                 st.success(f"Added task {new_task_id}")
                 st.rerun()
 
-        # Display and edit tasks
+    def _create_task_management_content(self):
+        """Create content for task management section"""
+        tasks_df = st.session_state.tasks
+        
         if not tasks_df.empty:
-            st.markdown('<div class="subheader">📝 Task Details</div>', unsafe_allow_html=True)
-            
             edited_tasks = st.data_editor(
                 tasks_df,
                 column_config={
@@ -1578,88 +1648,93 @@ class SEASFinancialTracker:
             )
             
             st.session_state.tasks = edited_tasks
+        else:
+            st.info("No tasks available. Add a new task to get started.")
+
+    def _create_task_removal_content(self):
+        """Create content for task removal section"""
+        tasks_df = st.session_state.tasks
+        
+        if not tasks_df.empty:
+            st.write("Select tasks to remove from the project:")
             
-            # Task removal section
-            st.markdown('<div class="subheader">🗑️ Remove Tasks</div>', unsafe_allow_html=True)
+            # Create columns for better layout
+            col1, col2, col3 = st.columns([2, 1, 1])
             
-            if not tasks_df.empty:
-                st.write("Select tasks to remove from the project:")
-                
-                # Create columns for better layout
-                col1, col2, col3 = st.columns([2, 1, 1])
-                
-                with col1:
-                    # Task selection dropdown
-                    selected_task = st.selectbox(
-                        "Choose task to remove:",
-                        options=[f"{row['Task_ID']} - {row['Task_Name']}" for _, row in tasks_df.iterrows()],
-                        key="task_removal_select"
-                    )
-                
-                with col2:
-                    # Show task details
-                    if selected_task:
+            with col1:
+                # Task selection dropdown
+                selected_task = st.selectbox(
+                    "Choose task to remove:",
+                    options=[f"{row['Task_ID']} - {row['Task_Name']}" for _, row in tasks_df.iterrows()],
+                    key="task_removal_select"
+                )
+            
+            with col2:
+                # Show task details
+                if selected_task:
+                    task_id = selected_task.split(" - ")[0]
+                    task_data = tasks_df[tasks_df['Task_ID'] == task_id].iloc[0]
+                    st.write(f"**Task Name:** {task_data['Task_Name']}")
+                    st.write(f"**LCAT:** {task_data['LCAT']}")
+                    st.write(f"**Person:** {task_data['Person']}")
+                    st.write(f"**Hours:** {task_data['Hours']:.2f}")
+                    st.write(f"**Cost:** ${task_data['Cost']:.2f}")
+            
+            with col3:
+                # Remove button with confirmation
+                if selected_task:
+                    if st.button("🗑️ Remove Task", type="secondary", key="remove_task_btn"):
+                        # Remove the task
                         task_id = selected_task.split(" - ")[0]
-                        task_data = tasks_df[tasks_df['Task_ID'] == task_id].iloc[0]
-                        st.write(f"**Task Name:** {task_data['Task_Name']}")
-                        st.write(f"**LCAT:** {task_data['LCAT']}")
-                        st.write(f"**Person:** {task_data['Person']}")
-                        st.write(f"**Hours:** {task_data['Hours']:.2f}")
-                        st.write(f"**Cost:** ${task_data['Cost']:.2f}")
-                
-                with col3:
-                    # Remove button with confirmation
-                    if selected_task:
-                        if st.button("🗑️ Remove Task", type="secondary", key="remove_task_btn"):
-                            # Remove the task
-                            task_id = selected_task.split(" - ")[0]
-                            st.session_state.tasks = st.session_state.tasks[
-                                st.session_state.tasks['Task_ID'] != task_id
-                            ]
-                            st.success(f"✅ Task {task_id} has been removed from the project.")
-                            st.rerun()
-                
-                # Show current task count
-                st.info(f"📊 **Current Task Count:** {len(st.session_state.tasks)}")
-                
-                # Bulk removal section
-                st.markdown("---")
-                st.markdown("**Bulk Operations:**")
-                
-                # Bulk remove by Task ID
-                task_id_options = tasks_df['Task_ID'].unique().tolist()
-                if task_id_options:
-                    col1, col2 = st.columns([2, 1])
-                    with col1:
-                        selected_task_id = st.selectbox(
-                            "Remove all tasks by Task ID:",
-                            options=task_id_options,
-                            key="bulk_task_id_select"
-                        )
-                    with col2:
-                        if st.button("🗑️ Remove All by Task ID", type="secondary", key="bulk_remove_task_id_btn"):
-                            task_id_count = len(tasks_df[tasks_df['Task_ID'] == selected_task_id])
-                            st.session_state.tasks = st.session_state.tasks[
-                                st.session_state.tasks['Task_ID'] != selected_task_id
-                            ]
-                            st.success(f"✅ Removed {task_id_count} tasks with Task ID: {selected_task_id}")
-                            st.rerun()
-                
-                # Clear all tasks (with confirmation)
-                if st.button("🗑️ Clear All Tasks", type="secondary", key="clear_all_tasks_btn"):
-                    st.warning("⚠️ This will remove ALL tasks from the project. This action cannot be undone.")
-                    if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_tasks_btn"):
-                        task_count = len(st.session_state.tasks)
-                        st.session_state.tasks = pd.DataFrame(columns=st.session_state.tasks.columns)
-                        st.success(f"✅ Cleared all {task_count} tasks from the project.")
+                        st.session_state.tasks = st.session_state.tasks[
+                            st.session_state.tasks['Task_ID'] != task_id
+                        ]
+                        st.success(f"✅ Task {task_id} has been removed from the project.")
                         st.rerun()
-            else:
-                st.warning("⚠️ No tasks to remove.")
             
-            # Task summary by ID
-            st.markdown('<div class="subheader">📊 Task Summary</div>', unsafe_allow_html=True)
+            # Show current task count
+            st.info(f"📊 **Current Task Count:** {len(st.session_state.tasks)}")
             
-            task_summary = edited_tasks.groupby(['Task_ID', 'Task_Name']).agg({
+            # Bulk removal section
+            st.markdown("---")
+            st.markdown("**Bulk Operations:**")
+            
+            # Bulk remove by Task ID
+            task_id_options = tasks_df['Task_ID'].unique().tolist()
+            if task_id_options:
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    selected_task_id = st.selectbox(
+                        "Remove all tasks by Task ID:",
+                        options=task_id_options,
+                        key="bulk_task_id_select"
+                    )
+                with col2:
+                    if st.button("🗑️ Remove All by Task ID", type="secondary", key="bulk_remove_task_id_btn"):
+                        task_id_count = len(tasks_df[tasks_df['Task_ID'] == selected_task_id])
+                        st.session_state.tasks = st.session_state.tasks[
+                            st.session_state.tasks['Task_ID'] != selected_task_id
+                        ]
+                        st.success(f"✅ Removed {task_id_count} tasks with Task ID: {selected_task_id}")
+                        st.rerun()
+            
+            # Clear all tasks (with confirmation)
+            if st.button("🗑️ Clear All Tasks", type="secondary", key="clear_all_tasks_btn"):
+                st.warning("⚠️ This will remove ALL tasks from the project. This action cannot be undone.")
+                if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_tasks_btn"):
+                    task_count = len(st.session_state.tasks)
+                    st.session_state.tasks = pd.DataFrame(columns=st.session_state.tasks.columns)
+                    st.success(f"✅ Cleared all {task_count} tasks from the project.")
+                    st.rerun()
+        else:
+            st.warning("⚠️ No tasks to remove.")
+
+    def _create_task_summary_content(self):
+        """Create content for task summary section"""
+        tasks_df = st.session_state.tasks
+        
+        if not tasks_df.empty:
+            task_summary = tasks_df.groupby(['Task_ID', 'Task_Name']).agg({
                 'Hours': 'sum',
                 'Cost': 'sum'
             }).reset_index()
@@ -1678,7 +1753,9 @@ class SEASFinancialTracker:
                     font=dict(size=12),
                     margin=dict(t=50, l=50, r=50, b=50)
                 )
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, width='stretch', key="task_cost_chart")
+        else:
+            st.info("No tasks available for summary analysis.")
 
     def process_uploaded_employees(self, df_upload: pd.DataFrame) -> pd.DataFrame:
         """Process uploaded employee data with duplicate handling"""
@@ -1749,7 +1826,7 @@ class SEASFinancialTracker:
             return result_df
         else:
             # No existing employees, just return processed upload
-            return df_upload
+        return df_upload
 
 def main():
     """Main application function"""
