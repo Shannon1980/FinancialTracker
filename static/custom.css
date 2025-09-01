@@ -687,8 +687,9 @@ a:visited {
 }
 
 .stButton > button:hover {
-  background-color: var(--qb-dark-gray) !important;
-  border-color: var(--qb-dark-gray) !important;
+  background-color: #1E3A8A !important;
+  border-color: #1E3A8A !important;
+  color: var(--qb-white) !important;
   transform: translateY(-1px) !important;
   box-shadow: var(--qb-shadow-md) !important;
 }
@@ -696,6 +697,46 @@ a:visited {
 .stButton > button:focus {
   outline: 3px solid var(--qb-primary-blue) !important;
   outline-offset: 2px !important;
+}
+
+.stButton > button:active {
+  background-color: #1E3A8A !important;
+  border-color: #1E3A8A !important;
+  transform: translateY(0) !important;
+  box-shadow: var(--qb-shadow-sm) !important;
+}
+
+/* Additional button states for better visibility */
+.stButton > button:disabled {
+  background-color: var(--qb-light-gray) !important;
+  color: var(--qb-medium-gray) !important;
+  border-color: var(--qb-light-gray) !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+/* Ensure button text is always visible */
+.stButton > button span,
+.stButton > button div {
+  color: inherit !important;
+}
+
+/* Force button colors for better visibility */
+.stButton > button {
+  color: var(--qb-white) !important;
+}
+
+.stButton > button:hover {
+  color: var(--qb-white) !important;
+}
+
+.stButton > button:active {
+  color: var(--qb-white) !important;
+}
+
+/* Override any Streamlit default button colors */
+.stButton > button * {
+  color: inherit !important;
 }
 
 .stSelectbox > div > div {
