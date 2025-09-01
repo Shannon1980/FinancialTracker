@@ -822,6 +822,9 @@ class SEASFinancialTracker:
         # Employee data editor
         st.markdown('<div class="subheader">👤 Employee Data</div>', unsafe_allow_html=True)
         
+        # Get employee data
+        employees_df = st.session_state.employees
+        
         # Employee summary
         if not employees_df.empty:
             col1, col2, col3, col4 = st.columns(4)
@@ -897,7 +900,6 @@ class SEASFinancialTracker:
                     st.rerun()
 
         # Display and edit employee data
-        employees_df = st.session_state.employees
         
         # Basic employee info
         st.markdown('<div class="subheader">ℹ️ Employee Information</div>', unsafe_allow_html=True)
