@@ -588,39 +588,25 @@ class SEASFinancialTracker:
         non_billable = params['non_billable_hours']
         billable_hours = actual_hours + non_billable
         
-        # Create metric cards
-        metric_cards = []
+        # Create metric cards using Streamlit columns
+        col1, col2, col3, col4 = st.columns(4)
         
-        metric_cards.append(create_metric_card("⏱️ EAC Hours", f"{eac_hours:,.0f}"))
-        metric_cards.append(create_metric_card("📈 Actual Hours", f"{actual_hours:,.0f}"))
-        metric_cards.append(create_metric_card("💼 Billable Hours", f"{billable_hours:,.0f}"))
+        with col1:
+            st.metric("⏱️ EAC Hours", f"{eac_hours:,.0f}")
+        with col2:
+            st.metric("📈 Actual Hours", f"{actual_hours:,.0f}")
+        with col3:
+            st.metric("💼 Billable Hours", f"{billable_hours:,.0f}")
         
         # Calculate completion percentage
         completion_pct = (actual_hours / eac_hours) * 100 if eac_hours > 0 else 0
-        progress_color = "#27ae60" if completion_pct >= 75 else "#f39c12" if completion_pct >= 50 else "#e74c3c"
-        metric_cards.append(create_metric_card("🎯 Completion", f"{completion_pct:.1f}%"))
-        
-        # Create grid of metric cards
-        grid_html = f'''
-        <div class="section-grid">
-            {''.join(metric_cards)}
-        </div>
-        '''
+        with col4:
+            st.metric("🎯 Completion", f"{completion_pct:.1f}%")
         
         # Add progress bar
-        progress_html = f'''
-        <div style="margin-top: 1.5rem;">
-            <h4>📊 Project Progress</h4>
-            <div style="background: #e9ecef; border-radius: 8px; height: 20px; overflow: hidden;">
-                <div style="background: {progress_color}; height: 100%; width: {min(completion_pct, 100)}%; transition: width 0.3s ease;"></div>
-            </div>
-            <p style="text-align: center; margin-top: 0.5rem; color: {progress_color}; font-weight: 600;">
-                {completion_pct:.1f}% Complete
-            </p>
-        </div>
-        '''
-        
-        return grid_html + progress_html
+        st.markdown("### 📊 Project Progress")
+        st.progress(completion_pct / 100)
+        st.markdown(f"**{completion_pct:.1f}% Complete** - {actual_hours:,.0f} of {eac_hours:,.0f} hours")
     
     def _create_financial_summary_content(self):
         """Create content for financial summary section"""
@@ -657,10 +643,30 @@ class SEASFinancialTracker:
         eac_hours = params['eac_hours']
         recalculated_revenue = (actual_hours / eac_hours) * total_transaction_price if eac_hours > 0 else 0
         
-        # Create financial summary
-
+        # Create financial summary using Streamlit columns
+        col1, col2, col3, col4 = st.columns(4)
         
-        return ""
+        with col1:
+            st.metric("💰 Total Revenue", f"${total_transaction_price:,.2f}")
+        with col2:
+            st.metric("💼 Direct Labor", f"${total_direct_labor:,.2f}")
+        with col3:
+            st.metric("🏢 ODC Costs", f"${total_odc:,.2f}")
+        with col4:
+            st.metric("📊 Total Costs", f"${total_costs:,.2f}")
+        
+        # Additional metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("🤝 Subcontractors", f"${total_subcontractor:,.2f}")
+        with col2:
+            st.metric("📈 Indirect Costs", f"${indirect_costs['Total_Indirect']:,.2f}")
+        with col3:
+            profit_margin = ((total_transaction_price - total_costs) / total_transaction_price * 100) if total_transaction_price > 0 else 0
+            st.metric("📊 Profit Margin", f"{profit_margin:.1f}%")
+        with col4:
+            st.metric("🎯 Recalculated Revenue", f"${recalculated_revenue:,.2f}")
     
     def _create_cost_analysis_content(self):
         """Create content for cost analysis section"""
@@ -1132,48 +1138,21 @@ class SEASFinancialTracker:
     def create_overview_tab(self):
         """Create overview dashboard with modular design"""
         
-        # Section 1: Project Metrics - Info Section
-        create_section(
-            title="📊 Project Metrics",
-            content=self._create_project_metrics_content(),
-            section_type="info",
-            status="active",
-            footer_content="Real-time project tracking",
-            actions=[
-                {"type": "primary", "label": "Refresh Metrics"},
-                {"type": "secondary", "label": "Export Report"}
-            ]
-        )
+        # Section 1: Project Metrics
+        st.markdown("## 📊 Project Metrics")
+        self._create_project_metrics_content()
         
-        create_section_divider()
+        st.markdown("---")
         
-        # Section 2: Financial Summary - Success Section
-        create_section(
-            title="💰 Financial Summary",
-            content=self._create_financial_summary_content(),
-            section_type="success",
-            status="complete",
-            footer_content="Financial calculations updated",
-            actions=[
-                {"type": "primary", "label": "View Details"},
-                {"type": "secondary", "label": "Download Report"}
-            ]
-        )
+        # Section 2: Financial Summary
+        st.markdown("## 💰 Financial Summary")
+        self._create_financial_summary_content()
         
-        create_section_divider()
+        st.markdown("---")
         
-        # Section 3: Cost Analysis - Warning Section
-        create_section(
-            title="📈 Cost Analysis",
-            content=self._create_cost_analysis_content(),
-            section_type="warning",
-            status="needs_review",
-            footer_content="Review cost breakdowns",
-            actions=[
-                {"type": "primary", "label": "Analyze Trends"},
-                {"type": "secondary", "label": "Compare Periods"}
-            ]
-        )
+        # Section 3: Cost Analysis
+        st.markdown("## 📈 Cost Analysis")
+        self._create_cost_analysis_content()
         
 
 
