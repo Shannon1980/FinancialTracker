@@ -9,6 +9,7 @@ import io
 import json
 from typing import Dict, List, Tuple, Optional
 import base64
+from utils.template_downloader import generate_employee_template, get_template_info
 
 # Set page config
 st.set_page_config(
@@ -728,6 +729,50 @@ class SEASFinancialTracker:
             <h3>📁 Upload Employee Data</h3>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Template download section
+        st.markdown('<div class="subheader">📋 Download Templates</div>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**Basic Template**")
+            st.markdown("5 required fields + monthly hours/revenue columns")
+            st.markdown("Perfect for quick employee data entry")
+            
+            if st.button("📥 Download Basic Template", key="download_basic"):
+                try:
+                    file_bytes, filename, mime_type = generate_employee_template("basic")
+                    st.download_button(
+                        label="💾 Save Basic Template",
+                        data=file_bytes,
+                        file_name=filename,
+                        mime_type=mime_type,
+                        key="save_basic"
+                    )
+                except Exception as e:
+                    st.error(f"Error generating template: {e}")
+        
+        with col2:
+            st.markdown("**Comprehensive Template**")
+            st.markdown("10 fields + monthly hours/revenue + instructions")
+            st.markdown("Perfect for detailed employee management")
+            
+            if st.button("📥 Download Comprehensive Template", key="download_comprehensive"):
+                try:
+                    file_bytes, filename, mime_type = generate_employee_template("comprehensive")
+                    st.download_button(
+                        label="💾 Save Comprehensive Template",
+                        data=file_bytes,
+                        file_name=filename,
+                        mime_type=mime_type,
+                        key="save_comprehensive"
+                    )
+                except Exception as e:
+                    st.error(f"Error generating template: {e}")
+        
+        st.markdown("---")
+        
         uploaded_file = st.file_uploader("Choose Excel/CSV file", type=['xlsx', 'csv'])
         
         if uploaded_file is not None:
