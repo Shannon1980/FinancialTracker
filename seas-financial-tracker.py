@@ -388,7 +388,7 @@ class SEASFinancialTracker:
                         
                         if st.button("🔄 Import Anyway (Replace Duplicates)", key="import_anyway"):
                             # Process and merge with existing data (this will replace duplicates)
-                            st.session_state.employees = self.process_uploaded_employees(df_upload)
+                    st.session_state.employees = self.process_uploaded_employees(df_upload)
                             st.success("Data imported successfully! Duplicates were replaced.")
                             st.rerun()
                     else:
@@ -437,27 +437,27 @@ class SEASFinancialTracker:
                 if new_name.lower() in existing_names:
                     st.error(f"❌ Employee '{new_name}' already exists! Please use a different name or update the existing employee.")
                 else:
-                    new_employee = {
-                        "Name": new_name,
-                        "LCAT": new_lcat,
+                new_employee = {
+                    "Name": new_name,
+                    "LCAT": new_lcat,
                         "Employee_Type": new_employee_type,
                         "Company": new_company,
                         "Status": new_status,
-                        "Priced_Salary": new_priced_salary,
-                        "Current_Salary": new_current_salary,
-                        "Hours_Per_Month": new_hours_per_month,
-                        "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
-                    }
-                    
-                    # Add columns for time periods
+                    "Priced_Salary": new_priced_salary,
+                    "Current_Salary": new_current_salary,
+                    "Hours_Per_Month": new_hours_per_month,
+                    "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
+                }
+                
+                # Add columns for time periods
                     for period in st.session_state.employees.columns:
                         if period.startswith('Hours_') or period.startswith('Revenue_'):
                             new_employee[period] = 0.0
-                    
-                    # Add to dataframe
-                    new_row = pd.DataFrame([new_employee])
-                    st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
-                                                          ignore_index=True)
+                
+                # Add to dataframe
+                new_row = pd.DataFrame([new_employee])
+                st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
+                                                      ignore_index=True)
                     st.success(f"✅ Added {new_name} to employee list")
                     st.rerun()
 
@@ -558,7 +558,7 @@ class SEASFinancialTracker:
                     with col1:
                         total_hours = period_df['Hours'].sum()
                         st.metric("Total Hours", f"{total_hours:.1f}")
-            with col2:
+        with col2:
                 total_revenue = period_df['Revenue'].sum()
                 st.metric("Total Revenue", f"${total_revenue:,.2f}")
             with col3:
