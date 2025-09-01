@@ -68,6 +68,14 @@ SAMPLE_SUBCONTRACTORS = [
     {"Name": "Andrew Sung", "Company": "FFtC", "LCAT": "Full Stack Dev", "Hourly_Rate": 130.0},
 ]
 
+SAMPLE_ODC_COSTS = [
+    {"Name": "Office Space", "Category": "Facilities", "Monthly_Cost": 5000.0, "Description": "Office rent and utilities"},
+    {"Name": "Software Licenses", "Category": "Technology", "Monthly_Cost": 2500.0, "Description": "Development tools and software"},
+    {"Name": "Internet & Phone", "Category": "Technology", "Monthly_Cost": 800.0, "Description": "High-speed internet and phone services"},
+    {"Name": "Insurance", "Category": "Business", "Monthly_Cost": 1200.0, "Description": "Business liability and property insurance"},
+    {"Name": "Marketing", "Category": "Business", "Monthly_Cost": 1500.0, "Description": "Marketing materials and advertising"},
+]
+
 SAMPLE_TASKS = [
     {"Task_ID": "0001AA", "Task_Name": "CEDAR and KMP Transition", "LCAT": "AI Lead (KEY)", 
      "Person_Org": "OPERATIONS", "Person": "Baklikov, Vitaliy", "Hours": 984, "Cost": 118292.52},

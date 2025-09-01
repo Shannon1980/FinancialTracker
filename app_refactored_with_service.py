@@ -189,7 +189,7 @@ class SEASFinancialTrackerRefactored:
         # Add monthly hours columns
         for period in st.session_state.time_periods:
             df[f'Hours_{period}'] = 0.0
-            df[f'Hours_{period}'] = 0.0
+            df[f'Revenue_{period}'] = 0.0
         
         return df
     
