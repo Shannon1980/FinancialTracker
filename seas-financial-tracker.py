@@ -1179,7 +1179,7 @@ class SEASFinancialTracker:
 
 
         
-        # Financial summary with modern cards
+
 
         
         col1, col2 = st.columns(2)
