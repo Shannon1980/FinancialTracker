@@ -576,6 +576,288 @@ class SEASFinancialTracker:
         
         return ""
 
+    # ============================================================================
+    # Subcontractor Tab Content Helper Methods
+    # ============================================================================
+    
+    def _create_subcontractor_summary_content(self):
+        """Create content for subcontractor summary section"""
+        sub_df = st.session_state.subcontractors
+        
+        if not sub_df.empty:
+            # Create metric cards
+            metric_cards = []
+            
+            total_subcontractors = len(sub_df)
+            total_hourly_rate = sub_df['Hourly_Rate'].sum()
+            avg_hourly_rate = sub_df['Hourly_Rate'].mean()
+            total_companies = len(sub_df['Company'].unique())
+            
+            metric_cards.append(create_metric_card("Total Subcontractors", total_subcontractors))
+            metric_cards.append(create_metric_card("Total Hourly Rate", f"${total_hourly_rate:,.2f}"))
+            metric_cards.append(create_metric_card("Avg Hourly Rate", f"${avg_hourly_rate:,.2f}"))
+            metric_cards.append(create_metric_card("Unique Companies", total_companies))
+            
+            # Create grid of metric cards
+            grid_html = f'''
+            <div class="section-grid">
+                {''.join(metric_cards)}
+            </div>
+            '''
+            
+            # Add breakdown summary
+            company_counts = sub_df['Company'].value_counts()
+            lcat_counts = sub_df['LCAT'].value_counts()
+            
+            breakdown_html = '''
+            <div style="margin-top: 1.5rem;">
+                <div class="section-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div>
+                        <h4>🏢 Companies</h4>
+            '''
+            
+            for company, count in company_counts.items():
+                breakdown_html += f'<p>• {company}: {count}</p>'
+            
+            breakdown_html += '''
+                    </div>
+                    <div>
+                        <h4>🎯 LCATs</h4>
+            '''
+            
+            for lcat, count in lcat_counts.items():
+                breakdown_html += f'<p>• {lcat}: {count}</p>'
+            
+            breakdown_html += '''
+                    </div>
+                </div>
+            </div>
+            '''
+            
+            return grid_html + breakdown_html
+        else:
+            return '<p>📝 No subcontractors added yet. Use the sections below to add subcontractors.</p>'
+    
+    def _create_add_subcontractor_content(self):
+        """Create content for add new subcontractor section"""
+        content_html = '''
+        <div class="section-with-sidebar">
+            <div class="section-main">
+                <h4>➕ Add New Subcontractor</h4>
+                <p>Enter subcontractor information to add them to your project.</p>
+        '''
+        
+        # Add form using Streamlit
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            new_name = st.text_input("Subcontractor Name")
+            new_company = st.text_input("Company")
+        with col2:
+            new_lcat = st.text_input("LCAT/Role")
+            new_hourly_rate = st.number_input("Hourly Rate", min_value=0.0, value=100.0)
+        with col3:
+            if st.button("Add Subcontractor") and new_name:
+                new_sub = {
+                    "Name": new_name,
+                    "Company": new_company,
+                    "LCAT": new_lcat,
+                    "Hourly_Rate": new_hourly_rate
+                }
+                
+                # Add time period columns
+                for period in st.session_state.time_periods:
+                    new_sub[f'Hours_{period}'] = 0.0
+                    new_sub[f'Revenue_{period}'] = 0.0
+                
+                new_row = pd.DataFrame([new_sub])
+                st.session_state.subcontractors = pd.concat([st.session_state.subcontractors, new_row], 
+                                                          ignore_index=True)
+                st.success(f"Added {new_name} to subcontractor list")
+                st.rerun()
+        
+        return '''
+            </div>
+            <div class="section-sidebar">
+                <h4>📋 Required Fields</h4>
+                <ul>
+                    <li><strong>Name:</strong> Subcontractor's full name</li>
+                    <li><strong>Company:</strong> Company or organization</li>
+                    <li><strong>LCAT:</strong> Labor category or role</li>
+                    <li><strong>Hourly Rate:</strong> Rate per hour</li>
+                </ul>
+                
+                <h4>💡 Tips</h4>
+                <ul>
+                    <li>Use consistent naming conventions</li>
+                    <li>Verify hourly rates are accurate</li>
+                    <li>Include all required information</li>
+                </ul>
+            </div>
+        </div>
+        '''
+    
+    def _create_subcontractor_management_content(self):
+        """Create content for subcontractor management section"""
+        sub_df = st.session_state.subcontractors
+        
+        if not sub_df.empty:
+            st.markdown("### Subcontractor Information")
+            basic_columns = ["Name", "Company", "LCAT", "Hourly_Rate"]
+            
+            edited_basic = st.data_editor(
+                sub_df[basic_columns],
+                column_config={
+                    "Hourly_Rate": st.column_config.NumberColumn("Hourly Rate", format="$%.2f"),
+                },
+                width='stretch',
+                key="basic_subcontractor_data"
+            )
+            
+            # Update main dataframe
+            for col in basic_columns:
+                st.session_state.subcontractors[col] = edited_basic[col]
+            
+            # Subcontractor removal section
+            st.markdown("### Remove Subcontractors")
+            
+            if not sub_df.empty:
+                st.write("Select subcontractors to remove from the project:")
+                
+                # Create columns for better layout
+                col1, col2, col3 = st.columns([2, 1, 1])
+                
+                with col1:
+                    # Subcontractor selection dropdown
+                    selected_subcontractor = st.selectbox(
+                        "Choose subcontractor to remove:",
+                        options=sub_df['Name'].tolist(),
+                        key="subcontractor_removal_select"
+                    )
+                
+                with col2:
+                    # Show subcontractor details
+                    if selected_subcontractor:
+                        sub_data = sub_df[sub_df['Name'] == selected_subcontractor].iloc[0]
+                        st.write(f"**Company:** {sub_data['Company']}")
+                        st.write(f"**LCAT:** {sub_data['LCAT']}")
+                        st.write(f"**Rate:** ${sub_data['Hourly_Rate']:.2f}/hr")
+                
+                with col3:
+                    # Remove button with confirmation
+                    if selected_subcontractor:
+                        if st.button("🗑️ Remove Subcontractor", type="secondary", key="remove_subcontractor_btn"):
+                            # Remove the subcontractor
+                            st.session_state.subcontractors = st.session_state.subcontractors[
+                                st.session_state.subcontractors['Name'] != selected_subcontractor
+                            ]
+                            st.success(f"✅ {selected_subcontractor} has been removed from the project.")
+                            st.rerun()
+                
+                # Show current subcontractor count
+                st.info(f"📊 **Current Subcontractor Count:** {len(st.session_state.subcontractors)}")
+                
+                # Bulk removal section
+                st.markdown("---")
+                st.markdown("**Bulk Operations:**")
+                
+                # Bulk remove by company
+                company_options = sub_df['Company'].unique().tolist()
+                if company_options:
+                    col1, col2 = st.columns([2, 1])
+                    with col1:
+                        selected_company = st.selectbox(
+                            "Remove all subcontractors by Company:",
+                            options=company_options,
+                            key="bulk_company_select"
+                        )
+                    with col2:
+                        if st.button("🗑️ Remove All by Company", type="secondary", key="bulk_remove_company_btn"):
+                            company_count = len(sub_df[sub_df['Company'] == selected_company])
+                            st.session_state.subcontractors = st.session_state.subcontractors[
+                                st.session_state.subcontractors['Company'] != selected_company
+                            ]
+                            st.success(f"✅ Removed {company_count} subcontractors from company: {selected_company}")
+                            st.rerun()
+                
+                # Clear all subcontractors (with confirmation)
+                if st.button("🗑️ Clear All Subcontractors", type="secondary", key="clear_all_subcontractors_btn"):
+                    st.warning("⚠️ This will remove ALL subcontractors from the project. This action cannot be undone.")
+                    if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_subcontractors_btn"):
+                        subcontractor_count = len(st.session_state.subcontractors)
+                        st.session_state.subcontractors = pd.DataFrame(columns=st.session_state.subcontractors.columns)
+                        st.success(f"✅ Cleared all {subcontractor_count} subcontractors from the project.")
+                        st.rerun()
+            else:
+                st.warning("⚠️ No subcontractors to remove.")
+        else:
+            return '<p>📝 No subcontractors available for management. Add some first.</p>'
+        
+        return ""
+    
+    def _create_subcontractor_hours_content(self):
+        """Create content for subcontractor monthly hours section"""
+        sub_df = st.session_state.subcontractors
+        
+        if not sub_df.empty:
+            st.markdown("### Monthly Hours Management")
+            
+            # Show fewer periods at a time for better usability
+            selected_periods = st.multiselect(
+                "Select periods to edit",
+                st.session_state.time_periods,
+                default=st.session_state.time_periods[:6]
+            )
+            
+            if selected_periods:
+                hours_columns = [f'Hours_{period}' for period in selected_periods]
+                hours_data = sub_df[["Name"] + hours_columns].copy()
+                
+                edited_hours = st.data_editor(
+                    hours_data,
+                    column_config={col: st.column_config.NumberColumn(period, format="%.1f") 
+                                  for col, period in zip(hours_columns, selected_periods)},
+                    width='stretch',
+                    key="subcontractor_hours"
+                )
+                
+                # Update main dataframe and calculate revenues
+                for col in hours_columns:
+                    st.session_state.subcontractors[col] = edited_hours[col]
+                
+                # Calculate revenues
+                for idx, row in st.session_state.subcontractors.iterrows():
+                    hourly_rate = row['Hourly_Rate']
+                    for period in selected_periods:
+                        hours_col = f'Hours_{period}'
+                        revenue_col = f'Revenue_{period}'
+                        hours = row[hours_col] if pd.notna(row[hours_col]) else 0
+                        st.session_state.subcontractors.at[idx, revenue_col] = hours * hourly_rate
+                
+                st.success("✅ Hours updated and revenues calculated!")
+        else:
+            return '<p>📝 No subcontractors available for hours management. Add some first.</p>'
+        
+        return ""
+    
+    def _create_odc_management_content(self):
+        """Create content for ODC management section"""
+        odc_df = st.session_state.odc_costs
+        
+        st.markdown("### Other Direct Costs (ODC)")
+        
+        edited_odc = st.data_editor(
+            odc_df,
+            column_config={
+                "Amount": st.column_config.NumberColumn("Amount", format="$%.2f"),
+            },
+            width='stretch',
+            key="odc_data"
+        )
+        
+        st.session_state.odc_costs = edited_odc
+        
+        return ""
+
     def create_sample_subcontractors(self) -> pd.DataFrame:
         """Create sample subcontractor data"""
         subcontractors = [
@@ -925,179 +1207,24 @@ class SEASFinancialTracker:
             section_type="info",
             status="active"
         )
-                    # Show detailed period data
-                    with st.expander("📊 View All Time Periods"):
-                        st.dataframe(period_df, width='stretch')
-                        
-                        # Create visualization
-                        if not period_df.empty:
-                            fig = go.Figure()
-                            
-                            # Add hours bar chart
-                            fig.add_trace(go.Bar(
-                                x=period_df['Period'],
-                                y=period_df['Hours'],
-                                name='Hours',
-                                yaxis='y',
-                                marker_color='#2E5BBA'
-                            ))
-                            
-                            # Add revenue line chart
-                            fig.add_trace(go.Scatter(
-                                x=period_df['Period'],
-                                y=period_df['Revenue'],
-                                name='Revenue',
-                                yaxis='y2',
-                                line=dict(color='#FF6B35', width=3)
-                            ))
-                            
-                            fig.update_layout(
-                                title=f'Time Period Data for {selected_employee}',
-                                xaxis=dict(title='Period'),
-                                yaxis=dict(title='Hours', side='left'),
-                                yaxis2=dict(title='Revenue ($)', side='right', overlaying='y'),
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                font=dict(size=12),
-                                margin=dict(t=50, l=50, r=50, b=50)
-                            )
-                            
-                            st.plotly_chart(fig, width='stretch')
-        else:
-            st.info("📝 No employees to view. Add employees first to see detailed information.")
         
         # Duplicate detection and management
-        st.markdown('<div class="subheader">🔍 Duplicate Detection</div>', unsafe_allow_html=True)
+
         
-        # Check for existing duplicates in current data
-        if not employees_df.empty:
-            # Find duplicates by name (case-insensitive)
-            name_counts = employees_df['Name'].str.lower().value_counts()
-            duplicates = name_counts[name_counts > 1]
-            
-            if not duplicates.empty:
-                st.warning(f"⚠️ Found {len(duplicates)} duplicate employee names in current data:")
-                
-                for dup_name in duplicates.index:
-                    dup_employees = employees_df[employees_df['Name'].str.lower() == dup_name]
-                    st.write(f"**'{dup_name.title()}':** {len(dup_employees)} entries")
-                    
-                    # Show duplicate details
-                    with st.expander(f"View duplicates for '{dup_name.title()}'"):
-                        st.dataframe(dup_employees)
-                        
-                        # Option to merge duplicates
-                        if st.button(f"🔄 Merge Duplicates for '{dup_name.title()}'", key=f"merge_{dup_name}"):
-                            # Keep the first entry and remove others
-                            first_idx = dup_employees.index[0]
-                            duplicate_indices = dup_employees.index[1:]
-                            
-                            # Remove duplicates
-                            st.session_state.employees = st.session_state.employees.drop(duplicate_indices)
-                            st.success(f"✅ Merged duplicates for '{dup_name.title()}' - kept first entry, removed {len(duplicate_indices)} duplicates")
-                            st.rerun()
-            else:
-                st.success("✅ No duplicate employee names found in current data")
+
         
-        # Employee removal section
-        st.markdown('<div class="subheader">🗑️ Remove Employees</div>', unsafe_allow_html=True)
-        
-        # Create a more user-friendly employee removal interface
-        if not employees_df.empty:
-            st.write("Select employees to remove from the project:")
-            
-            # Create columns for better layout
-            col1, col2, col3 = st.columns([2, 1, 1])
-            
-            with col1:
-                # Employee selection dropdown
-                selected_employee = st.selectbox(
-                    "Choose employee to remove:",
-                    options=employees_df['Name'].tolist(),
-                    key="employee_removal_select"
-                )
-            
-            with col2:
-                # Show employee details
-                if selected_employee:
-                    emp_data = employees_df[employees_df['Name'] == selected_employee].iloc[0]
-                    st.write(f"**LCAT:** {emp_data['LCAT']}")
-                    st.write(f"**Current Salary:** ${emp_data['Current_Salary']:,.2f}")
-            
-            with col3:
-                # Remove button with confirmation
-                if selected_employee:
-                    if st.button("🗑️ Remove Employee", type="secondary", key="remove_employee_btn"):
-                        # Remove the employee
-                        st.session_state.employees = st.session_state.employees[
-                            st.session_state.employees['Name'] != selected_employee
-                        ]
-                        st.success(f"✅ {selected_employee} has been removed from the project.")
-                        st.rerun()
-            
-            # Show current employee count
-            st.info(f"📊 **Current Employee Count:** {len(st.session_state.employees)}")
-            
-            # Bulk removal section
-            st.markdown("---")
-            st.markdown("**Bulk Operations:**")
-            
-            # Bulk remove by LCAT
-            lcat_options = employees_df['LCAT'].unique().tolist()
-            if lcat_options:
-                col1, col2 = st.columns([2, 1])
-                with col1:
-                    selected_lcat = st.selectbox(
-                        "Remove all employees by Labor Category:",
-                        options=lcat_options,
-                        key="bulk_lcat_select"
-                    )
-                with col2:
-                    if st.button("🗑️ Remove All by LCAT", type="secondary", key="bulk_remove_lcat_btn"):
-                        lcat_count = len(employees_df[employees_df['LCAT'] == selected_lcat])
-                        st.session_state.employees = st.session_state.employees[
-                            st.session_state.employees['LCAT'] != selected_lcat
-                        ]
-                        st.success(f"✅ Removed {lcat_count} employees with LCAT: {selected_lcat}")
-                        st.rerun()
-            
-            # Clear all employees (with confirmation)
-            if st.button("🗑️ Clear All Employees", type="secondary", key="clear_all_employees_btn"):
-                st.warning("⚠️ This will remove ALL employees from the project. This action cannot be undone.")
-                if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_btn"):
-                    employee_count = len(st.session_state.employees)
-                    st.session_state.employees = pd.DataFrame(columns=st.session_state.employees.columns)
-                    st.success(f"✅ Cleared all {employee_count} employees from the project.")
-                    st.rerun()
-        else:
-            st.warning("⚠️ No employees to remove. Add some employees first.")
+
         
         # Update calculations
         self.update_employee_calculations()
         
         # Monthly hours input - show in sections
-        st.markdown('<div class="subheader">📅 Monthly Hours (Base Year)</div>', unsafe_allow_html=True)
-        base_year_periods = st.session_state.time_periods[:12]
-        base_year_columns = [f'Hours_{period}' for period in base_year_periods]
-        
-        if all(col in employees_df.columns for col in base_year_columns):
-            base_year_data = employees_df[["Name"] + base_year_columns].copy()
-            
-            edited_base_year = st.data_editor(
-                base_year_data,
-                column_config={col: st.column_config.NumberColumn(period, format="%.1f") 
-                              for col, period in zip(base_year_columns, base_year_periods)},
-                width='stretch',
-                key="base_year_hours"
-            )
-            
-            # Update main dataframe
-            for col in base_year_columns:
-                st.session_state.employees[col] = edited_base_year[col]
+
+
         
         # Option Year 1 hours
         if len(st.session_state.time_periods) > 12:
-            st.subheader("Monthly Hours (Option Year 1)")
+    
             oy1_periods = st.session_state.time_periods[12:]
             oy1_columns = [f'Hours_{period}' for period in oy1_periods]
             
@@ -1120,265 +1247,71 @@ class SEASFinancialTracker:
         self.update_employee_calculations()
         
         # Data Management section
-        st.markdown('<div class="subheader">💾 Data Management</div>', unsafe_allow_html=True)
+
         
-        # Export functionality
-        st.markdown("**📤 Export Data:**")
-        col1, col2 = st.columns(2)
+
         
-        with col1:
-            if st.button("Download Employee Data (Excel)"):
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    st.session_state.employees.to_excel(writer, index=False, sheet_name='Employees')
-                output.seek(0)
-                
-                st.download_button(
-                    label="📥 Download Excel",
-                    data=output.getvalue(),
-                    file_name="seas_employee_data.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-        
-        with col2:
-            if st.button("Download Employee Data (CSV)"):
-                csv = st.session_state.employees.to_csv(index=False)
-                st.download_button(
-                    label="📥 Download CSV",
-                    data=csv,
-                    file_name="seas_employee_data.csv",
-                    mime="text/csv"
-                )
-        
-        # Backup and Restore functionality
-        st.markdown("**🔄 Backup & Restore:**")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("💾 Create Backup"):
-                # Create a comprehensive backup of all data
-                backup_data = {
-                    'employees': st.session_state.employees.to_dict('records'),
-                    'subcontractors': st.session_state.subcontractors.to_dict('records'),
-                    'odc_costs': st.session_state.odc_costs.to_dict('records'),
-                    'tasks': st.session_state.tasks.to_dict('records'),
-                    'project_params': st.session_state.project_params,
-                    'time_periods': st.session_state.time_periods,
-                    'backup_timestamp': datetime.now().isoformat()
-                }
-                
-                backup_json = json.dumps(backup_data, indent=2, default=str)
-                st.download_button(
-                    label="📥 Download Backup",
-                    data=backup_json,
-                    file_name=f"seas_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                    mime="application/json"
-                )
-                st.success("✅ Backup created successfully!")
-        
-        with col2:
-            # File upload for restore
-            uploaded_backup = st.file_uploader("Upload backup file to restore", type=['json'], key="backup_restore")
-            if uploaded_backup is not None:
-                if st.button("🔄 Restore from Backup"):
-                    try:
-                        backup_data = json.load(uploaded_backup)
-                        
-                        # Restore all data
-                        if 'employees' in backup_data:
-                            st.session_state.employees = pd.DataFrame(backup_data['employees'])
-                        if 'subcontractors' in backup_data:
-                            st.session_state.subcontractors = pd.DataFrame(backup_data['subcontractors'])
-                        if 'odc_costs' in backup_data:
-                            st.session_state.odc_costs = pd.DataFrame(backup_data['odc_costs'])
-                        if 'tasks' in backup_data:
-                            st.session_state.tasks = pd.DataFrame(backup_data['tasks'])
-                        if 'project_params' in backup_data:
-                            st.session_state.project_params = backup_data['project_params']
-                        if 'time_periods' in backup_data:
-                            st.session_state.time_periods = backup_data['time_periods']
-                        
-                        st.success("✅ Data restored successfully from backup!")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"❌ Error restoring backup: {str(e)}")
+
 
     def create_subcontractor_tab(self):
-        """Create subcontractor management tab"""
-        st.markdown('<div class="subheader">🏢 Subcontractor Management</div>', unsafe_allow_html=True)
+        """Create subcontractor management tab with modular design"""
         
-        # Add new subcontractor
-        with st.expander("➕ Add New Subcontractor", expanded=False):
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                new_name = st.text_input("Subcontractor Name")
-                new_company = st.text_input("Company")
-            with col2:
-                new_lcat = st.text_input("LCAT/Role")
-                new_hourly_rate = st.number_input("Hourly Rate", min_value=0.0, value=100.0)
-            with col3:
-                if st.button("Add Subcontractor") and new_name:
-                    new_sub = {
-                        "Name": new_name,
-                        "Company": new_company,
-                        "LCAT": new_lcat,
-                        "Hourly_Rate": new_hourly_rate
-                    }
-                    
-                    # Add time period columns
-                    for period in st.session_state.time_periods:
-                        new_sub[f'Hours_{period}'] = 0.0
-                        new_sub[f'Revenue_{period}'] = 0.0
-                    
-                    new_row = pd.DataFrame([new_sub])
-                    st.session_state.subcontractors = pd.concat([st.session_state.subcontractors, new_row], 
-                                                              ignore_index=True)
-                    st.success(f"Added {new_name} to subcontractor list")
-                    st.rerun()
-
-        # Subcontractor data editor
-        sub_df = st.session_state.subcontractors
-        
-        if not sub_df.empty:
-            st.markdown('<div class="subheader">ℹ️ Subcontractor Information</div>', unsafe_allow_html=True)
-            basic_columns = ["Name", "Company", "LCAT", "Hourly_Rate"]
-            
-            edited_basic = st.data_editor(
-                sub_df[basic_columns],
-                column_config={
-                    "Hourly_Rate": st.column_config.NumberColumn("Hourly Rate", format="$%.2f"),
-                },
-                width='stretch',
-                key="basic_subcontractor_data"
-            )
-            
-            # Update main dataframe
-            for col in basic_columns:
-                st.session_state.subcontractors[col] = edited_basic[col]
-            
-            # Subcontractor removal section
-            st.markdown('<div class="subheader">🗑️ Remove Subcontractors</div>', unsafe_allow_html=True)
-            
-            if not sub_df.empty:
-                st.write("Select subcontractors to remove from the project:")
-                
-                # Create columns for better layout
-                col1, col2, col3 = st.columns([2, 1, 1])
-                
-                with col1:
-                    # Subcontractor selection dropdown
-                    selected_subcontractor = st.selectbox(
-                        "Choose subcontractor to remove:",
-                        options=sub_df['Name'].tolist(),
-                        key="subcontractor_removal_select"
-                    )
-                
-                with col2:
-                    # Show subcontractor details
-                    if selected_subcontractor:
-                        sub_data = sub_df[sub_df['Name'] == selected_subcontractor].iloc[0]
-                        st.write(f"**Company:** {sub_data['Company']}")
-                        st.write(f"**LCAT:** {sub_data['LCAT']}")
-                        st.write(f"**Rate:** ${sub_data['Hourly_Rate']:.2f}/hr")
-                
-                with col3:
-                    # Remove button with confirmation
-                    if selected_subcontractor:
-                        if st.button("🗑️ Remove Subcontractor", type="secondary", key="remove_subcontractor_btn"):
-                            # Remove the subcontractor
-                            st.session_state.subcontractors = st.session_state.subcontractors[
-                                st.session_state.subcontractors['Name'] != selected_subcontractor
-                            ]
-                            st.success(f"✅ {selected_subcontractor} has been removed from the project.")
-                            st.rerun()
-                
-                # Show current subcontractor count
-                st.info(f"📊 **Current Subcontractor Count:** {len(st.session_state.subcontractors)}")
-                
-                # Bulk removal section
-                st.markdown("---")
-                st.markdown("**Bulk Operations:**")
-                
-                # Bulk remove by company
-                company_options = sub_df['Company'].unique().tolist()
-                if company_options:
-                    col1, col2 = st.columns([2, 1])
-                    with col1:
-                        selected_company = st.selectbox(
-                            "Remove all subcontractors by Company:",
-                            options=company_options,
-                            key="bulk_company_select"
-                        )
-                    with col2:
-                        if st.button("🗑️ Remove All by Company", type="secondary", key="bulk_remove_company_btn"):
-                            company_count = len(sub_df[sub_df['Company'] == selected_company])
-                            st.session_state.subcontractors = st.session_state.subcontractors[
-                                st.session_state.subcontractors['Company'] != selected_company
-                            ]
-                            st.success(f"✅ Removed {company_count} subcontractors from company: {selected_company}")
-                            st.rerun()
-                
-                # Clear all subcontractors (with confirmation)
-                if st.button("🗑️ Clear All Subcontractors", type="secondary", key="clear_all_subcontractors_btn"):
-                    st.warning("⚠️ This will remove ALL subcontractors from the project. This action cannot be undone.")
-                    if st.button("✅ Confirm Clear All", type="primary", key="confirm_clear_all_subcontractors_btn"):
-                        subcontractor_count = len(st.session_state.subcontractors)
-                        st.session_state.subcontractors = pd.DataFrame(columns=st.session_state.subcontractors.columns)
-                        st.success(f"✅ Cleared all {subcontractor_count} subcontractors from the project.")
-                        st.rerun()
-            else:
-                st.warning("⚠️ No subcontractors to remove.")
-            
-            # Monthly hours for subcontractors
-            st.markdown('<div class="subheader">📅 Subcontractor Monthly Hours</div>', unsafe_allow_html=True)
-            
-            # Show fewer periods at a time for better usability
-            selected_periods = st.multiselect(
-                "Select periods to edit",
-                st.session_state.time_periods,
-                default=st.session_state.time_periods[:6]
-            )
-            
-            if selected_periods:
-                hours_columns = [f'Hours_{period}' for period in selected_periods]
-                hours_data = sub_df[["Name"] + hours_columns].copy()
-                
-                edited_hours = st.data_editor(
-                    hours_data,
-                    column_config={col: st.column_config.NumberColumn(period, format="%.1f") 
-                                  for col, period in zip(hours_columns, selected_periods)},
-                    width='stretch',
-                    key="subcontractor_hours"
-                )
-                
-                # Update main dataframe and calculate revenues
-                for col in hours_columns:
-                    st.session_state.subcontractors[col] = edited_hours[col]
-                
-                # Calculate revenues
-                for idx, row in st.session_state.subcontractors.iterrows():
-                    hourly_rate = row['Hourly_Rate']
-                    for period in selected_periods:
-                        hours_col = f'Hours_{period}'
-                        revenue_col = f'Revenue_{period}'
-                        hours = row[hours_col] if pd.notna(row[hours_col]) else 0
-                        st.session_state.subcontractors.at[idx, revenue_col] = hours * hourly_rate
-
-        # ODC Management
-        st.markdown('<div class="subheader">🏗️ Other Direct Costs (ODC)</div>', unsafe_allow_html=True)
-        
-        odc_df = st.session_state.odc_costs
-        
-        edited_odc = st.data_editor(
-            odc_df,
-            column_config={
-                "Amount": st.column_config.NumberColumn("Amount", format="$%.2f"),
-            },
-            width='stretch',
-            key="odc_data"
+        # Section 1: Subcontractor Summary - Info Section
+        create_section(
+            title="📊 Subcontractor Summary",
+            content=self._create_subcontractor_summary_content(),
+            section_type="info",
+            status="active",
+            footer_content="Data refreshes automatically",
+            actions=[
+                {"type": "primary", "label": "Refresh Data"},
+                {"type": "secondary", "label": "Export Report"}
+            ]
         )
         
-        st.session_state.odc_costs = edited_odc
+        create_section_divider()
+        
+        # Section 2: Add New Subcontractor - Success Section
+        create_section(
+            title="➕ Add New Subcontractor",
+            content=self._create_add_subcontractor_content(),
+            section_type="success",
+            status="ready"
+        )
+        
+        create_section_divider()
+        
+        # Section 3: Subcontractor Management - Info Section
+        create_section(
+            title="👥 Subcontractor Management",
+            content=self._create_subcontractor_management_content(),
+            section_type="info",
+            status="active",
+            actions=[
+                {"type": "primary", "label": "Edit Data"},
+                {"type": "secondary", "label": "Bulk Operations"}
+            ]
+        )
+        
+        create_section_divider()
+        
+        # Section 4: Monthly Hours - Warning Section
+        create_section(
+            title="📅 Monthly Hours Management",
+            content=self._create_subcontractor_hours_content(),
+            section_type="warning",
+            status="needs_review"
+        )
+        
+        create_section_divider()
+        
+        # Section 5: ODC Management - Info Section
+        create_section(
+            title="🏗️ Other Direct Costs (ODC)",
+            content=self._create_odc_management_content(),
+            section_type="info",
+            status="active"
+        )
         
         # ODC removal section
         st.markdown('<div class="subheader">🗑️ Remove ODC Entries</div>', unsafe_allow_html=True)
