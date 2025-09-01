@@ -577,6 +577,149 @@ class SEASFinancialTracker:
         return ""
 
     # ============================================================================
+    # Overview Tab Content Helper Methods
+    # ============================================================================
+    
+    def _create_project_metrics_content(self):
+        """Create content for project metrics section"""
+        params = st.session_state.project_params
+        actual_hours = params['actual_hours']
+        eac_hours = params['eac_hours']
+        non_billable = params['non_billable_hours']
+        billable_hours = actual_hours + non_billable
+        
+        # Create metric cards
+        metric_cards = []
+        
+        metric_cards.append(create_metric_card("⏱️ EAC Hours", f"{eac_hours:,.0f}"))
+        metric_cards.append(create_metric_card("📈 Actual Hours", f"{actual_hours:,.0f}"))
+        metric_cards.append(create_metric_card("💼 Billable Hours", f"{billable_hours:,.0f}"))
+        
+        # Calculate completion percentage
+        completion_pct = (actual_hours / eac_hours) * 100 if eac_hours > 0 else 0
+        progress_color = "#27ae60" if completion_pct >= 75 else "#f39c12" if completion_pct >= 50 else "#e74c3c"
+        metric_cards.append(create_metric_card("🎯 Completion", f"{completion_pct:.1f}%"))
+        
+        # Create grid of metric cards
+        grid_html = f'''
+        <div class="section-grid">
+            {''.join(metric_cards)}
+        </div>
+        '''
+        
+        # Add progress bar
+        progress_html = f'''
+        <div style="margin-top: 1.5rem;">
+            <h4>📊 Project Progress</h4>
+            <div style="background: #e9ecef; border-radius: 8px; height: 20px; overflow: hidden;">
+                <div style="background: {progress_color}; height: 100%; width: {min(completion_pct, 100)}%; transition: width 0.3s ease;"></div>
+            </div>
+            <p style="text-align: center; margin-top: 0.5rem; color: {progress_color}; font-weight: 600;">
+                {completion_pct:.1f}% Complete
+            </p>
+        </div>
+        '''
+        
+        return grid_html + progress_html
+    
+    def _create_financial_summary_content(self):
+        """Create content for financial summary section"""
+        # Calculate totals
+        employees_df = st.session_state.employees
+        total_direct_labor = 0
+        
+        # Sum up all revenue columns
+        revenue_columns = [col for col in employees_df.columns if col.startswith('Revenue_')]
+        if revenue_columns:
+            total_direct_labor = employees_df[revenue_columns].sum().sum()
+
+        # ODC total
+        odc_df = st.session_state.odc_costs
+        total_odc = odc_df['Amount'].sum()
+
+        # Subcontractor total
+        sub_df = st.session_state.subcontractors
+        sub_revenue_columns = [col for col in sub_df.columns if col.startswith('Revenue_')]
+        total_subcontractor = 0
+        if sub_revenue_columns:
+            total_subcontractor = sub_df[sub_revenue_columns].sum().sum()
+
+        # Indirect costs
+        indirect_costs = self.calculate_indirect_costs(total_direct_labor)
+        
+        # Total costs
+        total_costs = total_direct_labor + total_odc + total_subcontractor + indirect_costs['Total_Indirect']
+        
+        # Revenue calculation
+        params = st.session_state.project_params
+        total_transaction_price = params['total_transaction_price']
+        actual_hours = params['actual_hours']
+        eac_hours = params['eac_hours']
+        recalculated_revenue = (actual_hours / eac_hours) * total_transaction_price if eac_hours > 0 else 0
+        
+        # Create financial summary
+
+        
+        return ""
+    
+    def _create_cost_analysis_content(self):
+        """Create content for cost analysis section"""
+        # Calculate totals for chart
+        employees_df = st.session_state.employees
+        total_direct_labor = 0
+        
+        # Sum up all revenue columns
+        revenue_columns = [col for col in employees_df.columns if col.startswith('Revenue_')]
+        if revenue_columns:
+            total_direct_labor = employees_df[revenue_columns].sum().sum()
+
+        # ODC total
+        odc_df = st.session_state.odc_costs
+        total_odc = odc_df['Amount'].sum()
+
+        # Subcontractor total
+        sub_df = st.session_state.subcontractors
+        sub_revenue_columns = [col for col in sub_df.columns if col.startswith('Revenue_')]
+        total_subcontractor = 0
+        if sub_revenue_columns:
+            total_subcontractor = sub_df[sub_revenue_columns].sum().sum()
+
+        # Indirect costs
+        indirect_costs = self.calculate_indirect_costs(total_direct_labor)
+        
+        # Cost breakdown chart
+        cost_data = {
+            'Category': ['Direct Labor', 'ODC', 'Subcontractor', 'Fringe', 'Overhead', 'G&A'],
+            'Amount': [total_direct_labor, total_odc, total_subcontractor, 
+                      indirect_costs['Fringe'], indirect_costs['Overhead'], indirect_costs['G&A']]
+        }
+        
+        fig = px.pie(pd.DataFrame(cost_data), values='Amount', names='Category', 
+                     title="Cost Breakdown by Category")
+        st.plotly_chart(fig, width='stretch')
+        
+        # Add cost analysis summary
+        st.markdown("### 💡 Cost Analysis Insights")
+        
+        # Calculate percentages
+        total_costs = sum(cost_data['Amount'])
+        if total_costs > 0:
+            direct_labor_pct = (total_direct_labor / total_costs) * 100
+            odc_pct = (total_odc / total_costs) * 100
+            subcontractor_pct = (total_subcontractor / total_costs) * 100
+            indirect_pct = ((indirect_costs['Fringe'] + indirect_costs['Overhead'] + indirect_costs['G&A']) / total_costs) * 100
+            
+            st.markdown(f"""
+            **Cost Distribution:**
+            - **Direct Labor:** {direct_labor_pct:.1f}% (${total_direct_labor:,.2f})
+            - **ODC:** {odc_pct:.1f}% (${total_odc:,.2f})
+            - **Subcontractor:** {subcontractor_pct:.1f}% (${total_subcontractor:,.2f})
+            - **Indirect Costs:** {indirect_pct:.1f}% (${indirect_costs['Fringe'] + indirect_costs['Overhead'] + indirect_costs['G&A']:,.2f})
+            """)
+        
+        return ""
+
+    # ============================================================================
     # Subcontractor Tab Content Helper Methods
     # ============================================================================
     
@@ -987,89 +1130,57 @@ class SEASFinancialTracker:
             self.create_tasks_tab()
 
     def create_overview_tab(self):
-        """Create overview dashboard"""
-        st.markdown('<div class="subheader">📊 Project Overview</div>', unsafe_allow_html=True)
+        """Create overview dashboard with modular design"""
         
-        # Key metrics with modern styling
-        params = st.session_state.project_params
-        actual_hours = params['actual_hours']
-        eac_hours = params['eac_hours']
-        non_billable = params['non_billable_hours']
-        billable_hours = actual_hours + non_billable
+        # Section 1: Project Metrics - Info Section
+        create_section(
+            title="📊 Project Metrics",
+            content=self._create_project_metrics_content(),
+            section_type="info",
+            status="active",
+            footer_content="Real-time project tracking",
+            actions=[
+                {"type": "primary", "label": "Refresh Metrics"},
+                {"type": "secondary", "label": "Export Report"}
+            ]
+        )
         
-        # Modern metric cards with icons and gradients
-        col1, col2, col3, col4 = st.columns(4)
+        create_section_divider()
         
-        with col1:
-            st.markdown(f"""
-            <div class="metric-card" style="text-align: center;">
-                <div class="metric-icon">⏱️</div>
-                <div class="metric-value">{eac_hours:,.0f}</div>
-                <div class="metric-label">EAC Hours</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with col2:
-            st.markdown(f"""
-            <div class="metric-card" style="text-align: center;">
-                <div class="metric-icon">📈</div>
-                <div class="metric-value">{actual_hours:,.0f}</div>
-                <div class="metric-label">Actual Hours</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with col3:
-            st.markdown(f"""
-            <div class="metric-card" style="text-align: center;">
-                <div class="metric-icon">💼</div>
-                <div class="metric-value">{billable_hours:,.0f}</div>
-                <div class="metric-label">Billable Hours</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with col4:
-            completion_pct = (actual_hours / eac_hours) * 100 if eac_hours > 0 else 0
-            progress_color = "#27ae60" if completion_pct >= 75 else "#f39c12" if completion_pct >= 50 else "#e74c3c"
-            st.markdown(f"""
-            <div class="metric-card" style="text-align: center;">
-                <div class="metric-icon">🎯</div>
-                <div class="metric-value" style="color: {progress_color};">{completion_pct:.1f}%</div>
-                <div class="metric-label">Completion</div>
-            </div>
-            """, unsafe_allow_html=True)
+        # Section 2: Financial Summary - Success Section
+        create_section(
+            title="💰 Financial Summary",
+            content=self._create_financial_summary_content(),
+            section_type="success",
+            status="complete",
+            footer_content="Financial calculations updated",
+            actions=[
+                {"type": "primary", "label": "View Details"},
+                {"type": "secondary", "label": "Download Report"}
+            ]
+        )
+        
+        create_section_divider()
+        
+        # Section 3: Cost Analysis - Warning Section
+        create_section(
+            title="📈 Cost Analysis",
+            content=self._create_cost_analysis_content(),
+            section_type="warning",
+            status="needs_review",
+            footer_content="Review cost breakdowns",
+            actions=[
+                {"type": "primary", "label": "Analyze Trends"},
+                {"type": "secondary", "label": "Compare Periods"}
+            ]
+        )
+        
 
-        # Calculate totals
-        employees_df = st.session_state.employees
-        total_direct_labor = 0
-        
-        # Sum up all revenue columns
-        revenue_columns = [col for col in employees_df.columns if col.startswith('Revenue_')]
-        if revenue_columns:
-            total_direct_labor = employees_df[revenue_columns].sum().sum()
 
-        # ODC total
-        odc_df = st.session_state.odc_costs
-        total_odc = odc_df['Amount'].sum()
 
-        # Subcontractor total
-        sub_df = st.session_state.subcontractors
-        sub_revenue_columns = [col for col in sub_df.columns if col.startswith('Revenue_')]
-        total_subcontractor = 0
-        if sub_revenue_columns:
-            total_subcontractor = sub_df[sub_revenue_columns].sum().sum()
-
-        # Indirect costs
-        indirect_costs = self.calculate_indirect_costs(total_direct_labor)
-        
-        # Total costs
-        total_costs = total_direct_labor + total_odc + total_subcontractor + indirect_costs['Total_Indirect']
-        
-        # Revenue calculation
-        total_transaction_price = params['total_transaction_price']
-        recalculated_revenue = (billable_hours / eac_hours) * total_transaction_price if eac_hours > 0 else 0
         
         # Financial summary with modern cards
-        st.markdown('<div class="subheader">💰 Financial Summary</div>', unsafe_allow_html=True)
+
         
         col1, col2 = st.columns(2)
         
