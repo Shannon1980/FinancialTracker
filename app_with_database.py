@@ -251,7 +251,7 @@ class SEASFinancialTrackerWithDatabase:
                     go.Bar(name='Expenses', x=['Expenses'], y=[summary['expenses']], marker_color='red')
                 ])
                 fig.update_layout(title="Income vs Expenses", barmode='group')
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
             
             # Recent Transactions
             st.subheader("💳 Recent Transactions")
@@ -271,7 +271,7 @@ class SEASFinancialTrackerWithDatabase:
                     })
                 
                 df = pd.DataFrame(trans_data)
-                st.dataframe(df, use_container_width=True)
+                st.dataframe(df, width='stretch')
             else:
                 st.info("No transactions found.")
                 

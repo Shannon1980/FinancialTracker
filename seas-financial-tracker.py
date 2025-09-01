@@ -19,336 +19,29 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for QuickBooks-inspired design
-st.markdown("""
-<style>
-    /* QuickBooks Design System - Professional Business Aesthetic */
-    
-    /* Global styles */
-    .stApp {
-        background: #f8f9fa;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    /* QuickBooks-inspired header */
-    .main-header {
-        background: linear-gradient(135deg, #2E5BBA 0%, #1E3A8A 100%);
-        color: white;
-        padding: 2.5rem 2rem;
-        border-radius: 0;
-        margin: -2rem -2rem 2rem -2rem;
-        box-shadow: 0 4px 20px rgba(46, 91, 186, 0.15);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .main-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 200px;
-        height: 200px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        transform: translate(50%, -50%);
-    }
-    
-    .main-header h1 {
-        color: white;
-        font-size: 2.8rem;
-        font-weight: 600;
-        margin: 0;
-        text-align: center;
-        letter-spacing: -0.5px;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .main-header .subtitle {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 1.1rem;
-        text-align: center;
-        margin-top: 0.5rem;
-        font-weight: 400;
-    }
-    
-    /* QuickBooks-style metric cards */
-    .metric-card {
-        background: white;
-        padding: 1.8rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .metric-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: #2E5BBA;
-    }
-    
-    .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-        border-color: #2E5BBA;
-    }
-    
-    .metric-card .metric-icon {
-        font-size: 2.2rem;
-        margin-bottom: 1rem;
-        opacity: 0.8;
-    }
-    
-    .metric-card .metric-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #2E5BBA;
-        margin-bottom: 0.5rem;
-        line-height: 1.2;
-    }
-    
-    .metric-card .metric-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    /* QuickBooks-style tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0;
-        background: white;
-        border-radius: 8px;
-        padding: 4px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e9ecef;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background: transparent;
-        border-radius: 6px;
-        color: #6c757d;
-        font-weight: 500;
-        padding: 12px 20px;
-        transition: all 0.2s ease;
-        border: none;
-        font-size: 0.9rem;
-    }
-    
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background: #2E5BBA;
-        color: white;
-        box-shadow: 0 2px 8px rgba(46, 91, 186, 0.3);
-        font-weight: 600;
-    }
-    
-    /* QuickBooks-style sidebar */
-    .css-1d391kg {
-        background: white;
-        border-right: 1px solid #e9ecef;
-    }
-    
-    .css-1d391kg .stMarkdown {
-        color: #495057;
-    }
-    
-    /* QuickBooks-style buttons */
-    .stButton > button {
-        background: #2E5BBA;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 20px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(46, 91, 186, 0.2);
-        font-size: 0.9rem;
-    }
-    
-    .stButton > button:hover {
-        background: #1E3A8A;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(46, 91, 186, 0.3);
-    }
-    
-    /* QuickBooks-style data editors */
-    .stDataFrame {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e9ecef;
-        overflow: hidden;
-    }
-    
-    /* QuickBooks-style charts */
-    .stPlotlyChart {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e9ecef;
-        margin: 1.5rem 0;
-    }
-    
-    /* QuickBooks-style subheaders */
-    .subheader {
-        background: white;
-        color: #2E5BBA;
-        padding: 1.2rem 1.5rem;
-        border-radius: 8px;
-        margin: 2rem 0 1.5rem 0;
-        font-weight: 600;
-        font-size: 1.1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e9ecef;
-        border-left: 4px solid #2E5BBA;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    /* QuickBooks-style financial cards */
-    .financial-card {
-        background: white;
-        color: #495057;
-        padding: 1.8rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e9ecef;
-        margin: 1.5rem 0;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .financial-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: linear-gradient(90deg, #2E5BBA, #1E3A8A);
-    }
-    
-    .financial-card h3 {
-        color: #2E5BBA;
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .financial-card .financial-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem 0;
-        border-bottom: 1px solid #f8f9fa;
-        font-size: 1rem;
-    }
-    
-    .financial-card .financial-item:last-child {
-        border-bottom: none;
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #2E5BBA;
-        padding-top: 1.2rem;
-        border-top: 2px solid #e9ecef;
-    }
-    
-    /* QuickBooks-style upload section */
-    .upload-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 2rem;
-        border-radius: 8px;
-        border: 2px dashed #dee2e6;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    
-    .upload-section h3 {
-        color: #2E5BBA;
-        margin-bottom: 1rem;
-        font-weight: 600;
-    }
-    
-    /* QuickBooks-style expanders */
-    .streamlit-expanderHeader {
-        background: #f8f9fa !important;
-        border: 1px solid #e9ecef !important;
-        border-radius: 6px !important;
-        color: #2E5BBA !important;
-        font-weight: 500 !important;
-    }
-    
-    .streamlit-expanderHeader:hover {
-        background: #e9ecef !important;
-    }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .main-header h1 {
-            font-size: 2.2rem;
-        }
-        
-        .main-header {
-            padding: 2rem 1rem;
-        }
-        
-        .metric-card {
-            padding: 1.5rem;
-        }
-    }
-    
-    /* QuickBooks-style form inputs */
-    .stTextInput > div > div > input {
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 0.9rem;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: #2E5BBA;
-        box-shadow: 0 0 0 3px rgba(46, 91, 186, 0.1);
-    }
-    
-    .stNumberInput > div > div > input {
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 0.9rem;
-    }
-    
-    .stNumberInput > div > div > input:focus {
-        border-color: #2E5BBA;
-        box-shadow: 0 0 0 3px rgba(46, 91, 186, 0.1);
-    }
-    
-    .stSelectbox > div > div > div {
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 0.9rem;
-    }
-    
-    .stSelectbox > div > div > div:focus {
-        border-color: #2E5BBA;
-        box-shadow: 0 0 0 3px rgba(46, 91, 186, 0.1);
-    }
-</style>
-""", unsafe_allow_html=True)
+# Load comprehensive Section 508 compliant QuickBooks design CSS
+def load_css():
+    """Load the comprehensive CSS for Section 508 compliance and QuickBooks design"""
+    try:
+        with open('static/custom.css', 'r') as f:
+            css_content = f.read()
+        st.markdown(f'<style>{css_content}</style>', unsafe_allow_html=True)
+        st.success("✅ Section 508 compliant QuickBooks design loaded successfully!")
+    except FileNotFoundError:
+        st.warning("⚠️ CSS file not found. Using default Streamlit styling.")
+        # Fallback to basic QuickBooks-inspired styling
+        st.markdown("""
+        <style>
+            .stApp { background: #f7fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+            .stButton > button { background: #2C7BE5; color: white; border-radius: 8px; padding: 0.75rem 1.5rem; }
+            .stButton > button:hover { background: #2D3748; transform: translateY(-1px); }
+        </style>
+        """, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"❌ Error loading CSS: {e}")
+
+# Load the CSS
+load_css()
 
 class SEASFinancialTracker:
     def __init__(self):
@@ -720,7 +413,7 @@ class SEASFinancialTracker:
         
         fig = px.pie(pd.DataFrame(cost_data), values='Amount', names='Category', 
                      title="Cost Breakdown by Category")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     def create_direct_labor_tab(self):
         """Create direct labor management tab"""
@@ -930,7 +623,7 @@ class SEASFinancialTracker:
                 "Current_Salary": st.column_config.NumberColumn("Current Salary", format="$%.2f"),
                 "Hourly_Rate": st.column_config.NumberColumn("Hourly Rate", format="$%.2f"),
             },
-            use_container_width=True,
+            width='stretch',
             key="basic_employee_data"
         )
         
@@ -1025,7 +718,7 @@ class SEASFinancialTracker:
                     
                     # Show detailed period data
                     with st.expander("📊 View All Time Periods"):
-                        st.dataframe(period_df, use_container_width=True)
+                        st.dataframe(period_df, width='stretch')
                         
                         # Create visualization
                         if not period_df.empty:
@@ -1060,7 +753,7 @@ class SEASFinancialTracker:
                                 margin=dict(t=50, l=50, r=50, b=50)
                             )
                             
-                            st.plotly_chart(fig, use_container_width=True)
+                            st.plotly_chart(fig, width='stretch')
         else:
             st.info("📝 No employees to view. Add employees first to see detailed information.")
         
@@ -1185,7 +878,7 @@ class SEASFinancialTracker:
                 base_year_data,
                 column_config={col: st.column_config.NumberColumn(period, format="%.1f") 
                               for col, period in zip(base_year_columns, base_year_periods)},
-                use_container_width=True,
+                width='stretch',
                 key="base_year_hours"
             )
             
@@ -1206,7 +899,7 @@ class SEASFinancialTracker:
                     oy1_data,
                     column_config={col: st.column_config.NumberColumn(period, format="%.1f") 
                                   for col, period in zip(oy1_columns, oy1_periods)},
-                    use_container_width=True,
+                    width='stretch',
                     key="oy1_hours"
                 )
                 
@@ -1346,7 +1039,7 @@ class SEASFinancialTracker:
                 column_config={
                     "Hourly_Rate": st.column_config.NumberColumn("Hourly Rate", format="$%.2f"),
                 },
-                use_container_width=True,
+                width='stretch',
                 key="basic_subcontractor_data"
             )
             
@@ -1445,7 +1138,7 @@ class SEASFinancialTracker:
                     hours_data,
                     column_config={col: st.column_config.NumberColumn(period, format="%.1f") 
                                   for col, period in zip(hours_columns, selected_periods)},
-                    use_container_width=True,
+                    width='stretch',
                     key="subcontractor_hours"
                 )
                 
@@ -1472,7 +1165,7 @@ class SEASFinancialTracker:
             column_config={
                 "Amount": st.column_config.NumberColumn("Amount", format="$%.2f"),
             },
-            use_container_width=True,
+            width='stretch',
             key="odc_data"
         )
         
@@ -1563,7 +1256,7 @@ class SEASFinancialTracker:
                 font=dict(size=12),
                 margin=dict(t=50, l=50, r=50, b=50)
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         # Employee utilization heatmap
         st.markdown('<div class="subheader">🔥 Employee Hours Heatmap</div>', unsafe_allow_html=True)
@@ -1589,7 +1282,7 @@ class SEASFinancialTracker:
                 font=dict(size=12),
                 margin=dict(t=50, l=50, r=50, b=50)
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         # Cost analysis by LCAT
         st.markdown('<div class="subheader">💰 Cost Analysis by Labor Category</div>', unsafe_allow_html=True)
@@ -1610,7 +1303,7 @@ class SEASFinancialTracker:
                 font=dict(size=12),
                 margin=dict(t=50, l=50, r=50, b=50)
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         # Burn rate analysis
         st.markdown('<div class="subheader">⚡ Project Burn Rate Analysis</div>', unsafe_allow_html=True)
@@ -1666,7 +1359,7 @@ class SEASFinancialTracker:
                 margin=dict(t=50, l=50, r=50, b=50)
             )
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
     def create_tasks_tab(self):
         """Create task management tab"""
@@ -1716,7 +1409,7 @@ class SEASFinancialTracker:
                     "Hours": st.column_config.NumberColumn("Hours", format="%.2f"),
                     "Cost": st.column_config.NumberColumn("Cost", format="$%.2f"),
                 },
-                use_container_width=True,
+                width='stretch',
                 key="tasks_data"
             )
             
@@ -1807,7 +1500,7 @@ class SEASFinancialTracker:
                 'Cost': 'sum'
             }).reset_index()
             
-            st.dataframe(task_summary, use_container_width=True)
+            st.dataframe(task_summary, width='stretch')
             
             # Task cost visualization
             if not task_summary.empty:
@@ -1821,7 +1514,7 @@ class SEASFinancialTracker:
                     font=dict(size=12),
                     margin=dict(t=50, l=50, r=50, b=50)
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
 
     def process_uploaded_employees(self, df_upload: pd.DataFrame) -> pd.DataFrame:
         """Process uploaded employee data with duplicate handling"""
