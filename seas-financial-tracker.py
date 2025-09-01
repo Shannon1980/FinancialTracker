@@ -782,16 +782,62 @@ class SEASFinancialTracker:
                 st.success(f"Uploaded {len(df_upload)} rows of data")
                 
                 if st.button("Import Data"):
-                    # Process and merge with existing data
-                    st.session_state.employees = self.process_uploaded_employees(df_upload)
-                    st.success("Data imported successfully!")
-                    st.rerun()
+                    # Check for duplicates before importing
+                    existing_names = [name.lower() for name in st.session_state.employees['Name'].tolist()]
+                    new_names = [name.lower() for name in df_upload['Name'].tolist()]
+                    
+                    # Find duplicate names
+                    duplicates = [name for name in new_names if name in existing_names]
+                    
+                    if duplicates:
+                        st.warning(f"⚠️ Found {len(duplicates)} duplicate employee(s): {', '.join(duplicates)}")
+                        st.info("💡 Tip: Update existing employees instead of creating duplicates, or use different names.")
+                        
+                        # Show duplicate comparison
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write("**Existing Employees:**")
+                            existing_dups = st.session_state.employees[st.session_state.employees['Name'].str.lower().isin(duplicates)]
+                            st.dataframe(existing_dups[['Name', 'LCAT', 'Current_Salary']])
+                        
+                        with col2:
+                            st.write("**New Data (Duplicates):**")
+                            new_dups = df_upload[df_upload['Name'].str.lower().isin(duplicates)]
+                            st.dataframe(new_dups[['Name', 'LCAT', 'Current_Salary']])
+                        
+                        if st.button("🔄 Import Anyway (Replace Duplicates)", key="import_anyway"):
+                            # Process and merge with existing data (this will replace duplicates)
+                            st.session_state.employees = self.process_uploaded_employees(df_upload)
+                            st.success("Data imported successfully! Duplicates were replaced.")
+                            st.rerun()
+                    else:
+                        # No duplicates, safe to import
+                        st.session_state.employees = self.process_uploaded_employees(df_upload)
+                        st.success("✅ Data imported successfully! No duplicates found.")
+                        st.rerun()
                     
             except Exception as e:
                 st.error(f"Error reading file: {str(e)}")
 
         # Employee data editor
         st.markdown('<div class="subheader">👤 Employee Data</div>', unsafe_allow_html=True)
+        
+        # Employee summary
+        if not employees_df.empty:
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Total Employees", len(employees_df))
+            with col2:
+                unique_lcats = employees_df['LCAT'].nunique()
+                st.metric("Unique LCATs", unique_lcats)
+            with col3:
+                total_salary = employees_df['Current_Salary'].sum()
+                st.metric("Total Salary", f"${total_salary:,.0f}")
+            with col4:
+                avg_salary = employees_df['Current_Salary'].mean()
+                st.metric("Avg Salary", f"${avg_salary:,.0f}")
+        else:
+            st.info("📝 No employees added yet. Use the form below or upload a template to get started.")
         
         # Add new employee
         with st.expander("➕ Add New Employee", expanded=False):
@@ -807,26 +853,31 @@ class SEASFinancialTracker:
                 new_hours_per_month = st.number_input("Hours per Month", min_value=0, value=173)
                 
             if st.button("Add Employee") and new_name:
-                new_employee = {
-                    "Name": new_name,
-                    "LCAT": new_lcat,
-                    "Priced_Salary": new_priced_salary,
-                    "Current_Salary": new_current_salary,
-                    "Hours_Per_Month": new_hours_per_month,
-                    "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
-                }
-                
-                # Add columns for time periods
-                for period in st.session_state.time_periods:
-                    new_employee[f'Hours_{period}'] = 0.0
-                    new_employee[f'Revenue_{period}'] = 0.0
-                
-                # Add to dataframe
-                new_row = pd.DataFrame([new_employee])
-                st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
-                                                      ignore_index=True)
-                st.success(f"Added {new_name} to employee list")
-                st.rerun()
+                # Check for duplicate employee names (case-insensitive)
+                existing_names = [name.lower() for name in st.session_state.employees['Name'].tolist()]
+                if new_name.lower() in existing_names:
+                    st.error(f"❌ Employee '{new_name}' already exists! Please use a different name or update the existing employee.")
+                else:
+                    new_employee = {
+                        "Name": new_name,
+                        "LCAT": new_lcat,
+                        "Priced_Salary": new_priced_salary,
+                        "Current_Salary": new_current_salary,
+                        "Hours_Per_Month": new_hours_per_month,
+                        "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
+                    }
+                    
+                    # Add columns for time periods
+                    for period in st.session_state.employees.columns:
+                        if period.startswith('Hours_') or period.startswith('Revenue_'):
+                            new_employee[period] = 0.0
+                    
+                    # Add to dataframe
+                    new_row = pd.DataFrame([new_employee])
+                    st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
+                                                          ignore_index=True)
+                    st.success(f"✅ Added {new_name} to employee list")
+                    st.rerun()
 
         # Display and edit employee data
         employees_df = st.session_state.employees
@@ -849,6 +900,39 @@ class SEASFinancialTracker:
         # Update the main dataframe
         for col in basic_columns:
             st.session_state.employees[col] = edited_basic[col]
+        
+        # Duplicate detection and management
+        st.markdown('<div class="subheader">🔍 Duplicate Detection</div>', unsafe_allow_html=True)
+        
+        # Check for existing duplicates in current data
+        if not employees_df.empty:
+            # Find duplicates by name (case-insensitive)
+            name_counts = employees_df['Name'].str.lower().value_counts()
+            duplicates = name_counts[name_counts > 1]
+            
+            if not duplicates.empty:
+                st.warning(f"⚠️ Found {len(duplicates)} duplicate employee names in current data:")
+                
+                for dup_name in duplicates.index:
+                    dup_employees = employees_df[employees_df['Name'].str.lower() == dup_name]
+                    st.write(f"**'{dup_name.title()}':** {len(dup_employees)} entries")
+                    
+                    # Show duplicate details
+                    with st.expander(f"View duplicates for '{dup_name.title()}'"):
+                        st.dataframe(dup_employees)
+                        
+                        # Option to merge duplicates
+                        if st.button(f"🔄 Merge Duplicates for '{dup_name.title()}'", key=f"merge_{dup_name}"):
+                            # Keep the first entry and remove others
+                            first_idx = dup_employees.index[0]
+                            duplicate_indices = dup_employees.index[1:]
+                            
+                            # Remove duplicates
+                            st.session_state.employees = st.session_state.employees.drop(duplicate_indices)
+                            st.success(f"✅ Merged duplicates for '{dup_name.title()}' - kept first entry, removed {len(duplicate_indices)} duplicates")
+                            st.rerun()
+            else:
+                st.success("✅ No duplicate employee names found in current data")
         
         # Employee removal section
         st.markdown('<div class="subheader">🗑️ Remove Employees</div>', unsafe_allow_html=True)
@@ -1577,7 +1661,7 @@ class SEASFinancialTracker:
                 st.plotly_chart(fig, use_container_width=True)
 
     def process_uploaded_employees(self, df_upload: pd.DataFrame) -> pd.DataFrame:
-        """Process uploaded employee data"""
+        """Process uploaded employee data with duplicate handling"""
         # Map common column names
         column_mapping = {
             'Employee Name': 'Name',
@@ -1612,12 +1696,34 @@ class SEASFinancialTracker:
             axis=1
         )
         
-        # Add time period columns
-        for period in st.session_state.time_periods:
-            df_upload[f'Hours_{period}'] = 0.0
-            df_upload[f'Revenue_{period}'] = 0.0
+        # Handle duplicates within uploaded data first
+        df_upload = df_upload.drop_duplicates(subset=['Name'], keep='first')
         
-        return df_upload
+        # Merge with existing data, handling duplicates by name
+        if not st.session_state.employees.empty:
+            # Get existing employee names (case-insensitive)
+            existing_names = [name.lower() for name in st.session_state.employees['Name'].tolist()]
+            
+            # Filter out duplicates from new data
+            new_employees = df_upload[~df_upload['Name'].str.lower().isin(existing_names)]
+            duplicate_employees = df_upload[df_upload['Name'].str.lower().isin(existing_names)]
+            
+            if not duplicate_employees.empty:
+                st.info(f"ℹ️ {len(duplicate_employees)} duplicate employee(s) from upload will replace existing entries")
+            
+            # Combine new employees with existing ones (new data takes precedence)
+            result_df = pd.concat([st.session_state.employees, new_employees], ignore_index=True)
+            
+            # Update existing employees with new data
+            for _, new_emp in duplicate_employees.iterrows():
+                # Find and replace existing employee
+                mask = result_df['Name'].str.lower() == new_emp['Name'].lower()
+                result_df.loc[mask] = new_emp
+            
+            return result_df
+        else:
+            # No existing employees, just return processed upload
+            return df_upload
 
 def main():
     """Main application function"""
