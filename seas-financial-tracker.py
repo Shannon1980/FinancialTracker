@@ -742,12 +742,11 @@ class SEASFinancialTracker:
             
             if st.button("📥 Download Basic Template", key="download_basic"):
                 try:
-                    file_bytes, filename, mime_type = generate_employee_template("basic")
+                    file_bytes, filename = generate_employee_template("basic")
                     st.download_button(
                         label="💾 Save Basic Template",
                         data=file_bytes,
                         file_name=filename,
-                        mime_type=mime_type,
                         key="save_basic"
                     )
                 except Exception as e:
@@ -760,12 +759,11 @@ class SEASFinancialTracker:
             
             if st.button("📥 Download Comprehensive Template", key="download_comprehensive"):
                 try:
-                    file_bytes, filename, mime_type = generate_employee_template("comprehensive")
+                    file_bytes, filename = generate_employee_template("comprehensive")
                     st.download_button(
                         label="💾 Save Comprehensive Template",
                         data=file_bytes,
                         file_name=filename,
-                        mime_type=mime_type,
                         key="save_comprehensive"
                     )
                 except Exception as e:

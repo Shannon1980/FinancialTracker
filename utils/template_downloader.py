@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Tuple
 
-def generate_employee_template(template_type: str = "comprehensive") -> Tuple[bytes, str, str]:
+def generate_employee_template(template_type: str = "comprehensive") -> Tuple[bytes, str]:
     """
     Generate employee template for download
     
@@ -17,7 +17,7 @@ def generate_employee_template(template_type: str = "comprehensive") -> Tuple[by
         template_type: "basic" or "comprehensive"
     
     Returns:
-        Tuple of (file_bytes, filename, mime_type)
+        Tuple of (file_bytes, filename)
     """
     
     if template_type == "basic":
@@ -82,9 +82,9 @@ def _generate_basic_template() -> Tuple[bytes, str, str]:
     file_bytes = output.getvalue()
     filename = f"employee_template_basic_{datetime.now().strftime('%Y%m%d')}.xlsx"
     
-    return file_bytes, filename, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    return file_bytes, filename
 
-def _generate_comprehensive_template() -> Tuple[bytes, str, str]:
+def _generate_comprehensive_template() -> Tuple[bytes, str]:
     """Generate comprehensive employee template"""
     
     # Comprehensive employee data
@@ -168,7 +168,7 @@ def _generate_comprehensive_template() -> Tuple[bytes, str, str]:
     file_bytes = output.getvalue()
     filename = f"employee_template_comprehensive_{datetime.now().strftime('%Y%m%d')}.xlsx"
     
-    return file_bytes, filename, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    return file_bytes, filename
 
 def get_template_info() -> Dict[str, Any]:
     """Get information about available templates"""
