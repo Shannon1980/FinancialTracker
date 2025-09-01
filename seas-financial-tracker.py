@@ -43,6 +43,88 @@ def load_css():
 # Load the CSS
 load_css()
 
+# ============================================================================
+# Modular Section Helper Functions
+# ============================================================================
+
+def create_section(title, content, section_type="info", status=None, footer_content=None, actions=None):
+    """Create a modular section with consistent styling"""
+    
+    # Section type classes
+    type_classes = {
+        "info": "info-section",
+        "success": "success-section", 
+        "warning": "warning-section",
+        "danger": "danger-section"
+    }
+    
+    # Status badges
+    status_badges = {
+        "active": "active",
+        "pending": "pending",
+        "completed": "completed",
+        "ready": "completed",
+        "needs_review": "pending"
+    }
+    
+    # Build section HTML
+    section_class = f"section-container {type_classes.get(section_type, 'info-section')}"
+    status_html = f'<span class="section-status {status_badges.get(status, "active")}">{status or "Active"}</span>' if status else ""
+    
+    section_html = f'''
+    <div class="{section_class}">
+        <div class="section-header">
+            <h3>{title}</h3>
+            {status_html}
+        </div>
+        <div class="section-content">
+            {content}
+        </div>
+    '''
+    
+    # Add footer if provided
+    if footer_content or actions:
+        section_html += '<div class="section-footer">'
+        if footer_content:
+            section_html += f'<span>{footer_content}</span>'
+        if actions:
+            section_html += '<div class="section-actions">'
+            for action in actions:
+                section_html += f'<button class="btn btn-{action["type"]}">{action["label"]}</button>'
+            section_html += '</div>'
+        section_html += '</div>'
+    
+    section_html += '</div>'
+    
+    return st.markdown(section_html, unsafe_allow_html=True)
+
+def create_section_divider():
+    """Create a visual separator between sections"""
+    return st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
+def create_section_grid(sections, columns=2):
+    """Create a responsive grid of sections"""
+    grid_html = f'<div class="section-grid" style="grid-template-columns: repeat({columns}, 1fr);">'
+    for section in sections:
+        grid_html += section
+    grid_html += '</div>'
+    return st.markdown(grid_html, unsafe_allow_html=True)
+
+def create_metric_card(title, value, change=None, change_type="positive"):
+    """Create a metric card for use within sections"""
+    change_html = f'<p class="metric-change {change_type}">{change}</p>' if change else ""
+    return f'''
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">{title}</h4>
+        </div>
+        <div class="card-body">
+            <p class="metric-value">{value}</p>
+            {change_html}
+        </div>
+    </div>
+    '''
+
 class SEASFinancialTracker:
     def __init__(self):
         self.initialize_session_state()
@@ -124,6 +206,375 @@ class SEASFinancialTracker:
             df[f'Revenue_{period}'] = 0.0
             
         return df
+
+    # ============================================================================
+    # Modular Section Content Helper Methods
+    # ============================================================================
+    
+    def _create_employee_summary_content(self):
+        """Create content for employee summary section"""
+        employees_df = st.session_state.employees
+        
+        if not employees_df.empty:
+            # Create metric cards
+            metric_cards = []
+            
+            total_employees = len(employees_df)
+            active_employees = len(employees_df[employees_df['Status'] == 'Active'])
+            total_salary = employees_df['Current_Salary'].sum()
+            avg_salary = employees_df['Current_Salary'].mean()
+            
+            metric_cards.append(create_metric_card("Total Employees", total_employees, "+2 this month"))
+            metric_cards.append(create_metric_card("Active Employees", active_employees))
+            metric_cards.append(create_metric_card("Total Salary", f"${total_salary:,.0f}"))
+            metric_cards.append(create_metric_card("Avg Salary", f"${avg_salary:,.0f}"))
+            
+            # Create grid of metric cards
+            grid_html = f'''
+            <div class="section-grid">
+                {''.join(metric_cards)}
+            </div>
+            '''
+            
+            # Add breakdown summary
+            employee_type_counts = employees_df['Employee_Type'].value_counts()
+            status_counts = employees_df['Status'].value_counts()
+            company_counts = employees_df['Company'].value_counts()
+            
+            breakdown_html = '''
+            <div style="margin-top: 1.5rem;">
+                <div class="section-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div>
+                        <h4>👥 Employee Types</h4>
+            '''
+            
+            for emp_type, count in employee_type_counts.items():
+                type_icon = "👨‍💼" if emp_type == 'Employee' else "🏢"
+                breakdown_html += f'<p>{type_icon} {emp_type}: {count}</p>'
+            
+            breakdown_html += '''
+                    </div>
+                    <div>
+                        <h4>📊 Status</h4>
+            '''
+            
+            for status, count in status_counts.items():
+                status_icon = "🟢" if status == 'Active' else "🔴"
+                breakdown_html += f'<p>{status_icon} {status}: {count}</p>'
+            
+            breakdown_html += '''
+                    </div>
+                    <div>
+                        <h4>🏢 Companies</h4>
+            '''
+            
+            for company, count in company_counts.items():
+                breakdown_html += f'<p>• {company}: {count}</p>'
+            
+            breakdown_html += '''
+                    </div>
+                </div>
+            </div>
+            '''
+            
+            return grid_html + breakdown_html
+        else:
+            return '<p>📝 No employees added yet. Use the sections below to add employees or upload data.</p>'
+    
+    def _create_template_download_content(self):
+        """Create content for template download section"""
+        content_html = '''
+        <div class="section-with-sidebar">
+            <div class="section-main">
+                <h4>📥 Download Employee Templates</h4>
+                <p>Choose from our professionally designed templates to ensure consistent data entry and maintain all required fields.</p>
+        '''
+        
+        # Add template options using Streamlit
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**Basic Template**")
+            st.markdown("5 required fields + monthly hours/revenue columns")
+            st.markdown("Perfect for quick employee data entry")
+            
+            if st.button("📥 Download Basic Template", key="download_basic"):
+                try:
+                    file_bytes, filename = generate_employee_template("basic")
+                    st.download_button(
+                        label="💾 Save Basic Template",
+                        data=file_bytes,
+                        file_name=filename,
+                        key="save_basic"
+                    )
+                except Exception as e:
+                    st.error(f"Error generating template: {e}")
+        
+        with col2:
+            st.markdown("**Comprehensive Template**")
+            st.markdown("10 fields + monthly hours/revenue + instructions")
+            st.markdown("Perfect for detailed employee management")
+            
+            if st.button("📥 Download Comprehensive Template", key="download_comprehensive"):
+                try:
+                    file_bytes, filename = generate_employee_template("comprehensive")
+                    st.download_button(
+                        label="💾 Save Comprehensive Template",
+                        data=file_bytes,
+                        file_name=filename,
+                        key="save_comprehensive"
+                    )
+                except Exception as e:
+                    st.error(f"Error generating template: {e}")
+        
+        return '''
+            </div>
+            <div class="section-sidebar">
+                <h4>📋 Template Features</h4>
+                <ul>
+                    <li><strong>Standardized Format:</strong> Consistent data structure</li>
+                    <li><strong>Data Validation:</strong> Built-in field validation</li>
+                    <li><strong>Monthly Tracking:</strong> 24 monthly periods included</li>
+                    <li><strong>Professional Design:</strong> QuickBooks-inspired layout</li>
+                    <li><strong>Easy Import:</strong> Direct upload compatibility</li>
+                </ul>
+                
+                <h4>🎯 Best Practices</h4>
+                <ul>
+                    <li>Use consistent naming conventions</li>
+                    <li>Fill all required fields</li>
+                    <li>Validate salary ranges</li>
+                    <li>Check for duplicate entries</li>
+                </ul>
+            </div>
+        </div>
+        '''
+    
+    def _create_upload_content(self):
+        """Create content for data upload section"""
+        uploaded_file = st.file_uploader("Choose Excel/CSV file", type=['xlsx', 'csv'])
+        
+        if uploaded_file is not None:
+            try:
+                if uploaded_file.name.endswith('.xlsx'):
+                    df_upload = pd.read_excel(uploaded_file)
+                else:
+                    df_upload = pd.read_csv(uploaded_file)
+                st.success(f"Uploaded {len(df_upload)} rows of data")
+                
+                if st.button("Import Data"):
+                    # Check for duplicates before importing
+                    existing_names = [name.lower() for name in st.session_state.employees['Name'].tolist()]
+                    new_names = [name.lower() for name in df_upload['Name'].tolist()]
+                    
+                    # Find duplicate names
+                    duplicates = [name for name in new_names if name in existing_names]
+                    
+                    if duplicates:
+                        st.warning(f"⚠️ Found {len(duplicates)} duplicate employee(s): {', '.join(duplicates)}")
+                        st.info("💡 Tip: Update existing employees instead of creating duplicates, or use different names.")
+                        
+                        # Show duplicate comparison
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write("**Existing Employees:**")
+                            existing_dups = st.session_state.employees[st.session_state.employees['Name'].str.lower().isin(duplicates)]
+                            st.dataframe(existing_dups[['Name', 'LCAT', 'Current_Salary']])
+                        
+                        with col2:
+                            st.write("**New Data (Duplicates):**")
+                            new_dups = df_upload[df_upload['Name'].str.lower().isin(duplicates)]
+                            st.dataframe(new_dups[['Name', 'LCAT', 'Current_Salary']])
+                        
+                        if st.button("🔄 Import Anyway (Replace Duplicates)", key="import_anyway"):
+                            # Process and merge with existing data (this will replace duplicates)
+                            st.session_state.employees = self.process_uploaded_employees(df_upload)
+                            st.success("Data imported successfully! Duplicates were replaced.")
+                            st.rerun()
+                    else:
+                        # No duplicates, safe to import
+                        st.session_state.employees = self.process_uploaded_employees(df_upload)
+                        st.success("✅ Data imported successfully! No duplicates found.")
+                        st.rerun()
+                    
+            except Exception as e:
+                st.error(f"Error reading file: {str(e)}")
+        
+        return '''
+        <div class="upload-instructions">
+            <h4>📂 Upload Instructions</h4>
+            <p>Upload your employee data using Excel (.xlsx) or CSV (.csv) files. The system will automatically validate the data and check for duplicates.</p>
+            
+            <div class="alert alert-info">
+                <strong>💡 Pro Tip:</strong> Download a template first to ensure your data is in the correct format.
+            </div>
+        </div>
+        '''
+    
+    def _create_employee_management_content(self):
+        """Create content for employee management section"""
+        employees_df = st.session_state.employees
+        
+        # Add new employee form
+        with st.expander("➕ Add New Employee", expanded=False):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                new_name = st.text_input("Name")
+                new_lcat = st.selectbox("LCAT", ["PM", "SA/Eng Lead", "AI Lead", "HCD Lead", 
+                                                "Scrum Master", "Cloud Data Engineer", "SRE", "Full Stack Dev"])
+                new_employee_type = st.selectbox("Employee Type", ["Employee", "Subcontractor"])
+            with col2:
+                new_company = st.selectbox("Company", ["Skyward IT Solutions", "BEELINE", "Self Employed", "Aquia", "Friends"])
+                new_status = st.selectbox("Status", ["Active", "Inactive"])
+                new_priced_salary = st.number_input("Priced Salary", min_value=0, value=100000)
+            with col3:
+                new_current_salary = st.number_input("Current Salary", min_value=0, value=100000)
+                new_hours_per_month = st.number_input("Hours per Month", min_value=0, value=173)
+                
+            if st.button("Add Employee") and new_name:
+                # Check for duplicate employee names (case-insensitive)
+                existing_names = [name.lower() for name in st.session_state.employees['Name'].tolist()]
+                if new_name.lower() in existing_names:
+                    st.error(f"❌ Employee '{new_name}' already exists! Please use a different name or update the existing employee.")
+                else:
+                    new_employee = {
+                        "Name": new_name,
+                        "LCAT": new_lcat,
+                        "Employee_Type": new_employee_type,
+                        "Company": new_company,
+                        "Status": new_status,
+                        "Priced_Salary": new_priced_salary,
+                        "Current_Salary": new_current_salary,
+                        "Hours_Per_Month": new_hours_per_month,
+                        "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
+                    }
+                    
+                    # Add columns for time periods
+                    for period in st.session_state.employees.columns:
+                        if period.startswith('Hours_') or period.startswith('Revenue_'):
+                            new_employee[period] = 0.0
+                    
+                    # Add to dataframe
+                    new_row = pd.DataFrame([new_employee])
+                    st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
+                                                          ignore_index=True)
+                    st.success(f"✅ Added {new_name} to employee list")
+                    st.rerun()
+
+        # Employee data editor
+        st.markdown("### Employee Information")
+        basic_columns = ["Name", "LCAT", "Employee_Type", "Company", "Status", "Priced_Salary", "Current_Salary", "Hours_Per_Month", "Hourly_Rate"]
+        
+        edited_basic = st.data_editor(
+            employees_df[basic_columns],
+            column_config={
+                "Priced_Salary": st.column_config.NumberColumn("Priced Salary", format="$%.2f"),
+                "Current_Salary": st.column_config.NumberColumn("Current Salary", format="$%.2f"),
+                "Hourly_Rate": st.column_config.NumberColumn("Hourly Rate", format="$%.2f"),
+            },
+            width='stretch',
+            key="basic_employee_data"
+        )
+        
+        # Update the main dataframe
+        for col in basic_columns:
+            st.session_state.employees[col] = edited_basic[col]
+        
+        return ""
+    
+    def _create_employee_detail_content(self):
+        """Create content for employee detail view section"""
+        employees_df = st.session_state.employees
+        
+        if not employees_df.empty:
+            # Employee selector
+            selected_employee = st.selectbox(
+                "Select Employee to View Details:",
+                options=employees_df['Name'].tolist(),
+                key="employee_detail_selector"
+            )
+            
+            if selected_employee:
+                # Get employee data
+                employee_data = employees_df[employees_df['Name'] == selected_employee].iloc[0]
+                
+                # Create detail view
+                col1, col2 = st.columns([1, 2])
+                
+                with col1:
+                    st.markdown("**📋 Basic Information**")
+                    st.write(f"**Name:** {employee_data['Name']}")
+                    st.write(f"**LCAT:** {employee_data['LCAT']}")
+                    st.write(f"**Employee Type:** {employee_data['Employee_Type']}")
+                    st.write(f"**Company:** {employee_data['Company']}")
+                    st.write(f"**Status:** {employee_data['Status']}")
+                    st.write(f"**Hours/Month:** {employee_data['Hours_Per_Month']}")
+                    
+                    # Status indicator
+                    status_color = "🟢" if employee_data['Status'] == 'Active' else "🔴"
+                    st.markdown(f"{status_color} **Status:** {employee_data['Status']}")
+                    
+                    # Employee type indicator
+                    type_icon = "👨‍💼" if employee_data['Employee_Type'] == 'Employee' else "🏢"
+                    st.markdown(f"{type_icon} **Type:** {employee_data['Employee_Type']}")
+                
+                with col2:
+                    st.markdown("**💰 Financial Information**")
+                    st.write(f"**Priced Salary:** ${employee_data['Priced_Salary']:,.2f}")
+                    st.write(f"**Current Salary:** ${employee_data['Current_Salary']:,.2f}")
+                    st.write(f"**Hourly Rate:** ${employee_data['Hourly_Rate']:,.2f}")
+                    
+                    # Salary comparison
+                    salary_diff = employee_data['Current_Salary'] - employee_data['Priced_Salary']
+                    if salary_diff != 0:
+                        diff_color = "🔴" if salary_diff > 0 else "🟢"
+                        st.write(f"{diff_color} **Salary Difference:** ${salary_diff:,.2f}")
+                
+                # Time period data
+                st.markdown("**📅 Time Period Data**")
+                
+                # Get all time period columns
+                hours_cols = [col for col in employees_df.columns if col.startswith('Hours_') and col != 'Hours_Per_Month']
+                revenue_cols = [col for col in employees_df.columns if col.startswith('Revenue_')]
+                
+                if hours_cols:
+                    # Create time period summary
+                    period_data = []
+                    for hours_col in hours_cols:
+                        period_name = hours_col.replace('Hours_', '')
+                        hours = employee_data[hours_col]
+                        revenue = employee_data.get(f'Revenue_{period_name}', 0)
+                        period_data.append({
+                            'Period': period_name,
+                            'Hours': hours,
+                            'Revenue': revenue,
+                            'Rate': revenue / hours if hours > 0 else 0
+                        })
+                    
+                    period_df = pd.DataFrame(period_data)
+                    
+                    # Show summary statistics
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        total_hours = period_df['Hours'].sum()
+                        st.metric("Total Hours", f"{total_hours:.1f}")
+                    with col2:
+                        total_revenue = period_df['Revenue'].sum()
+                        st.metric("Total Revenue", f"${total_revenue:,.2f}")
+                    with col3:
+                        avg_hours = period_df['Hours'].mean()
+                        st.metric("Avg Hours/Period", f"{avg_hours:.1f}")
+                    with col4:
+                        avg_revenue = period_df['Revenue'].mean()
+                        st.metric("Avg Revenue/Period", f"${avg_revenue:,.2f}")
+                    
+                    # Show detailed period data
+                    with st.expander("📊 View All Time Periods"):
+                        st.dataframe(period_df, width='stretch')
+        else:
+            return '<p>📝 No employees available for detailed view. Add employees first.</p>'
+        
+        return ""
 
     def create_sample_subcontractors(self) -> pd.DataFrame:
         """Create sample subcontractor data"""
@@ -416,306 +867,64 @@ class SEASFinancialTracker:
         st.plotly_chart(fig, width='stretch')
 
     def create_direct_labor_tab(self):
-        """Create direct labor management tab"""
-        st.markdown('<div class="subheader">👥 Direct Labor Management</div>', unsafe_allow_html=True)
+        """Create direct labor management tab with modular design"""
         
-        # QuickBooks-style upload section
-        st.markdown("""
-        <div class="upload-section">
-            <h3>📁 Upload Employee Data</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Template download section
-        st.markdown('<div class="subheader">📋 Download Templates</div>', unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("**Basic Template**")
-            st.markdown("5 required fields + monthly hours/revenue columns")
-            st.markdown("Perfect for quick employee data entry")
-            
-            if st.button("📥 Download Basic Template", key="download_basic"):
-                try:
-                    file_bytes, filename = generate_employee_template("basic")
-                    st.download_button(
-                        label="💾 Save Basic Template",
-                        data=file_bytes,
-                        file_name=filename,
-                        key="save_basic"
-                    )
-                except Exception as e:
-                    st.error(f"Error generating template: {e}")
-        
-        with col2:
-            st.markdown("**Comprehensive Template**")
-            st.markdown("10 fields + monthly hours/revenue + instructions")
-            st.markdown("Perfect for detailed employee management")
-            
-            if st.button("📥 Download Comprehensive Template", key="download_comprehensive"):
-                try:
-                    file_bytes, filename = generate_employee_template("comprehensive")
-                    st.download_button(
-                        label="💾 Save Comprehensive Template",
-                        data=file_bytes,
-                        file_name=filename,
-                        key="save_comprehensive"
-                    )
-                except Exception as e:
-                    st.error(f"Error generating template: {e}")
-        
-        st.markdown("---")
-        
-        uploaded_file = st.file_uploader("Choose Excel/CSV file", type=['xlsx', 'csv'])
-        
-        if uploaded_file is not None:
-            try:
-                if uploaded_file.name.endswith('.xlsx'):
-                    df_upload = pd.read_excel(uploaded_file)
-                else:
-                    df_upload = pd.read_csv(uploaded_file)
-                st.success(f"Uploaded {len(df_upload)} rows of data")
-                
-                if st.button("Import Data"):
-                    # Check for duplicates before importing
-                    existing_names = [name.lower() for name in st.session_state.employees['Name'].tolist()]
-                    new_names = [name.lower() for name in df_upload['Name'].tolist()]
-                    
-                    # Find duplicate names
-                    duplicates = [name for name in new_names if name in existing_names]
-                    
-                    if duplicates:
-                        st.warning(f"⚠️ Found {len(duplicates)} duplicate employee(s): {', '.join(duplicates)}")
-                        st.info("💡 Tip: Update existing employees instead of creating duplicates, or use different names.")
-                        
-                        # Show duplicate comparison
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.write("**Existing Employees:**")
-                            existing_dups = st.session_state.employees[st.session_state.employees['Name'].str.lower().isin(duplicates)]
-                            st.dataframe(existing_dups[['Name', 'LCAT', 'Current_Salary']])
-                        
-                        with col2:
-                            st.write("**New Data (Duplicates):**")
-                            new_dups = df_upload[df_upload['Name'].str.lower().isin(duplicates)]
-                            st.dataframe(new_dups[['Name', 'LCAT', 'Current_Salary']])
-                        
-                        if st.button("🔄 Import Anyway (Replace Duplicates)", key="import_anyway"):
-                            # Process and merge with existing data (this will replace duplicates)
-                            st.session_state.employees = self.process_uploaded_employees(df_upload)
-                            st.success("Data imported successfully! Duplicates were replaced.")
-                            st.rerun()
-                    else:
-                        # No duplicates, safe to import
-                        st.session_state.employees = self.process_uploaded_employees(df_upload)
-                        st.success("✅ Data imported successfully! No duplicates found.")
-                        st.rerun()
-                    
-            except Exception as e:
-                st.error(f"Error reading file: {str(e)}")
-
-        # Employee data editor
-        st.markdown('<div class="subheader">👤 Employee Data</div>', unsafe_allow_html=True)
-        
-        # Get employee data
-        employees_df = st.session_state.employees
-        
-        # Employee summary
-        if not employees_df.empty:
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Total Employees", len(employees_df))
-            with col2:
-                active_employees = len(employees_df[employees_df['Status'] == 'Active'])
-                st.metric("Active Employees", active_employees)
-            with col3:
-                total_salary = employees_df['Current_Salary'].sum()
-                st.metric("Total Salary", f"${total_salary:,.0f}")
-            with col4:
-                avg_salary = employees_df['Current_Salary'].mean()
-                st.metric("Avg Salary", f"${avg_salary:,.0f}")
-            
-            # Employee type and company breakdown
-            col1, col2 = st.columns(2)
-            with col1:
-                employee_type_counts = employees_df['Employee_Type'].value_counts()
-                st.markdown("**👥 Employee Type Breakdown**")
-                for emp_type, count in employee_type_counts.items():
-                    type_icon = "👨‍💼" if emp_type == 'Employee' else "🏢"
-                    st.write(f"{type_icon} {emp_type}: {count}")
-                
-                company_counts = employees_df['Company'].value_counts()
-                st.markdown("**🏢 Company Distribution**")
-                for company, count in company_counts.items():
-                    st.write(f"• {company}: {count}")
-            
-            with col2:
-                status_counts = employees_df['Status'].value_counts()
-                st.markdown("**📊 Status Breakdown**")
-                for status, count in status_counts.items():
-                    status_icon = "🟢" if status == 'Active' else "🔴"
-                    st.write(f"{status_icon} {status}: {count}")
-                
-                lcat_counts = employees_df['LCAT'].value_counts()
-                st.markdown("**🎯 LCAT Distribution**")
-                for lcat, count in lcat_counts.items():
-                    st.write(f"• {lcat}: {count}")
-        else:
-            st.info("📝 No employees added yet. Use the form below or upload a template to get started.")
-        
-        # Add new employee
-        with st.expander("➕ Add New Employee", expanded=False):
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                new_name = st.text_input("Name")
-                new_lcat = st.selectbox("LCAT", ["PM", "SA/Eng Lead", "AI Lead", "HCD Lead", 
-                                                "Scrum Master", "Cloud Data Engineer", "SRE", "Full Stack Dev"])
-                new_employee_type = st.selectbox("Employee Type", ["Employee", "Subcontractor"])
-            with col2:
-                new_company = st.selectbox("Company", ["Skyward IT Solutions", "BEELINE", "Self Employed", "Aquia", "Friends"])
-                new_status = st.selectbox("Status", ["Active", "Inactive"])
-                new_priced_salary = st.number_input("Priced Salary", min_value=0, value=100000)
-            with col3:
-                new_current_salary = st.number_input("Current Salary", min_value=0, value=100000)
-                new_hours_per_month = st.number_input("Hours per Month", min_value=0, value=173)
-                
-            if st.button("Add Employee") and new_name:
-                # Check for duplicate employee names (case-insensitive)
-                existing_names = [name.lower() for name in st.session_state.employees['Name'].tolist()]
-                if new_name.lower() in existing_names:
-                    st.error(f"❌ Employee '{new_name}' already exists! Please use a different name or update the existing employee.")
-                else:
-                    new_employee = {
-                        "Name": new_name,
-                        "LCAT": new_lcat,
-                        "Employee_Type": new_employee_type,
-                        "Company": new_company,
-                        "Status": new_status,
-                        "Priced_Salary": new_priced_salary,
-                        "Current_Salary": new_current_salary,
-                        "Hours_Per_Month": new_hours_per_month,
-                        "Hourly_Rate": self.calculate_hourly_rate(new_current_salary, new_hours_per_month)
-                    }
-                    
-                    # Add columns for time periods
-                    for period in st.session_state.employees.columns:
-                        if period.startswith('Hours_') or period.startswith('Revenue_'):
-                            new_employee[period] = 0.0
-                    
-                    # Add to dataframe
-                    new_row = pd.DataFrame([new_employee])
-                    st.session_state.employees = pd.concat([st.session_state.employees, new_row], 
-                                                          ignore_index=True)
-                    st.success(f"✅ Added {new_name} to employee list")
-                    st.rerun()
-
-        # Display and edit employee data
-        
-        # Basic employee info
-        st.markdown('<div class="subheader">ℹ️ Employee Information</div>', unsafe_allow_html=True)
-        basic_columns = ["Name", "LCAT", "Employee_Type", "Company", "Status", "Priced_Salary", "Current_Salary", "Hours_Per_Month", "Hourly_Rate"]
-        
-        edited_basic = st.data_editor(
-            employees_df[basic_columns],
-            column_config={
-                "Priced_Salary": st.column_config.NumberColumn("Priced Salary", format="$%.2f"),
-                "Current_Salary": st.column_config.NumberColumn("Current Salary", format="$%.2f"),
-                "Hourly_Rate": st.column_config.NumberColumn("Hourly Rate", format="$%.2f"),
-            },
-            width='stretch',
-            key="basic_employee_data"
+        # Section 1: Employee Summary - Info Section
+        create_section(
+            title="📊 Employee Summary",
+            content=self._create_employee_summary_content(),
+            section_type="info",
+            status="active",
+            footer_content="Data refreshes automatically",
+            actions=[
+                {"type": "primary", "label": "Refresh Data"},
+                {"type": "secondary", "label": "Export Report"}
+            ]
         )
         
-        # Update the main dataframe
-        for col in basic_columns:
-            st.session_state.employees[col] = edited_basic[col]
+        create_section_divider()
         
-        # Employee detail view
-        st.markdown('<div class="subheader">👁️ Employee Detail View</div>', unsafe_allow_html=True)
+        # Section 2: Template Download - Success Section
+        create_section(
+            title="📋 Download Templates",
+            content=self._create_template_download_content(),
+            section_type="success",
+            status="ready"
+        )
         
-        if not employees_df.empty:
-            # Employee selector
-            selected_employee = st.selectbox(
-                "Select Employee to View Details:",
-                options=employees_df['Name'].tolist(),
-                key="employee_detail_selector"
-            )
-            
-            if selected_employee:
-                # Get employee data
-                employee_data = employees_df[employees_df['Name'] == selected_employee].iloc[0]
-                
-                # Create detail view
-                col1, col2 = st.columns([1, 2])
-                
-                with col1:
-                    st.markdown("**📋 Basic Information**")
-                    st.write(f"**Name:** {employee_data['Name']}")
-                    st.write(f"**LCAT:** {employee_data['LCAT']}")
-                    st.write(f"**Employee Type:** {employee_data['Employee_Type']}")
-                    st.write(f"**Company:** {employee_data['Company']}")
-                    st.write(f"**Status:** {employee_data['Status']}")
-                    st.write(f"**Hours/Month:** {employee_data['Hours_Per_Month']}")
-                    
-                    # Status indicator
-                    status_color = "🟢" if employee_data['Status'] == 'Active' else "🔴"
-                    st.markdown(f"{status_color} **Status:** {employee_data['Status']}")
-                    
-                    # Employee type indicator
-                    type_icon = "👨‍💼" if employee_data['Employee_Type'] == 'Employee' else "🏢"
-                    st.markdown(f"{type_icon} **Type:** {employee_data['Employee_Type']}")
-                
-                with col2:
-                    st.markdown("**💰 Financial Information**")
-                    st.write(f"**Priced Salary:** ${employee_data['Priced_Salary']:,.2f}")
-                    st.write(f"**Current Salary:** ${employee_data['Current_Salary']:,.2f}")
-                    st.write(f"**Hourly Rate:** ${employee_data['Hourly_Rate']:,.2f}")
-                    
-                    # Salary comparison
-                    salary_diff = employee_data['Current_Salary'] - employee_data['Priced_Salary']
-                    if salary_diff != 0:
-                        diff_color = "🔴" if salary_diff > 0 else "🟢"
-                        st.write(f"{diff_color} **Salary Difference:** ${salary_diff:,.2f}")
-                
-                # Time period data
-                st.markdown("**📅 Time Period Data**")
-                
-                # Get all time period columns
-                hours_cols = [col for col in employees_df.columns if col.startswith('Hours_') and col != 'Hours_Per_Month']
-                revenue_cols = [col for col in employees_df.columns if col.startswith('Revenue_')]
-                
-                if hours_cols:
-                    # Create time period summary
-                    period_data = []
-                    for hours_col in hours_cols:
-                        period_name = hours_col.replace('Hours_', '')
-                        hours = employee_data[hours_col]
-                        revenue = employee_data.get(f'Revenue_{period_name}', 0)
-                        period_data.append({
-                            'Period': period_name,
-                            'Hours': hours,
-                            'Revenue': revenue,
-                            'Rate': revenue / hours if hours > 0 else 0
-                        })
-                    
-                    period_df = pd.DataFrame(period_data)
-                    
-                    # Show summary statistics
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        total_hours = period_df['Hours'].sum()
-                        st.metric("Total Hours", f"{total_hours:.1f}")
-                    with col2:
-                        total_revenue = period_df['Revenue'].sum()
-                        st.metric("Total Revenue", f"${total_revenue:,.2f}")
-                    with col3:
-                        avg_hours = period_df['Hours'].mean()
-                        st.metric("Avg Hours/Period", f"{avg_hours:.1f}")
-                    with col4:
-                        avg_revenue = period_df['Revenue'].mean()
-                        st.metric("Avg Revenue/Period", f"${avg_revenue:,.2f}")
-                    
+        create_section_divider()
+        
+        # Section 3: Data Upload - Warning Section
+        create_section(
+            title="📁 Data Upload",
+            content=self._create_upload_content(),
+            section_type="warning",
+            status="needs_review"
+        )
+        
+        create_section_divider()
+        
+        # Section 4: Employee Management - Info Section
+        create_section(
+            title="👥 Employee Management",
+            content=self._create_employee_management_content(),
+            section_type="info",
+            status="active",
+            actions=[
+                {"type": "primary", "label": "Add Employee"},
+                {"type": "secondary", "label": "Bulk Edit"}
+            ]
+        )
+        
+        create_section_divider()
+        
+        # Section 5: Employee Detail View - Info Section
+        create_section(
+            title="👁️ Employee Detail View",
+            content=self._create_employee_detail_content(),
+            section_type="info",
+            status="active"
+        )
                     # Show detailed period data
                     with st.expander("📊 View All Time Periods"):
                         st.dataframe(period_df, width='stretch')
