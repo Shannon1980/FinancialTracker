@@ -15,6 +15,8 @@ This directory contains templates for uploading employee data to the SEAS Financ
 - Priced_Salary
 - Current_Salary
 - Hours_Per_Month
+- **24 monthly Hours columns** (Base Year + Option Year 1)
+- **24 monthly Revenue columns** (Base Year + Option Year 1)
 
 ### 2. **Comprehensive Template** (`comprehensive_employee_template.xlsx` / `comprehensive_employee_template.csv`)
 - **10 fields** including optional ones
@@ -33,6 +35,8 @@ This directory contains templates for uploading employee data to the SEAS Financ
 - Location (Optional)
 - Manager (Optional)
 - Skills (Optional)
+- **24 monthly Hours columns** (Base Year + Option Year 1)
+- **24 monthly Revenue columns** (Base Year + Option Year 1)
 
 ## 📊 How to Use
 
@@ -71,6 +75,23 @@ This directory contains templates for uploading employee data to the SEAS Financ
 - **Priced_Salary**: Original budgeted salary
 - **Current_Salary**: Actual salary being paid
 - **Hours_Per_Month**: Standard monthly hours (typically 173)
+
+### **Time Period Columns**
+The templates include **24 monthly periods** covering:
+
+**Base Year (March 2024 - March 2025):**
+- 03/13-04/11/24, 04/12-05/11/24, 05/12-06/10/24, 06/11-07/10/24
+- 07/11-08/09/24, 08/10-09/08/24, 09/09-10/08/24, 10/09-11/07/24
+- 11/08-12/07/24, 12/08-01/06/25, 01/07-02/05/25, 02/06-03/07/25
+
+**Option Year 1 (March 2025 - March 2026):**
+- 03/08-04/07/25, 04/08-05/07/25, 05/08-06/06/25, 06/07-07/06/25
+- 07/07-08/05/25, 08/06-09/04/25, 09/05-10/04/25, 10/05-11/03/25
+- 11/04-12/03/25, 12/04-01/02/26, 01/03-02/01/26, 02/02-03/03/26
+
+**For each period, you get:**
+- **Hours_[Period]**: Hours worked in that period (default: 0.0)
+- **Revenue_[Period]**: Revenue generated in that period (default: 0.0)
 
 ### **Data Format Requirements**
 - **No currency symbols** ($, €, £)

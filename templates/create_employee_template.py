@@ -28,6 +28,29 @@ def main():
     # Create DataFrame
     df = pd.DataFrame(data)
     
+    # Add monthly hours columns for base year and option year one
+    # Base Year: March 2024 - March 2025 (12 periods)
+    base_year_periods = [
+        '03/13-04/11/24', '04/12-05/11/24', '05/12-06/10/24', '06/11-07/10/24',
+        '07/11-08/09/24', '08/10-09/08/24', '09/09-10/08/24', '10/09-11/07/24',
+        '11/08-12/07/24', '12/08-01/06/25', '01/07-02/05/25', '02/06-03/07/25'
+    ]
+    
+    # Option Year 1: March 2025 - March 2026 (12 periods)
+    option_year_periods = [
+        '03/08-04/07/25', '04/08-05/07/25', '05/08-06/06/25', '06/07-07/06/25',
+        '07/07-08/05/25', '08/06-09/04/25', '09/05-10/04/25', '10/05-11/03/25',
+        '11/04-12/03/25', '12/04-01/02/26', '01/03-02/01/26', '02/02-03/03/26'
+    ]
+    
+    # Add Hours columns for all periods
+    for period in base_year_periods + option_year_periods:
+        df[f'Hours_{period}'] = 0.0
+    
+    # Add Revenue columns for all periods
+    for period in base_year_periods + option_year_periods:
+        df[f'Revenue_{period}'] = 0.0
+    
     # Save as Excel
     excel_path = templates_dir / 'employee_template.xlsx'
     df.to_excel(excel_path, index=False, sheet_name='Employee_Data')
