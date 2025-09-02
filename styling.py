@@ -20,16 +20,6 @@ def load_css() -> None:
         </style>
         ''', unsafe_allow_html=True)
         
-        # Also inject CSS directly into the page for maximum priority
-        st.markdown(f'''
-        <script>
-        const style = document.createElement('style');
-        style.textContent = `{css_content}`;
-        style.setAttribute('data-priority', 'maximum');
-        document.head.appendChild(style);
-        </script>
-        ''', unsafe_allow_html=True)
-        
         st.success("✅ Section 508 compliant QuickBooks design loaded successfully!")
     except FileNotFoundError:
         st.warning("⚠️ CSS file not found. Using default Streamlit styling.")
