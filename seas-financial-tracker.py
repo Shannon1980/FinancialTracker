@@ -1548,56 +1548,38 @@ class SEASFinancialTracker:
 
     def create_direct_labor_tab(self):
         """Create direct labor management tab with modular design"""
+        st.markdown("## 👥 Direct Labor Management")
         
-        # Section 1: Employee Summary
-        st.markdown("""
-        <div class="section-container info-section">
-            <div class="section-header">
-                <h2 style="color: #000000; margin: 0;">📊 Employee Summary</h2>
-            </div>
-            <div class="section-content">
-        """, unsafe_allow_html=True)
-        self._create_employee_summary_content()
-        st.markdown("</div></div>", unsafe_allow_html=True)
+        # Test content first
+        st.info("✅ Direct Labor tab is working!")
+        st.write("This tab contains employee management features.")
         
-        st.markdown("---")
-        
-        # Section 2: Template Download
-        st.markdown("""
-        <div class="section-container success-section">
-            <div class="section-header">
-                <h2 style="color: #000000; margin: 0;">📋 Download Templates</h2>
-            </div>
-            <div class="section-content">
-        """, unsafe_allow_html=True)
-        self._create_template_download_content()
-        st.markdown("</div></div>", unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Section 3: Data Upload
-        st.markdown("""
-        <div class="section-container warning-section">
-            <div class="section-header">
-                <h2 style="color: #000000; margin: 0;">📁 Data Upload</h2>
-            </div>
-            <div class="section-content">
-        """, unsafe_allow_html=True)
-        self._create_upload_content()
-        st.markdown("</div></div>", unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Section 4: Employee Management
-        st.markdown("""
-        <div class="section-container info-section">
-            <div class="section-header">
-                <h2 style="color: #000000; margin: 0;">👥 Employee Management</h2>
-            </div>
-            <div class="section-content">
-        """, unsafe_allow_html=True)
-        self._create_employee_management_content()
-        st.markdown("</div></div>", unsafe_allow_html=True)
+        try:
+            # Section 1: Employee Summary
+            st.markdown("### 📊 Employee Summary")
+            self._create_employee_summary_content()
+            
+            st.markdown("---")
+            
+            # Section 2: Template Download
+            st.markdown("### 📋 Download Templates")
+            self._create_template_download_content()
+            
+            st.markdown("---")
+            
+            # Section 3: Data Upload
+            st.markdown("### 📤 Upload Data")
+            self._create_upload_content()
+            
+            st.markdown("---")
+            
+            # Section 4: Employee Management
+            st.markdown("### 👤 Employee Management")
+            self._create_employee_management_content()
+            
+        except Exception as e:
+            st.error(f"Error in Direct Labor tab: {e}")
+            st.write("Some features may not be available due to an error.")
         
         st.markdown("---")
         
@@ -1630,22 +1612,32 @@ class SEASFinancialTracker:
 
     def create_subcontractor_tab(self):
         """Create subcontractor management tab with modular design"""
+        st.markdown("## 🏢 Subcontractor Management")
         
-        # Section 1: Subcontractor Summary
-        st.markdown("## 📊 Subcontractor Summary")
-        self._create_subcontractor_summary_content()
+        # Test content first
+        st.info("✅ Subcontractor tab is working!")
+        st.write("This tab contains subcontractor management features.")
         
-        st.markdown("---")
-        
-        # Section 2: Add New Subcontractor
-        st.markdown("## ➕ Add New Subcontractor")
-        self._create_add_subcontractor_content()
-        
-        st.markdown("---")
-        
-        # Section 3: Subcontractor Management
-        st.markdown("## 👥 Subcontractor Management")
-        self._create_subcontractor_management_content()
+        try:
+            # Section 1: Subcontractor Summary
+            st.markdown("### 📊 Subcontractor Summary")
+            self._create_subcontractor_summary_content()
+            
+            st.markdown("---")
+            
+            # Section 2: Add New Subcontractor
+            st.markdown("### ➕ Add New Subcontractor")
+            self._create_add_subcontractor_content()
+            
+            st.markdown("---")
+            
+            # Section 3: Subcontractor Management
+            st.markdown("### 👥 Subcontractor Management")
+            self._create_subcontractor_management_content()
+            
+        except Exception as e:
+            st.error(f"Error in Subcontractor tab: {e}")
+            st.write("Some features may not be available due to an error.")
         
         st.markdown("---")
         
@@ -1669,22 +1661,38 @@ class SEASFinancialTracker:
 
     def create_analysis_tab(self):
         """Create analysis and visualization tab with modular design"""
+        st.markdown("## 📈 Financial Analysis")
         
-        # Section 1: Revenue Trends
-        st.markdown("## 📈 Monthly Revenue Trends")
-        self._create_revenue_trends_content()
+        # Test content first
+        st.info("✅ Analysis tab is working!")
+        st.write("This tab contains financial analysis and visualization features.")
         
-        st.markdown("---")
-        
-        # Section 2: Employee Utilization
-        st.markdown("## 🔥 Employee Hours Heatmap")
-        self._create_employee_heatmap_content()
-        
-        st.markdown("---")
-        
-        # Section 3: Cost Analysis
-        st.markdown("## 💰 Cost Analysis by Labor Category")
-        self._create_lcat_cost_analysis_content()
+        try:
+            # Section 1: Revenue Trends
+            st.markdown("### 📈 Monthly Revenue Trends")
+            self._create_revenue_trends_content()
+            
+            st.markdown("---")
+            
+            # Section 2: Employee Utilization
+            st.markdown("### 🔥 Employee Hours Heatmap")
+            self._create_employee_heatmap_content()
+            
+            st.markdown("---")
+            
+            # Section 3: Cost Analysis
+            st.markdown("### 💰 Cost Analysis by Labor Category")
+            self._create_lcat_cost_analysis_content()
+            
+            st.markdown("---")
+            
+            # Section 4: Burn Rate Analysis
+            st.markdown("### ⚡ Project Burn Rate Analysis")
+            self._create_burn_rate_content()
+            
+        except Exception as e:
+            st.error(f"Error in Analysis tab: {e}")
+            st.write("Some features may not be available due to an error.")
         
         st.markdown("---")
         
@@ -1750,22 +1758,32 @@ class SEASFinancialTracker:
 
     def create_tasks_tab(self):
         """Create task management tab with modular design"""
+        st.markdown("## ✅ Task Management")
         
-        # Section 1: Add New Task
-        st.markdown("## ➕ Add New Task")
-        self._create_add_task_content()
+        # Test content first
+        st.info("✅ Tasks tab is working!")
+        st.write("This tab contains task management features.")
         
-        st.markdown("---")
-        
-        # Section 2: Task Management
-        st.markdown("## 📝 Task Details & Management")
-        self._create_task_management_content()
-        
-        st.markdown("---")
-        
-        # Section 3: Task Removal
-        st.markdown("## 🗑️ Remove Tasks")
-        self._create_task_removal_content()
+        try:
+            # Section 1: Add New Task
+            st.markdown("### ➕ Add New Task")
+            self._create_add_task_content()
+            
+            st.markdown("---")
+            
+            # Section 2: Task Management
+            st.markdown("### 📝 Task Details & Management")
+            self._create_task_management_content()
+            
+            st.markdown("---")
+            
+            # Section 3: Task Removal
+            st.markdown("### 🗑️ Remove Tasks")
+            self._create_task_removal_content()
+            
+        except Exception as e:
+            st.error(f"Error in Tasks tab: {e}")
+            st.write("Some features may not be available due to an error.")
         
         st.markdown("---")
         
