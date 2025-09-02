@@ -1,0 +1,65 @@
+<svg width="300" height="80" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="80" fill="#FFFFFF" rx="10"/>
+  
+  <!-- Main Icon - Enhanced Financial Chart -->
+  <g transform="translate(15, 12)">
+    <!-- Chart Background -->
+    <rect x="0" y="25" width="56" height="32" fill="#F0F8FF" rx="3"/>
+    
+    <!-- Chart Bars with Gradient -->
+    <defs>
+      <linearGradient id="barGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#0073E6;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#0056B3;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="barGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#00A86B;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#2F855A;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="barGradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#FF8C00;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#DD6B20;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    
+    <rect x="4" y="40" width="8" height="17" fill="url(#barGradient1)" rx="1"/>
+    <rect x="14" y="35" width="8" height="22" fill="url(#barGradient2)" rx="1"/>
+    <rect x="24" y="30" width="8" height="27" fill="url(#barGradient3)" rx="1"/>
+    <rect x="34" y="38" width="8" height="19" fill="#E53E3E" rx="1"/>
+    <rect x="44" y="33" width="8" height="24" fill="#9C27B0" rx="1"/>
+    
+    <!-- Chart Line -->
+    <path d="M8,48 L18,43 L28,38 L38,46 L48,41" stroke="#0073E6" stroke-width="3" fill="none" stroke-linecap="round"/>
+    
+    <!-- Data Points -->
+    <circle cx="8" cy="48" r="3" fill="#0073E6"/>
+    <circle cx="18" cy="43" r="3" fill="#00A86B"/>
+    <circle cx="28" cy="38" r="3" fill="#FF8C00"/>
+    <circle cx="38" cy="46" r="3" fill="#E53E3E"/>
+    <circle cx="48" cy="41" r="3" fill="#9C27B0"/>
+    
+    <!-- Dollar Sign with Enhanced Design -->
+    <circle cx="28" cy="16" r="10" fill="#0073E6"/>
+    <circle cx="28" cy="16" r="8" fill="#FFFFFF"/>
+    <text x="28" y="21" text-anchor="middle" fill="#0073E6" font-family="Arial, sans-serif" font-size="12" font-weight="bold">$</text>
+  </g>
+  
+  <!-- Company Name with Enhanced Typography -->
+  <g transform="translate(85, 20)">
+    <text x="0" y="18" fill="#0073E6" font-family="Arial, sans-serif" font-size="20" font-weight="bold">SEAS</text>
+    <text x="0" y="38" fill="#4A5568" font-family="Arial, sans-serif" font-size="14" font-weight="600">Financial Tracker</text>
+  </g>
+  
+  <!-- Tagline -->
+  <g transform="translate(85, 50)">
+    <text x="0" y="12" fill="#9AA0A6" font-family="Arial, sans-serif" font-size="10" font-weight="500">Professional Financial Management & Analysis Platform</text>
+  </g>
+  
+  <!-- Decorative Elements -->
+  <circle cx="260" cy="20" r="4" fill="#0073E6" opacity="0.2"/>
+  <circle cx="270" cy="35" r="3" fill="#00A86B" opacity="0.2"/>
+  <circle cx="255" cy="50" r="3.5" fill="#FF8C00" opacity="0.2"/>
+  <circle cx="280" cy="15" r="2" fill="#E53E3E" opacity="0.2"/>
+  <circle cx="275" cy="55" r="2.5" fill="#9C27B0" opacity="0.2"/>
+</svg>

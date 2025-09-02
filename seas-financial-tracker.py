@@ -10,6 +10,10 @@ import json
 from typing import Dict, List, Tuple, Optional
 import base64
 
+# Import authentication and user management modules
+from auth import AuthManager, render_login_page, render_logout_button, require_auth, check_permission
+from user_management import UserManager, render_user_management_page, render_user_info_sidebar, render_data_access_notice
+
 # Import utility modules
 from utils.template_downloader import generate_employee_template, get_template_info
 from styling import load_css, create_section, create_section_divider, create_section_grid, create_metric_card
@@ -163,7 +167,14 @@ class SEASFinancialTracker:
         """Create content for employee summary section"""
         employees_df = st.session_state.employees
         
+        # Check data access permissions
+        if not render_data_access_notice('employees'):
+            return
+        
         if not employees_df.empty:
+            # Filter sensitive data based on user permissions
+            user_manager = UserManager()
+            filtered_df = user_manager.filter_sensitive_data(employees_df, 'employees')
             # Use utility function to calculate metrics
             try:
                 metrics = calculate_employee_metrics(employees_df)
@@ -176,9 +187,17 @@ class SEASFinancialTracker:
                 with col2:
                     st.metric("Active Employees", metrics['active_employees'])
                 with col3:
-                    st.metric("Total Salary", f"${metrics['total_salary']:,.0f}")
+                    # Check if user has salary access
+                    if user_manager.has_sensitive_data_access('salary'):
+                        st.metric("Total Salary", f"${metrics['total_salary']:,.0f}")
+                    else:
+                        st.metric("Total Salary", "*** Restricted ***")
                 with col4:
-                    st.metric("Avg Salary", f"${metrics['average_salary']:,.0f}")
+                    # Check if user has salary access
+                    if user_manager.has_sensitive_data_access('salary'):
+                        st.metric("Avg Salary", f"${metrics['average_salary']:,.0f}")
+                    else:
+                        st.metric("Avg Salary", "*** Restricted ***")
             except Exception as e:
                 st.error(f"Error calculating metrics: {e}")
                 # Fallback metrics
@@ -284,6 +303,11 @@ class SEASFinancialTracker:
     
     def _create_upload_content(self):
         """Create content for data upload section"""
+        # Check permissions for data import
+        if not check_permission('import'):
+            st.warning("🔒 You don't have permission to import data. Contact your administrator.")
+            return
+            
         uploaded_file = st.file_uploader("Choose Excel/CSV file", type=['xlsx', 'csv'])
         
         if uploaded_file is not None:
@@ -345,6 +369,11 @@ class SEASFinancialTracker:
     
     def _create_employee_management_content(self):
         """Create content for employee management section"""
+        # Check permissions for employee management
+        if not check_permission('edit'):
+            st.warning("🔒 You don't have permission to manage employees. Contact your administrator.")
+            return
+            
         employees_df = st.session_state.employees
         
         # Add new employee form
@@ -1316,8 +1345,16 @@ class SEASFinancialTracker:
         # Welcome message and onboarding
         self._create_welcome_section()
         
-        # Enhanced sidebar with better organization
+        # Enhanced sidebar with better organization and user management
         self._create_enhanced_sidebar()
+        
+        # Check if user management should be shown
+        if st.session_state.get('show_user_management', False):
+            render_user_management_page()
+            if st.button("← Back to Dashboard"):
+                st.session_state.show_user_management = False
+                st.rerun()
+            return
         
         # Main content area with improved layout
         self._create_main_content()
@@ -1930,8 +1967,20 @@ class SEASFinancialTracker:
 
 def main():
     """Main application function"""
+    # Check authentication first
+    auth_manager = AuthManager()
+    
+    if not auth_manager.is_authenticated():
+        render_login_page()
+        return
+    
+    # User is authenticated, show the main application
     tracker = SEASFinancialTracker()
     tracker.create_dashboard()
+    
+    # Add user info and logout button to sidebar
+    render_user_info_sidebar()
+    render_logout_button()
     
     # Footer
     st.markdown("---")
