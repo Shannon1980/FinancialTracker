@@ -206,6 +206,12 @@ class SEASFinancialTracker:
         """Create content for employee summary section"""
         employees_df = st.session_state.employees
         
+        # Debug information
+        st.write(f"🔍 Debug: Employee data shape: {employees_df.shape}")
+        st.write(f"🔍 Debug: Employee columns: {list(employees_df.columns)}")
+        st.write(f"🔍 Debug: First few rows:")
+        st.write(employees_df.head(3))
+        
         if not employees_df.empty:
             # Use utility function to calculate metrics
             metrics = calculate_employee_metrics(employees_df)
