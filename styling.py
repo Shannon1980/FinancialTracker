@@ -12,7 +12,24 @@ def load_css() -> None:
     try:
         with open('static/custom.css', 'r') as f:
             css_content = f.read()
-        st.markdown(f'<style>{css_content}</style>', unsafe_allow_html=True)
+        
+        # Load CSS with maximum priority
+        st.markdown(f'''
+        <style>
+        {css_content}
+        </style>
+        ''', unsafe_allow_html=True)
+        
+        # Also inject CSS directly into the page for maximum priority
+        st.markdown(f'''
+        <script>
+        const style = document.createElement('style');
+        style.textContent = `{css_content}`;
+        style.setAttribute('data-priority', 'maximum');
+        document.head.appendChild(style);
+        </script>
+        ''', unsafe_allow_html=True)
+        
         st.success("✅ Section 508 compliant QuickBooks design loaded successfully!")
     except FileNotFoundError:
         st.warning("⚠️ CSS file not found. Using default Streamlit styling.")

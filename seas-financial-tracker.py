@@ -35,6 +35,51 @@ st.set_page_config(
 # Load the CSS
 load_css()
 
+# Additional aggressive CSS injection to fix white-on-white text
+st.markdown("""
+<style>
+/* ULTRA-AGGRESSIVE WHITE-ON-WHITE TEXT FIXES */
+/* Force black text on ALL elements */
+* {
+    color: #000000 !important;
+}
+
+/* Override any white text */
+*[style*="color: white"],
+*[style*="color: #ffffff"],
+*[style*="color: #fff"] {
+    color: #000000 !important;
+}
+
+/* Force white backgrounds for all elements */
+* {
+    background-color: #ffffff !important;
+}
+
+/* Only allow white text on dark backgrounds */
+button[style*="background-color: #0073E6"],
+button[style*="background-color: #0056b3"],
+button[style*="background-color: #004085"],
+.main-header,
+.main-header * {
+    color: #ffffff !important;
+}
+
+/* Override Streamlit's default styles */
+.stApp, .stApp * {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+}
+
+/* Force black text on all text elements */
+p, span, div, h1, h2, h3, h4, h5, h6, 
+label, td, th, li, a, strong, em {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ============================================================================
 # Modular Section Helper Functions
 # ============================================================================

@@ -1653,3 +1653,75 @@ input, textarea, select {
 .stApp [style*="background-color: var(--qb-primary-blue)"] * {
   color: #ffffff !important;
 }
+
+/* ULTRA-AGGRESSIVE WHITE-ON-WHITE FIXES */
+/* Override ALL possible white text scenarios */
+html, body, div, span, p, h1, h2, h3, h4, h5, h6, 
+a, strong, em, small, mark, del, ins, sub, sup,
+ul, ol, li, dl, dt, dd, blockquote, pre, code,
+table, thead, tbody, tfoot, tr, th, td,
+form, fieldset, legend, label, input, textarea, select, button,
+section, article, aside, nav, header, footer, main {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Force black text on ALL Streamlit elements */
+[data-testid="stApp"] *,
+[data-testid="stApp"] *::before,
+[data-testid="stApp"] *::after {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Override any CSS variables that might cause white text */
+:root {
+  --text-color: #000000 !important;
+  --background-color: #ffffff !important;
+  --primary-text: #000000 !important;
+  --secondary-text: #000000 !important;
+}
+
+/* Force black text on any element with white/light backgrounds */
+*[style*="background-color: white"],
+*[style*="background-color: #ffffff"],
+*[style*="background-color: #fff"],
+*[style*="background-color: #f8f9fa"],
+*[style*="background-color: #f0f0f0"],
+*[style*="background-color: #e9ecef"],
+*[style*="background-color: #dee2e6"],
+*[style*="background-color: #ced4da"],
+*[style*="background-color: #adb5bd"],
+*[style*="background-color: #6c757d"],
+*[style*="background-color: #495057"],
+*[style*="background-color: #343a40"],
+*[style*="background-color: #212529"],
+*[style*="background-color: transparent"] {
+  color: #000000 !important;
+}
+
+/* Only allow white text on very dark backgrounds */
+*[style*="background-color: #000000"],
+*[style*="background-color: #1a1a1a"],
+*[style*="background-color: #2c2c2c"],
+*[style*="background-color: #333333"],
+*[style*="background-color: #0073E6"],
+*[style*="background-color: #0056b3"],
+*[style*="background-color: #004085"] {
+  color: #ffffff !important;
+}
+
+/* Override any inherited white text */
+* {
+  color: #000000 !important;
+}
+
+/* Exception only for buttons and headers with dark backgrounds */
+button[style*="background-color: #0073E6"],
+button[style*="background-color: #0056b3"],
+button[style*="background-color: #004085"],
+.main-header,
+.main-header *,
+[class*="header"] {
+  color: #ffffff !important;
+}
