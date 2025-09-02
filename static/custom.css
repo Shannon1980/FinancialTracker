@@ -1792,10 +1792,23 @@ button[style*="background-color: #004085"],
 /* Progress bars with better visibility */
 .stProgress > div > div > div {
   background-color: #0073E6 !important;
+  user-select: auto !important;
 }
 
 .stProgress > div > div {
   background-color: #e9ecef !important;
+  user-select: auto !important;
+}
+
+/* Ensure progress bars are interactive and don't have problematic containers */
+.stProgress {
+  user-select: auto !important;
+  pointer-events: auto !important;
+}
+
+.stProgress * {
+  user-select: auto !important;
+  pointer-events: auto !important;
 }
 
 /* Charts and visualizations */
@@ -1811,6 +1824,24 @@ button[style*="background-color: #004085"],
   visibility: visible !important;
   display: block !important;
   opacity: 1 !important;
+  user-select: auto !important;
+  pointer-events: auto !important;
+}
+
+/* Fix any problematic containers that might interfere with user interaction */
+.svy-container, .svy-container * {
+  user-select: auto !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure all interactive elements work properly */
+.stApp * {
+  user-select: auto !important;
+}
+
+/* Override any user-select: none that might be applied by Streamlit */
+*[style*="user-select: none"] {
+  user-select: auto !important;
 }
 
 /* Tab content visibility */
