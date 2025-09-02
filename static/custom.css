@@ -1539,9 +1539,117 @@ input, textarea, select {
   color: #000000 !important;
 }
 
-/* Exception for headers and buttons */
+/* Exception for headers and buttons - ensure they have dark backgrounds */
 [data-testid="stApp"] .main-header,
-[data-testid="stApp"] .main-header *,
+[data-testid="stApp"] .main-header * {
+  color: #ffffff !important;
+  background-color: var(--qb-primary-blue) !important;
+}
+
 [data-testid="stApp"] .stButton > button {
+  color: #ffffff !important;
+  background-color: var(--qb-primary-blue) !important;
+}
+
+/* Fix any white text that might appear on white backgrounds */
+.stApp *[style*="color: white"],
+.stApp *[style*="color: #ffffff"],
+.stApp *[style*="color: #fff"],
+.stApp .white-text,
+.stApp .text-white {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Only allow white text on dark backgrounds */
+.stApp .main-header,
+.stApp .main-header *,
+.stApp .stButton > button,
+.stApp [style*="background-color: #000000"],
+.stApp [style*="background-color: #333333"],
+.stApp [style*="background-color: #1a1a1a"],
+.stApp [style*="background-color: #2c2c2c"],
+.stApp [style*="background-color: var(--qb-primary-blue)"] {
+  color: #ffffff !important;
+}
+
+/* Force all other elements to have black text */
+.stApp *:not(.main-header):not(.main-header *):not(.stButton > button):not([style*="background-color: #000000"]):not([style*="background-color: #333333"]):not([style*="background-color: #1a1a1a"]):not([style*="background-color: #2c2c2c"]):not([style*="background-color: var(--qb-primary-blue)"]) {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Additional overrides to prevent white-on-white text */
+/* Override any inline styles that might cause white-on-white */
+.stApp *[style*="color: white"][style*="background-color: white"],
+.stApp *[style*="color: #ffffff"][style*="background-color: #ffffff"],
+.stApp *[style*="color: #fff"][style*="background-color: #fff"] {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Force black text for any element with white background */
+.stApp *[style*="background-color: white"],
+.stApp *[style*="background-color: #ffffff"],
+.stApp *[style*="background-color: #fff"],
+.stApp *[style*="background-color: transparent"] {
+  color: #000000 !important;
+}
+
+/* Override Streamlit's default white text on white background */
+.stApp .stMarkdown,
+.stApp .stText,
+.stApp .stSelectbox,
+.stApp .stTextInput,
+.stApp .stNumberInput,
+.stApp .stTextArea,
+.stApp .stDateInput,
+.stApp .stTimeInput,
+.stApp .stFileUploader,
+.stApp .stCheckbox,
+.stApp .stRadio,
+.stApp .stSlider,
+.stApp .stExpander,
+.stApp .stTabs,
+.stApp .stSidebar,
+.stApp .stDataFrame,
+.stApp .stTable,
+.stApp .stMetric,
+.stApp .stProgress,
+.stApp .stAlert,
+.stApp .stSuccess,
+.stApp .stError,
+.stApp .stWarning,
+.stApp .stInfo {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Ensure all text content is black */
+.stApp p, .stApp span, .stApp div, .stApp label, .stApp td, .stApp th,
+.stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Final catch-all rule */
+.stApp {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.stApp * {
+  color: #000000 !important;
+}
+
+/* Only exceptions for specific elements that need white text */
+.stApp .main-header,
+.stApp .main-header *,
+.stApp .stButton > button,
+.stApp [style*="background-color: #000000"] *,
+.stApp [style*="background-color: #333333"] *,
+.stApp [style*="background-color: #1a1a1a"] *,
+.stApp [style*="background-color: #2c2c2c"] *,
+.stApp [style*="background-color: var(--qb-primary-blue)"] * {
   color: #ffffff !important;
 }
