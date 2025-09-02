@@ -81,16 +81,17 @@ body {
   font-family: var(--qb-font-family);
   font-size: var(--qb-font-size-base);
   line-height: var(--qb-line-height-base);
-  color: var(--qb-dark-gray);
-  background-color: var(--qb-off-white);
+  color: #000000 !important; /* Force black text */
+  background-color: #ffffff !important; /* Force white background */
   margin: 0;
   padding: 0;
 }
 
 /* Main App Container */
 .stApp {
-  background: var(--qb-off-white);
+  background: #ffffff !important; /* Force white background */
   font-family: var(--qb-font-family);
+  color: #000000 !important; /* Force black text */
 }
 
 /* Enhanced Header Styles */
@@ -1308,4 +1309,56 @@ a:visited {
     color: black !important;
     text-decoration: underline !important;
   }
+}
+
+/* Force black text on white background for all text elements */
+.stApp, .stApp * {
+  color: #000000 !important;
+}
+
+/* Override specific Streamlit text elements */
+.stMarkdown, .stMarkdown *,
+.stText, .stText *,
+.stSelectbox label, .stSelectbox *,
+.stTextInput label, .stTextInput *,
+.stNumberInput label, .stNumberInput *,
+.stTextArea label, .stTextArea *,
+.stDateInput label, .stDateInput *,
+.stTimeInput label, .stTimeInput *,
+.stFileUploader label, .stFileUploader *,
+.stCheckbox label, .stCheckbox *,
+.stRadio label, .stRadio *,
+.stSlider label, .stSlider *,
+.stExpander .streamlit-expanderHeader,
+.stExpander .streamlit-expanderContent,
+.stTabs [data-baseweb="tab"],
+.stSidebar .stMarkdown,
+.stSidebar .stText,
+.stDataFrame,
+.stTable,
+.stMetric,
+.stProgress,
+.stAlert,
+.stSuccess,
+.stError,
+.stWarning,
+.stInfo {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Ensure form elements have proper contrast */
+.stSelectbox > div > div,
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input,
+.stTextArea > div > div > textarea {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cccccc !important;
+}
+
+/* Override any remaining text colors */
+h1, h2, h3, h4, h5, h6,
+p, span, div, label, td, th {
+  color: #000000 !important;
 }
