@@ -35,67 +35,90 @@ def apply_theme_to_chart(fig: go.Figure) -> go.Figure:
 
 def create_revenue_trends_chart(employees_df: pd.DataFrame, subcontractors_df: pd.DataFrame) -> go.Figure:
     """Create revenue trends chart for employees and subcontractors"""
-    # Get time period columns
-    time_periods = [col for col in employees_df.columns if col.startswith('Revenue_')]
+    try:
+        # Get time period columns
+        time_periods = [col for col in employees_df.columns if col.startswith('Revenue_')]
+        
+        if not time_periods or employees_df.empty:
+            # Create a simple chart with sample data
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                y=[1000, 1200, 1100, 1300, 1400, 1500],
+                mode='lines+markers',
+                name='Sample Revenue',
+                line=dict(color='#2C7BE5', width=3),
+                marker=dict(size=8)
+            ))
+            fig.update_layout(
+                title="Revenue Trends (Sample Data)",
+                xaxis_title="Time Period",
+                yaxis_title="Revenue ($)",
+                font=dict(size=12),
+                margin=dict(t=50, l=50, r=50, b=50)
+            )
+            fig = apply_theme_to_chart(fig)
+            return fig
     
-    if not time_periods:
-        # Create empty chart if no data
+        # Calculate total revenue by period
+        employee_revenue = []
+        subcontractor_revenue = []
+        period_labels = []
+        
+        for period_col in time_periods:
+            period_name = period_col.replace('Revenue_', '')
+            period_labels.append(period_name)
+            
+            # Employee revenue
+            emp_rev = employees_df[period_col].sum() if not employees_df.empty else 0
+            employee_revenue.append(emp_rev)
+            
+            # Subcontractor revenue
+            sub_rev = subcontractors_df[period_col].sum() if not subcontractors_df.empty else 0
+            subcontractor_revenue.append(sub_rev)
+        
+        # Create the chart
         fig = go.Figure()
-        fig.add_annotation(text="No revenue data available", xref="paper", yref="paper", 
-                          x=0.5, y=0.5, showarrow=False, font_size=16)
+        
+        fig.add_trace(go.Scatter(
+            x=period_labels,
+            y=employee_revenue,
+            mode='lines+markers',
+            name='Employee Revenue',
+            line=dict(color='#2C7BE5', width=3),
+            marker=dict(size=8)
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=period_labels,
+            y=subcontractor_revenue,
+            mode='lines+markers',
+            name='Subcontractor Revenue',
+            line=dict(color='#E53E3E', width=3),
+            marker=dict(size=8)
+        ))
+        
+        fig.update_layout(
+            title="Revenue Trends by Period",
+            xaxis_title="Time Period",
+            yaxis_title="Revenue ($)",
+            font=dict(size=12),
+            margin=dict(t=50, l=50, r=50, b=50),
+            xaxis=dict(tickangle=45)
+        )
+        
+        # Apply theme
+        fig = apply_theme_to_chart(fig)
+        
         return fig
-    
-    # Calculate total revenue by period
-    employee_revenue = []
-    subcontractor_revenue = []
-    period_labels = []
-    
-    for period_col in time_periods:
-        period_name = period_col.replace('Revenue_', '')
-        period_labels.append(period_name)
         
-        # Employee revenue
-        emp_rev = employees_df[period_col].sum() if not employees_df.empty else 0
-        employee_revenue.append(emp_rev)
-        
-        # Subcontractor revenue
-        sub_rev = subcontractors_df[period_col].sum() if not subcontractors_df.empty else 0
-        subcontractor_revenue.append(sub_rev)
-    
-    # Create the chart
-    fig = go.Figure()
-    
-    fig.add_trace(go.Scatter(
-        x=period_labels,
-        y=employee_revenue,
-        mode='lines+markers',
-        name='Employee Revenue',
-        line=dict(color='#2C7BE5', width=3),
-        marker=dict(size=8)
-    ))
-    
-    fig.add_trace(go.Scatter(
-        x=period_labels,
-        y=subcontractor_revenue,
-        mode='lines+markers',
-        name='Subcontractor Revenue',
-        line=dict(color='#E53E3E', width=3),
-        marker=dict(size=8)
-    ))
-    
-    fig.update_layout(
-        title="Revenue Trends by Period",
-        xaxis_title="Time Period",
-        yaxis_title="Revenue ($)",
-        font=dict(size=12),
-        margin=dict(t=50, l=50, r=50, b=50),
-        xaxis=dict(tickangle=45)
-    )
-    
-    # Apply theme
-    fig = apply_theme_to_chart(fig)
-    
-    return fig
+    except Exception as e:
+        # Return a simple error chart
+        fig = go.Figure()
+        fig.add_annotation(text=f"Chart Error: {str(e)}", xref="paper", yref="paper", 
+                          x=0.5, y=0.5, showarrow=False, font_size=16)
+        fig.update_layout(title="Chart Error")
+        return fig
 
 
 def create_employee_heatmap_chart(employees_df: pd.DataFrame) -> go.Figure:

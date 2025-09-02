@@ -1438,26 +1438,55 @@ class SEASFinancialTracker:
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Overview", "👥 Direct Labor", "🏢 Subcontractors", "📈 Analysis", "✅ Tasks"])
 
             with tab1:
+                st.markdown("## 📊 Overview Dashboard")
                 self.create_overview_tab()
                 
             with tab2:
+                st.markdown("## 👥 Direct Labor Management")
                 self.create_direct_labor_tab()
                 
             with tab3:
+                st.markdown("## 🏢 Subcontractor Management")
                 self.create_subcontractor_tab()
                 
             with tab4:
+                st.markdown("## 📈 Financial Analysis")
                 self.create_analysis_tab()
                 
             with tab5:
+                st.markdown("## ✅ Task Management")
                 self.create_tasks_tab()
                 
         except Exception as e:
             st.error(f"Error loading tabs: {e}")
             st.info("Please refresh the page to resolve the issue.")
+            # Show debug information
+            st.write("Debug info:")
+            st.write(f"Session state keys: {list(st.session_state.keys())}")
+            st.write(f"Employees data shape: {st.session_state.employees.shape if 'employees' in st.session_state else 'No employees data'}")
 
     def create_overview_tab(self):
         """Create overview dashboard with enhanced modular design"""
+        
+        # Test chart first
+        st.markdown("## 🧪 Chart Test")
+        try:
+            # Simple test chart
+            test_data = pd.DataFrame({
+                'Month': ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                'Revenue': [1000, 1200, 1100, 1300, 1400],
+                'Costs': [800, 900, 850, 950, 1000]
+            })
+            
+            fig = px.line(test_data, x='Month', y=['Revenue', 'Costs'], 
+                         title='Test Chart - Revenue vs Costs')
+            st.plotly_chart(fig, use_container_width=True, key="overview_test_chart")
+            st.success("✅ Charts are working!")
+            
+        except Exception as e:
+            st.error(f"❌ Chart test failed: {e}")
+        
+        st.markdown("---")
         
         # Project Metrics with enhanced section styling
         st.markdown("""
@@ -1668,9 +1697,31 @@ class SEASFinancialTracker:
         employees_df = st.session_state.employees
         subcontractors_df = st.session_state.subcontractors
         
-        # Use utility function to create the chart
-        fig = create_revenue_trends_chart(employees_df, subcontractors_df)
-        st.plotly_chart(fig, width='stretch', key="revenue_trends_chart")
+        # Debug information
+        st.write("Debug - Employees columns:", list(employees_df.columns) if not employees_df.empty else "No employees data")
+        st.write("Debug - Subcontractors columns:", list(subcontractors_df.columns) if not subcontractors_df.empty else "No subcontractors data")
+        
+        # Create a simple test chart first
+        try:
+            # Simple test chart
+            test_data = pd.DataFrame({
+                'Period': ['Jan', 'Feb', 'Mar', 'Apr'],
+                'Revenue': [1000, 1200, 1100, 1300]
+            })
+            
+            fig = px.line(test_data, x='Period', y='Revenue', title='Test Chart - Revenue Trends')
+            st.plotly_chart(fig, use_container_width=True, key="test_chart")
+            
+            # Now try the actual chart
+            if not employees_df.empty:
+                fig = create_revenue_trends_chart(employees_df, subcontractors_df)
+                st.plotly_chart(fig, use_container_width=True, key="revenue_trends_chart")
+            else:
+                st.info("No employee data available for revenue trends chart.")
+                
+        except Exception as e:
+            st.error(f"Error creating chart: {e}")
+            st.write("Chart creation failed. Please check the data structure.")
 
     def _create_employee_heatmap_content(self):
         """Create content for employee heatmap section"""
