@@ -77,6 +77,30 @@ label, td, th, li, a, strong, em {
     color: #000000 !important;
     background-color: #ffffff !important;
 }
+
+/* Ensure employee information is visible */
+.stDataFrame, .stDataFrame *,
+.stTable, .stTable *,
+.stMetric, .stMetric *,
+.stColumns, .stColumns *,
+.stMarkdown, .stMarkdown * {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Ensure all Streamlit elements are visible */
+[data-testid="stDataFrame"],
+[data-testid="stTable"],
+[data-testid="stMetric"],
+[data-testid="stColumns"],
+[data-testid="stMarkdown"] {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    visibility: visible !important;
+    display: block !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -206,52 +230,63 @@ class SEASFinancialTracker:
         """Create content for employee summary section"""
         employees_df = st.session_state.employees
         
-        # Debug information
-        st.write(f"🔍 Debug: Employee data shape: {employees_df.shape}")
-        st.write(f"🔍 Debug: Employee columns: {list(employees_df.columns)}")
-        st.write(f"🔍 Debug: First few rows:")
-        st.write(employees_df.head(3))
-        
         if not employees_df.empty:
             # Use utility function to calculate metrics
-            metrics = calculate_employee_metrics(employees_df)
-            
-            # Create metric cards using Streamlit columns
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                st.metric("Total Employees", metrics['total_employees'], "+2 this month")
-            with col2:
-                st.metric("Active Employees", metrics['active_employees'])
-            with col3:
-                st.metric("Total Salary", f"${metrics['total_salary']:,.0f}")
-            with col4:
-                st.metric("Avg Salary", f"${metrics['average_salary']:,.0f}")
+            try:
+                metrics = calculate_employee_metrics(employees_df)
+                
+                # Create metric cards using Streamlit columns
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("Total Employees", metrics['total_employees'], "+2 this month")
+                with col2:
+                    st.metric("Active Employees", metrics['active_employees'])
+                with col3:
+                    st.metric("Total Salary", f"${metrics['total_salary']:,.0f}")
+                with col4:
+                    st.metric("Avg Salary", f"${metrics['average_salary']:,.0f}")
+            except Exception as e:
+                st.error(f"Error calculating metrics: {e}")
+                # Fallback metrics
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Total Employees", len(employees_df))
+                with col2:
+                    st.metric("Active Employees", len(employees_df[employees_df['Status'] == 'Active']) if 'Status' in employees_df.columns else len(employees_df))
+                with col3:
+                    st.metric("Total Salary", f"${employees_df['Current_Salary'].sum():,.0f}")
+                with col4:
+                    st.metric("Avg Salary", f"${employees_df['Current_Salary'].mean():,.0f}")
             
             # Add breakdown summary using Streamlit columns
             st.markdown("### 📊 Employee Breakdown")
             col1, col2, col3 = st.columns(3)
             
-            employee_type_counts = employees_df['Employee_Type'].value_counts()
-            status_counts = employees_df['Status'].value_counts()
-            company_counts = employees_df['Company'].value_counts()
-            
-            with col1:
-                st.markdown("#### 👥 Employee Types")
-                for emp_type, count in employee_type_counts.items():
-                    type_icon = "👨‍💼" if emp_type == 'Employee' else "🏢"
-                    st.write(f"{type_icon} {emp_type}: {count}")
-            
-            with col2:
-                st.markdown("#### 📊 Status")
-                for status, count in status_counts.items():
-                    status_icon = "🟢" if status == 'Active' else "🔴"
-                    st.write(f"{status_icon} {status}: {count}")
-            
-            with col3:
-                st.markdown("#### 🏢 Companies")
-                for company, count in company_counts.items():
-                    st.write(f"• {company}: {count}")
+            try:
+                employee_type_counts = employees_df['Employee_Type'].value_counts()
+                status_counts = employees_df['Status'].value_counts()
+                company_counts = employees_df['Company'].value_counts()
+                
+                with col1:
+                    st.markdown("#### 👥 Employee Types")
+                    for emp_type, count in employee_type_counts.items():
+                        type_icon = "👨‍💼" if emp_type == 'Employee' else "🏢"
+                        st.write(f"{type_icon} {emp_type}: {count}")
+                
+                with col2:
+                    st.markdown("#### 📊 Status")
+                    for status, count in status_counts.items():
+                        status_icon = "🟢" if status == 'Active' else "🔴"
+                        st.write(f"{status_icon} {status}: {count}")
+                
+                with col3:
+                    st.markdown("#### 🏢 Companies")
+                    for company, count in company_counts.items():
+                        st.write(f"• {company}: {count}")
+            except Exception as e:
+                st.error(f"Error in breakdown section: {e}")
+                st.write("Employee data available but breakdown failed")
         else:
             st.info("📝 No employees added yet. Use the sections below to add employees or upload data.")
     
