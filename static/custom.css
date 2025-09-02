@@ -1,56 +1,244 @@
 /* ==========================================================================
-   SEAS Financial Tracker - Section 508 Compliant QuickBooks Design System
+   SEAS Financial Tracker - Enhanced QuickBooks Design System
+   Sleek, User-Friendly Interface with Modern UX Best Practices
    ========================================================================== */
 
-/* CSS Custom Properties (Variables) - QuickBooks Color Palette */
+/* CSS Custom Properties (Variables) - Enhanced QuickBooks Color Palette */
 :root {
-  /* Primary Colors - Verified WCAG 2.1 AA Compliant */
-  --qb-primary-blue: #2C7BE5;        /* Primary Blue - 4.6:1 contrast on white */
-  --qb-secondary-gray: #4A5568;      /* Secondary Gray - 4.8:1 contrast on white */
-  --qb-accent-green: #48BB78;        /* Accent Green - 4.7:1 contrast on white */
-  --qb-success-green: #38A169;       /* Success Green - 5.2:1 contrast on white */
-  --qb-warning-orange: #ED8936;      /* Warning Orange - 4.9:1 contrast on white */
-  --qb-error-red: #E53E3E;           /* Error Red - 5.1:1 contrast on white */
+  /* Primary Colors - QuickBooks Inspired */
+  --qb-primary-blue: #0073E6;        /* QuickBooks Primary Blue */
+  --qb-primary-blue-dark: #0056B3;   /* Darker variant for hover states */
+  --qb-primary-blue-light: #E6F2FF;  /* Light variant for backgrounds */
+  --qb-secondary-gray: #4A5568;      /* Secondary Gray */
+  --qb-accent-green: #00A86B;        /* QuickBooks Green */
+  --qb-success-green: #00A86B;       /* Success Green */
+  --qb-warning-orange: #FF8C00;      /* Warning Orange */
+  --qb-error-red: #E53E3E;           /* Error Red */
   
-  /* Neutral Colors - High Contrast */
+  /* Neutral Colors - Enhanced Palette */
   --qb-white: #FFFFFF;               /* Pure White */
-  --qb-off-white: #F7FAFC;           /* Off White - 4.9:1 contrast on dark text */
-  --qb-light-gray: #E2E8F0;          /* Light Gray - 4.7:1 contrast on dark text */
-  --qb-medium-gray: #A0AEC0;         /* Medium Gray - 4.6:1 contrast on white */
-  --qb-dark-gray: #2D3748;           /* Dark Gray - 4.8:1 contrast on white */
-  --qb-black: #1A202C;               /* Near Black - 5.2:1 contrast on white */
+  --qb-off-white: #FAFBFC;           /* Off White - Clean background */
+  --qb-light-gray: #F1F3F4;          /* Light Gray - Subtle borders */
+  --qb-medium-gray: #9AA0A6;         /* Medium Gray - Secondary text */
+  --qb-dark-gray: #3C4043;           /* Dark Gray - Primary text */
+  --qb-black: #202124;               /* Near Black - Headers */
   
-  /* Typography */
-  --qb-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --qb-font-size-base: 16px;         /* Minimum accessible font size */
-  --qb-line-height-base: 1.5;        /* Optimal line height for readability */
+  /* Typography - QuickBooks Style */
+  --qb-font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --qb-font-size-xs: 12px;
+  --qb-font-size-sm: 14px;
+  --qb-font-size-base: 16px;         /* Base font size */
+  --qb-font-size-lg: 18px;
+  --qb-font-size-xl: 20px;
+  --qb-font-size-2xl: 24px;
+  --qb-font-size-3xl: 32px;
+  --qb-line-height-tight: 1.25;
+  --qb-line-height-base: 1.5;
+  --qb-line-height-relaxed: 1.75;
   --qb-font-weight-normal: 400;
   --qb-font-weight-medium: 500;
   --qb-font-weight-semibold: 600;
   --qb-font-weight-bold: 700;
   
-  /* Spacing System */
+  /* Enhanced Spacing System */
   --qb-spacing-xs: 0.25rem;          /* 4px */
   --qb-spacing-sm: 0.5rem;           /* 8px */
   --qb-spacing-md: 1rem;             /* 16px */
   --qb-spacing-lg: 1.5rem;           /* 24px */
   --qb-spacing-xl: 2rem;             /* 32px */
   --qb-spacing-2xl: 3rem;            /* 48px */
+  --qb-spacing-3xl: 4rem;            /* 64px */
   
-  /* Border Radius */
-  --qb-border-radius-sm: 4px;
+  /* Border Radius - Modern Design */
+  --qb-border-radius-sm: 6px;
   --qb-border-radius-md: 8px;
   --qb-border-radius-lg: 12px;
+  --qb-border-radius-xl: 16px;
   
-  /* Shadows */
-  --qb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-  --qb-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Enhanced Shadows */
+  --qb-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --qb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --qb-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
   --qb-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --qb-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
   
   /* Transitions */
   --qb-transition-fast: 0.15s ease-in-out;
   --qb-transition-normal: 0.25s ease-in-out;
   --qb-transition-slow: 0.35s ease-in-out;
+}
+
+/* ==========================================================================
+   Enhanced Base Styles - QuickBooks Inspired
+   ========================================================================== */
+
+/* Global Reset and Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--qb-font-family);
+  font-size: var(--qb-font-size-base);
+  line-height: var(--qb-line-height-base);
+  color: var(--qb-dark-gray);
+  background-color: var(--qb-off-white);
+  margin: 0;
+  padding: 0;
+}
+
+/* Main App Container */
+.stApp {
+  background: var(--qb-off-white);
+  font-family: var(--qb-font-family);
+}
+
+/* Enhanced Header Styles */
+.main-header {
+  background: linear-gradient(135deg, var(--qb-primary-blue) 0%, var(--qb-primary-blue-dark) 100%);
+  color: var(--qb-white);
+  padding: var(--qb-spacing-2xl) var(--qb-spacing-xl);
+  margin: calc(-1 * var(--qb-spacing-md)) calc(-1 * var(--qb-spacing-md)) var(--qb-spacing-xl) calc(-1 * var(--qb-spacing-md));
+  border-radius: 0 0 var(--qb-border-radius-lg) var(--qb-border-radius-lg);
+  box-shadow: var(--qb-shadow-lg);
+}
+
+.main-header h1 {
+  font-size: var(--qb-font-size-3xl);
+  font-weight: var(--qb-font-weight-bold);
+  margin: 0 0 var(--qb-spacing-sm) 0;
+  text-align: center;
+}
+
+.main-header .subtitle {
+  font-size: var(--qb-font-size-lg);
+  font-weight: var(--qb-font-weight-normal);
+  text-align: center;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Enhanced Button Styles - QuickBooks Inspired
+   ========================================================================== */
+
+/* Primary Button Styles */
+.stButton > button {
+  background: var(--qb-primary-blue);
+  color: var(--qb-white);
+  border: none;
+  border-radius: var(--qb-border-radius-md);
+  padding: var(--qb-spacing-sm) var(--qb-spacing-lg);
+  font-family: var(--qb-font-family);
+  font-size: var(--qb-font-size-base);
+  font-weight: var(--qb-font-weight-medium);
+  cursor: pointer;
+  transition: all var(--qb-transition-fast);
+  box-shadow: var(--qb-shadow-sm);
+  min-height: 44px; /* Touch-friendly minimum */
+}
+
+.stButton > button:hover {
+  background: var(--qb-primary-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--qb-shadow-md);
+}
+
+.stButton > button:active {
+  transform: translateY(0);
+  box-shadow: var(--qb-shadow-sm);
+}
+
+.stButton > button:disabled {
+  background: var(--qb-medium-gray);
+  color: var(--qb-white);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Secondary Button Styles */
+.stButton > button[kind="secondary"] {
+  background: var(--qb-white);
+  color: var(--qb-primary-blue);
+  border: 2px solid var(--qb-primary-blue);
+}
+
+.stButton > button[kind="secondary"]:hover {
+  background: var(--qb-primary-blue-light);
+  border-color: var(--qb-primary-blue-dark);
+}
+
+/* ==========================================================================
+   Enhanced Card Components
+   ========================================================================== */
+
+.qb-card {
+  background: var(--qb-white);
+  border-radius: var(--qb-border-radius-lg);
+  padding: var(--qb-spacing-xl);
+  margin-bottom: var(--qb-spacing-lg);
+  box-shadow: var(--qb-shadow-sm);
+  border: 1px solid var(--qb-light-gray);
+  transition: all var(--qb-transition-normal);
+}
+
+.qb-card:hover {
+  box-shadow: var(--qb-shadow-md);
+  transform: translateY(-2px);
+}
+
+.qb-card-header {
+  border-bottom: 1px solid var(--qb-light-gray);
+  padding-bottom: var(--qb-spacing-md);
+  margin-bottom: var(--qb-spacing-lg);
+}
+
+.qb-card-title {
+  font-size: var(--qb-font-size-xl);
+  font-weight: var(--qb-font-weight-semibold);
+  color: var(--qb-black);
+  margin: 0;
+}
+
+.qb-card-subtitle {
+  font-size: var(--qb-font-size-sm);
+  color: var(--qb-medium-gray);
+  margin: var(--qb-spacing-xs) 0 0 0;
+}
+
+/* ==========================================================================
+   Enhanced Layout Components
+   ========================================================================== */
+
+.qb-section {
+  background: var(--qb-white);
+  border-radius: var(--qb-border-radius-lg);
+  padding: var(--qb-spacing-xl);
+  margin-bottom: var(--qb-spacing-lg);
+  box-shadow: var(--qb-shadow-sm);
+  border: 1px solid var(--qb-light-gray);
+}
+
+.qb-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--qb-spacing-lg);
+  padding-bottom: var(--qb-spacing-md);
+  border-bottom: 1px solid var(--qb-light-gray);
+}
+
+.qb-section-title {
+  font-size: var(--qb-font-size-2xl);
+  font-weight: var(--qb-font-weight-semibold);
+  color: var(--qb-black);
+  margin: 0;
+}
+
+.qb-section-actions {
+  display: flex;
+  gap: var(--qb-spacing-sm);
 }
 
 /* ==========================================================================

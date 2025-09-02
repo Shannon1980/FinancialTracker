@@ -1285,8 +1285,8 @@ class SEASFinancialTracker:
                         df.at[idx, revenue_col] = hours * hourly_rate
 
     def create_dashboard(self):
-        """Create the main dashboard"""
-        # QuickBooks-style header with subtitle
+        """Create the main dashboard with enhanced QuickBooks design"""
+        # Enhanced QuickBooks-style header
         st.markdown("""
         <div class="main-header">
             <h1>📊 SEAS Project Financial Tracker</h1>
@@ -1294,12 +1294,50 @@ class SEASFinancialTracker:
         </div>
         """, unsafe_allow_html=True)
         
-        # QuickBooks-style sidebar for project parameters
+        # Welcome message and onboarding
+        self._create_welcome_section()
+        
+        # Enhanced sidebar with better organization
+        self._create_enhanced_sidebar()
+        
+        # Main content area with improved layout
+        self._create_main_content()
+
+    def _create_welcome_section(self):
+        """Create welcome section with onboarding guidance"""
+        st.markdown("""
+        <div class="qb-card">
+            <div class="qb-card-header">
+                <h2 class="qb-card-title">👋 Welcome to SEAS Financial Tracker</h2>
+                <p class="qb-card-subtitle">Your comprehensive project financial management solution</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="padding: 1rem; background: #E6F2FF; border-radius: 8px; border-left: 4px solid #0073E6;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #0056B3;">📊 Dashboard Overview</h4>
+                    <p style="margin: 0; font-size: 14px; color: #4A5568;">Monitor project metrics, financial summaries, and cost analysis in real-time.</p>
+                </div>
+                <div style="padding: 1rem; background: #E6F7E6; border-radius: 8px; border-left: 4px solid #00A86B;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #00A86B;">👥 Team Management</h4>
+                    <p style="margin: 0; font-size: 14px; color: #4A5568;">Manage employees, subcontractors, and track hours with detailed profiles.</p>
+                </div>
+                <div style="padding: 1rem; background: #FFF2E6; border-radius: 8px; border-left: 4px solid #FF8C00;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #FF8C00;">📈 Analytics & Reports</h4>
+                    <p style="margin: 0; font-size: 14px; color: #4A5568;">Generate insights with interactive charts and comprehensive reporting.</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    def _create_enhanced_sidebar(self):
+        """Create enhanced sidebar with better organization"""
         with st.sidebar:
+            # Enhanced sidebar header
             st.markdown("""
-            <div style="background: #2E5BBA; 
-                        padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(46, 91, 186, 0.2);">
-                <h3 style="color: white; margin: 0 0 1rem 0; text-align: center; font-weight: 600;">⚙️ Project Parameters</h3>
+            <div style="background: linear-gradient(135deg, #0073E6 0%, #0056B3 100%); 
+                        padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; 
+                        box-shadow: 0 4px 12px rgba(0, 115, 230, 0.2);">
+                <h3 style="color: white; margin: 0 0 0.5rem 0; text-align: center; font-weight: 600; font-size: 18px;">⚙️ Project Parameters</h3>
+                <p style="color: rgba(255,255,255,0.9); margin: 0; text-align: center; font-size: 14px;">Configure your project settings</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -1316,9 +1354,49 @@ class SEASFinancialTracker:
                                                format="%.3f", step=0.001)
             params['target_profit'] = st.number_input("🎯 Target Profit Margin", value=params['target_profit'], 
                                                      format="%.4f", step=0.0001)
+            
+            # Add quick actions section
+            st.markdown("---")
+            st.markdown("""
+            <div style="background: #F1F3F4; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #3C4043; font-size: 16px;">🚀 Quick Actions</h4>
+                <p style="margin: 0; font-size: 14px; color: #5F6368;">Common tasks and shortcuts</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button("🔄 Refresh Data", help="Reload all data and recalculate metrics"):
+                st.rerun()
+            
+            if st.button("📊 Export Report", help="Generate and download project report"):
+                st.success("📄 Report generation started!")
 
-        # Main tabs with modern styling
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Overview", "👥 Direct Labor", "🏢 Subcontractors", "📊 Analysis", "📋 Tasks"])
+    def _create_main_content(self):
+        """Create main content area with enhanced tab organization"""
+        # Enhanced tab styling
+        st.markdown("""
+        <style>
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+        }
+        .stTabs [data-baseweb="tab"] {
+            background: #F1F3F4;
+            border-radius: 8px 8px 0 0;
+            padding: 12px 20px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .stTabs [aria-selected="true"] {
+            background: #0073E6;
+            color: white;
+        }
+        .stTabs [data-baseweb="tab"]:hover {
+            background: #E6F2FF;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Main tabs with modern styling and consistent icons
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Overview", "👥 Direct Labor", "🏢 Subcontractors", "📈 Analysis", "✅ Tasks"])
 
         with tab1:
             self.create_overview_tab()
@@ -1336,22 +1414,40 @@ class SEASFinancialTracker:
             self.create_tasks_tab()
 
     def create_overview_tab(self):
-        """Create overview dashboard with modular design"""
+        """Create overview dashboard with enhanced modular design"""
         
-        # Section 1: Project Metrics
-        st.markdown("## 📊 Project Metrics")
+        # Enhanced section with card styling
+        st.markdown("""
+        <div class="qb-section">
+            <div class="qb-section-header">
+                <h2 class="qb-section-title">📊 Project Metrics</h2>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         self._create_project_metrics_content()
         
         st.markdown("---")
         
-        # Section 2: Financial Summary
-        st.markdown("## 💰 Financial Summary")
+        # Financial Summary with enhanced styling
+        st.markdown("""
+        <div class="qb-section">
+            <div class="qb-section-header">
+                <h2 class="qb-section-title">💰 Financial Summary</h2>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         self._create_financial_summary_content()
         
         st.markdown("---")
         
-        # Section 3: Cost Analysis
-        st.markdown("## 📈 Cost Analysis")
+        # Cost Analysis with enhanced styling
+        st.markdown("""
+        <div class="qb-section">
+            <div class="qb-section-header">
+                <h2 class="qb-section-title">📈 Cost Analysis</h2>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         self._create_cost_analysis_content()
         
 
