@@ -9,6 +9,28 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import Dict, List, Optional, Any
 import streamlit as st
+from theme_manager import ThemeManager
+
+
+def apply_theme_to_chart(fig: go.Figure) -> go.Figure:
+    """Apply current theme to a Plotly chart"""
+    theme_manager = ThemeManager()
+    theme_config = theme_manager.get_plotly_theme()
+    
+    # Apply theme to layout
+    fig.update_layout(**theme_config['layout'])
+    
+    # Update grid and axis styling
+    fig.update_xaxes(
+        gridcolor=theme_config['layout']['xaxis']['gridcolor'],
+        color=theme_config['layout']['xaxis']['color']
+    )
+    fig.update_yaxes(
+        gridcolor=theme_config['layout']['yaxis']['gridcolor'],
+        color=theme_config['layout']['yaxis']['color']
+    )
+    
+    return fig
 
 
 def create_revenue_trends_chart(employees_df: pd.DataFrame, subcontractors_df: pd.DataFrame) -> go.Figure:
@@ -65,12 +87,13 @@ def create_revenue_trends_chart(employees_df: pd.DataFrame, subcontractors_df: p
         title="Revenue Trends by Period",
         xaxis_title="Time Period",
         yaxis_title="Revenue ($)",
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
         font=dict(size=12),
         margin=dict(t=50, l=50, r=50, b=50),
         xaxis=dict(tickangle=45)
     )
+    
+    # Apply theme
+    fig = apply_theme_to_chart(fig)
     
     return fig
 

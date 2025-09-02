@@ -13,6 +13,7 @@ import base64
 # Import authentication and user management modules
 from auth import AuthManager, render_login_page, render_logout_button, require_auth, check_permission
 from user_management import UserManager, render_user_management_page, render_user_info_sidebar, render_data_access_notice
+from theme_manager import ThemeManager, render_theme_toggle_sidebar
 
 # Import utility modules
 from utils.template_downloader import generate_employee_template, get_template_info
@@ -1334,6 +1335,10 @@ class SEASFinancialTracker:
 
     def create_dashboard(self):
         """Create the main dashboard with enhanced QuickBooks design"""
+        # Initialize theme manager and apply theme
+        theme_manager = ThemeManager()
+        theme_manager.apply_theme_css()
+        
         # Enhanced QuickBooks-style header
         st.markdown("""
         <div class="main-header">
@@ -1428,46 +1433,28 @@ class SEASFinancialTracker:
 
     def _create_main_content(self):
         """Create main content area with enhanced tab organization"""
-        # Enhanced tab styling
-        st.markdown("""
-        <style>
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-        }
-        .stTabs [data-baseweb="tab"] {
-            background: #F1F3F4;
-            border-radius: 8px 8px 0 0;
-            padding: 12px 20px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .stTabs [aria-selected="true"] {
-            background: #0073E6;
-            color: white;
-        }
-        .stTabs [data-baseweb="tab"]:hover {
-            background: #E6F2FF;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
         # Main tabs with modern styling and consistent icons
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Overview", "👥 Direct Labor", "🏢 Subcontractors", "📈 Analysis", "✅ Tasks"])
+        try:
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Overview", "👥 Direct Labor", "🏢 Subcontractors", "📈 Analysis", "✅ Tasks"])
 
-        with tab1:
-            self.create_overview_tab()
-            
-        with tab2:
-            self.create_direct_labor_tab()
-            
-        with tab3:
-            self.create_subcontractor_tab()
-            
-        with tab4:
-            self.create_analysis_tab()
-            
-        with tab5:
-            self.create_tasks_tab()
+            with tab1:
+                self.create_overview_tab()
+                
+            with tab2:
+                self.create_direct_labor_tab()
+                
+            with tab3:
+                self.create_subcontractor_tab()
+                
+            with tab4:
+                self.create_analysis_tab()
+                
+            with tab5:
+                self.create_tasks_tab()
+                
+        except Exception as e:
+            st.error(f"Error loading tabs: {e}")
+            st.info("Please refresh the page to resolve the issue.")
 
     def create_overview_tab(self):
         """Create overview dashboard with enhanced modular design"""
@@ -1978,8 +1965,9 @@ def main():
     tracker = SEASFinancialTracker()
     tracker.create_dashboard()
     
-    # Add user info and logout button to sidebar
+    # Add user info, theme toggle, and logout button to sidebar
     render_user_info_sidebar()
+    render_theme_toggle_sidebar()
     render_logout_button()
     
     # Footer
