@@ -1316,6 +1316,29 @@ a:visited {
   color: #000000 !important;
 }
 
+/* Ensure proper contrast for dark backgrounds */
+.stApp [style*="background-color: #000000"],
+.stApp [style*="background-color: #333333"],
+.stApp [style*="background-color: #1a1a1a"],
+.stApp [style*="background-color: #2c2c2c"],
+.stApp .dark-bg,
+.stApp .header-bg,
+.stApp .sidebar-bg {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+}
+
+/* Ensure proper contrast for light backgrounds */
+.stApp [style*="background-color: #ffffff"],
+.stApp [style*="background-color: #f8f9fa"],
+.stApp [style*="background-color: #f0f0f0"],
+.stApp .light-bg,
+.stApp .card-bg,
+.stApp .content-bg {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
 /* Override specific Streamlit text elements */
 .stMarkdown, .stMarkdown *,
 .stText, .stText *,
@@ -1361,4 +1384,164 @@ a:visited {
 h1, h2, h3, h4, h5, h6,
 p, span, div, label, td, th {
   color: #000000 !important;
+}
+
+/* Fix specific contrast issues */
+/* Buttons - ensure proper contrast */
+.stButton > button {
+  color: #ffffff !important;
+  background-color: var(--qb-primary-blue) !important;
+  border: 1px solid var(--qb-primary-blue) !important;
+}
+
+.stButton > button:hover {
+  color: #ffffff !important;
+  background-color: var(--qb-primary-blue-dark) !important;
+  border: 1px solid var(--qb-primary-blue-dark) !important;
+}
+
+.stButton > button:active {
+  color: #ffffff !important;
+  background-color: var(--qb-primary-blue-darker) !important;
+}
+
+.stButton > button:disabled {
+  color: #666666 !important;
+  background-color: #cccccc !important;
+  border: 1px solid #cccccc !important;
+}
+
+/* Secondary buttons */
+.stButton > button[data-testid="baseButton-secondary"] {
+  color: var(--qb-primary-blue) !important;
+  background-color: #ffffff !important;
+  border: 1px solid var(--qb-primary-blue) !important;
+}
+
+.stButton > button[data-testid="baseButton-secondary"]:hover {
+  color: #ffffff !important;
+  background-color: var(--qb-primary-blue) !important;
+}
+
+/* Cards and containers */
+.stCard, .stCard *,
+.qb-card, .qb-card *,
+.section-container, .section-container * {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Headers with dark backgrounds */
+.main-header, .main-header *,
+.stApp > header, .stApp > header * {
+  color: #ffffff !important;
+  background-color: var(--qb-primary-blue) !important;
+}
+
+/* Sidebar */
+.stSidebar, .stSidebar * {
+  color: #000000 !important;
+  background-color: #f8f9fa !important;
+}
+
+/* Tables */
+.stDataFrame, .stDataFrame *,
+.stTable, .stTable *,
+table, table * {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Input fields */
+input, textarea, select {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cccccc !important;
+}
+
+/* Alerts and notifications */
+.stAlert, .stAlert *,
+.stSuccess, .stSuccess *,
+.stError, .stError *,
+.stWarning, .stWarning *,
+.stInfo, .stInfo * {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cccccc !important;
+}
+
+/* Metrics */
+.stMetric, .stMetric * {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Progress bars */
+.stProgress, .stProgress * {
+  color: #000000 !important;
+  background-color: #f0f0f0 !important;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab"] {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+  color: var(--qb-primary-blue) !important;
+  background-color: #ffffff !important;
+  border-bottom: 2px solid var(--qb-primary-blue) !important;
+}
+
+/* Additional contrast fixes */
+/* Ensure all text has proper contrast */
+* {
+  color: inherit !important;
+}
+
+/* Fix any elements that might have transparent or inherited colors */
+.stApp div:not([style*="background-color"]):not(.main-header):not(.stSidebar) {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Fix expandable sections */
+.stExpander .streamlit-expanderHeader {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.stExpander .streamlit-expanderContent {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Fix any remaining Streamlit elements */
+.stSelectbox, .stTextInput, .stNumberInput, .stTextArea,
+.stDateInput, .stTimeInput, .stFileUploader, .stCheckbox, .stRadio, .stSlider {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Fix plotly charts and other embedded content */
+.stPlotlyChart, .stPlotlyChart * {
+  background-color: #ffffff !important;
+}
+
+/* Fix any remaining contrast issues with specific selectors */
+[data-testid="stApp"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+[data-testid="stApp"] * {
+  color: #000000 !important;
+}
+
+/* Exception for headers and buttons */
+[data-testid="stApp"] .main-header,
+[data-testid="stApp"] .main-header *,
+[data-testid="stApp"] .stButton > button {
+  color: #ffffff !important;
 }
