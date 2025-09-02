@@ -9,7 +9,20 @@ import io
 import json
 from typing import Dict, List, Tuple, Optional
 import base64
+
+# Import utility modules
 from utils.template_downloader import generate_employee_template, get_template_info
+from styling import load_css, create_section, create_section_divider, create_section_grid, create_metric_card
+from data_utils import (
+    generate_time_periods, create_sample_employees, create_sample_subcontractors,
+    create_sample_odc, create_sample_tasks, validate_employee_data, validate_subcontractor_data,
+    calculate_employee_metrics, calculate_subcontractor_metrics, detect_duplicate_employees,
+    merge_employee_data
+)
+from chart_utils import (
+    create_revenue_trends_chart, create_employee_heatmap_chart, create_lcat_cost_analysis_chart,
+    create_burn_rate_chart, create_project_metrics_chart, create_financial_summary_chart
+)
 
 # Set page config
 st.set_page_config(
@@ -18,27 +31,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# Load comprehensive Section 508 compliant QuickBooks design CSS
-def load_css():
-    """Load the comprehensive CSS for Section 508 compliance and QuickBooks design"""
-    try:
-        with open('static/custom.css', 'r') as f:
-            css_content = f.read()
-        st.markdown(f'<style>{css_content}</style>', unsafe_allow_html=True)
-        st.success("✅ Section 508 compliant QuickBooks design loaded successfully!")
-    except FileNotFoundError:
-        st.warning("⚠️ CSS file not found. Using default Streamlit styling.")
-        # Fallback to basic QuickBooks-inspired styling
-        st.markdown("""
-        <style>
-            .stApp { background: #f7fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-            .stButton > button { background: #2C7BE5; color: white; border-radius: 8px; padding: 0.75rem 1.5rem; }
-            .stButton > button:hover { background: #2D3748; transform: translateY(-1px); }
-        </style>
-        """, unsafe_allow_html=True)
-    except Exception as e:
-        st.error(f"❌ Error loading CSS: {e}")
 
 # Load the CSS
 load_css()
@@ -133,7 +125,7 @@ class SEASFinancialTracker:
         """Initialize session state variables"""
         # Initialize time_periods first since other methods depend on it
         if 'time_periods' not in st.session_state:
-            st.session_state.time_periods = self.generate_time_periods()
+            st.session_state.time_periods = generate_time_periods()
             
         if 'project_params' not in st.session_state:
             st.session_state.project_params = {
@@ -149,63 +141,17 @@ class SEASFinancialTracker:
             }
             
         if 'employees' not in st.session_state:
-            st.session_state.employees = self.create_sample_employees()
+            st.session_state.employees = create_sample_employees()
         if 'subcontractors' not in st.session_state:
-            st.session_state.subcontractors = self.create_sample_subcontractors()
+            st.session_state.subcontractors = create_sample_subcontractors()
         if 'odc_costs' not in st.session_state:
-            st.session_state.odc_costs = self.create_sample_odc()
+            st.session_state.odc_costs = create_sample_odc()
         if 'tasks' not in st.session_state:
-            st.session_state.tasks = self.create_sample_tasks()
+            st.session_state.tasks = create_sample_tasks()
 
-    def generate_time_periods(self) -> List[str]:
-        """Generate monthly time periods for Base Year and Option Year 1"""
-        periods = []
-        start_date = datetime(2024, 3, 13)
-        
-        # Base Year: March 2024 - March 2025
-        for i in range(12):
-            period_start = start_date + timedelta(days=30*i)
-            period_end = period_start + timedelta(days=29)
-            periods.append(f"{period_start.strftime('%m/%d')}-{period_end.strftime('%m/%d/%y')}")
-        
-        # Option Year 1: March 2025 - March 2026
-        for i in range(12):
-            period_start = start_date + timedelta(days=30*(i+12))
-            period_end = period_start + timedelta(days=29)
-            periods.append(f"{period_start.strftime('%m/%d')}-{period_end.strftime('%m/%d/%y')}")
-            
-        return periods
 
-    def create_sample_employees(self) -> pd.DataFrame:
-        """Create sample employee data based on SEAS spreadsheet"""
-        employees = [
-            {"Name": "Shannon Gueringer", "LCAT": "PM", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 160000, "Current_Salary": 200000, "Hours_Per_Month": 173},
-            {"Name": "Drew Hynes", "LCAT": "PM", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Inactive", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
-            {"Name": "Uyen Tran", "LCAT": "SA/Eng Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 175000, "Hours_Per_Month": 173},
-            {"Name": "Leo Khan", "LCAT": "SA/Eng Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 180000, "Current_Salary": 190000, "Hours_Per_Month": 173},
-            {"Name": "Vitaliy Baklikov", "LCAT": "AI Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 200000, "Current_Salary": 250000, "Hours_Per_Month": 173},
-            {"Name": "Kenny Tran/Lynn Stahl", "LCAT": "HCD Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 130000, "Current_Salary": 150000, "Hours_Per_Month": 173},
-            {"Name": "Emilio Crocco", "LCAT": "Scrum Master", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 110000, "Current_Salary": 110000, "Hours_Per_Month": 173},
-            {"Name": "Robert Melton", "LCAT": "SA/Eng Lead", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 230000, "Current_Salary": 225000, "Hours_Per_Month": 173},
-            {"Name": "Nayeema Nageen", "LCAT": "Scrum Master", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 140000, "Current_Salary": 140000, "Hours_Per_Month": 173},
-            {"Name": "Daniil Goryachev", "LCAT": "Cloud Data Engineer", "Employee_Type": "Employee", "Company": "Skyward IT Solutions", "Status": "Active", "Priced_Salary": 90000, "Current_Salary": 90000, "Hours_Per_Month": 173},
-            {"Name": "Adrien Adams", "LCAT": "Data Systems SME", "Employee_Type": "Subcontractor", "Company": "BEELINE", "Status": "Active", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
-            {"Name": "Paulina Fisher", "LCAT": "HCD Researcher", "Employee_Type": "Subcontractor", "Company": "Self Employed", "Status": "Active", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
-            {"Name": "Andrew Sung", "LCAT": "Full Stack Dev", "Employee_Type": "Subcontractor", "Company": "Friends", "Status": "Active", "Priced_Salary": 0, "Current_Salary": 0, "Hours_Per_Month": 173},
-        ]
-        
-        df = pd.DataFrame(employees)
-        
-        # Calculate hourly rates
-        df['Hourly_Rate'] = df['Current_Salary'] / (df['Hours_Per_Month'] * 12 / 12)  # Annual to monthly rate
-        df['Hourly_Rate'] = df['Hourly_Rate'] / df['Hours_Per_Month'] * 40 * 4.33  # Approximate monthly hourly rate
-        
-        # Add monthly hours columns (initialize with zeros)
-        for period in st.session_state.time_periods:
-            df[f'Hours_{period}'] = 0.0
-            df[f'Revenue_{period}'] = 0.0
-            
-        return df
+
+
 
     # ============================================================================
     # Modular Section Content Helper Methods
@@ -216,22 +162,20 @@ class SEASFinancialTracker:
         employees_df = st.session_state.employees
         
         if not employees_df.empty:
+            # Use utility function to calculate metrics
+            metrics = calculate_employee_metrics(employees_df)
+            
             # Create metric cards using Streamlit columns
             col1, col2, col3, col4 = st.columns(4)
             
-            total_employees = len(employees_df)
-            active_employees = len(employees_df[employees_df['Status'] == 'Active'])
-            total_salary = employees_df['Current_Salary'].sum()
-            avg_salary = employees_df['Current_Salary'].mean()
-            
             with col1:
-                st.metric("Total Employees", total_employees, "+2 this month")
+                st.metric("Total Employees", metrics['total_employees'], "+2 this month")
             with col2:
-                st.metric("Active Employees", active_employees)
+                st.metric("Active Employees", metrics['active_employees'])
             with col3:
-                st.metric("Total Salary", f"${total_salary:,.0f}")
+                st.metric("Total Salary", f"${metrics['total_salary']:,.0f}")
             with col4:
-                st.metric("Avg Salary", f"${avg_salary:,.0f}")
+                st.metric("Avg Salary", f"${metrics['average_salary']:,.0f}")
             
             # Add breakdown summary using Streamlit columns
             st.markdown("### 📊 Employee Breakdown")
@@ -773,6 +717,10 @@ class SEASFinancialTracker:
         st.markdown("### 📊 Project Progress")
         st.progress(completion_pct / 100)
         st.markdown(f"**{completion_pct:.1f}% Complete** - {actual_hours:,.0f} of {eac_hours:,.0f} hours")
+        
+        # Add chart visualization
+        fig = create_project_metrics_chart(params)
+        st.plotly_chart(fig, width='stretch', key="project_metrics_chart")
     
     def _create_financial_summary_content(self):
         """Create content for financial summary section"""
@@ -833,6 +781,10 @@ class SEASFinancialTracker:
             st.metric("📊 Profit Margin", f"{profit_margin:.1f}%")
         with col4:
             st.metric("🎯 Recalculated Revenue", f"${recalculated_revenue:,.2f}")
+        
+        # Add chart visualization
+        fig = create_financial_summary_chart(params)
+        st.plotly_chart(fig, width='stretch', key="financial_summary_chart")
     
     def _create_cost_analysis_content(self):
         """Create content for cost analysis section"""
@@ -1290,27 +1242,9 @@ class SEASFinancialTracker:
             
         return df
 
-    def create_sample_odc(self) -> pd.DataFrame:
-        """Create sample ODC (Other Direct Costs) data"""
-        odc_data = []
-        for i, period in enumerate(st.session_state.time_periods):
-            amount = 472855.83 if i == 6 else 0.0  # Large ODC in 7th month as per spreadsheet
-            odc_data.append({"Period": period, "Amount": amount, "Description": "Infrastructure Costs"})
-            
-        return pd.DataFrame(odc_data)
 
-    def create_sample_tasks(self) -> pd.DataFrame:
-        """Create sample task breakdown data"""
-        tasks = [
-            {"Task_ID": "0001AA", "Task_Name": "CEDAR and KMP Transition", "LCAT": "AI Lead (KEY)", 
-             "Person_Org": "OPERATIONS", "Person": "Baklikov, Vitaliy", "Hours": 984, "Cost": 118292.52},
-            {"Task_ID": "0001AA", "Task_Name": "CEDAR and KMP Transition", "LCAT": "Cloud Data Engineers", 
-             "Person_Org": "PROGRAM", "Person": "Anton, Jason", "Hours": 734.75, "Cost": 74832.42},
-            {"Task_ID": "0001AA", "Task_Name": "CEDAR and KMP Transition", "LCAT": "Infrastructure Lead/SRE", 
-             "Person_Org": "V-AQUIA", "Person": "Hardison, William", "Hours": 831, "Cost": 136901.52},
-        ]
-        
-        return pd.DataFrame(tasks)
+
+
 
     def calculate_hourly_rate(self, salary: float, hours_per_month: float) -> float:
         """Calculate hourly rate from annual salary"""
@@ -1548,140 +1482,36 @@ class SEASFinancialTracker:
     def _create_revenue_trends_content(self):
         """Create content for revenue trends section"""
         employees_df = st.session_state.employees
-        revenue_by_month = {}
+        subcontractors_df = st.session_state.subcontractors
         
-        for period in st.session_state.time_periods:
-            revenue_col = f'Revenue_{period}'
-            if revenue_col in employees_df.columns:
-                revenue_by_month[period] = employees_df[revenue_col].sum()
-        
-        if revenue_by_month:
-            revenue_df = pd.DataFrame(list(revenue_by_month.items()), 
-                                    columns=['Period', 'Revenue'])
-            
-            fig = px.line(revenue_df, x='Period', y='Revenue', 
-                         title='Direct Labor Revenue by Month',
-                         color_discrete_sequence=['#2E5BBA'])
-            fig.update_layout(
-                xaxis_tickangle=45,
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(size=12),
-                margin=dict(t=50, l=50, r=50, b=50)
-            )
-            st.plotly_chart(fig, width='stretch', key="revenue_trends_chart")
-        else:
-            st.info("No revenue data available for visualization.")
+        # Use utility function to create the chart
+        fig = create_revenue_trends_chart(employees_df, subcontractors_df)
+        st.plotly_chart(fig, width='stretch', key="revenue_trends_chart")
 
     def _create_employee_heatmap_content(self):
         """Create content for employee heatmap section"""
         employees_df = st.session_state.employees
-        hours_columns = [col for col in employees_df.columns if col.startswith('Hours_')]
         
-        if hours_columns:
-            heatmap_data = employees_df[['Name'] + hours_columns].set_index('Name')
-            
-            # Rename columns for better display
-            period_names = [col.replace('Hours_', '') for col in hours_columns]
-            heatmap_data.columns = period_names
-            
-            fig = px.imshow(heatmap_data.values, 
-                           x=period_names,
-                           y=heatmap_data.index,
-                           aspect="auto",
-                           title="Employee Hours by Month",
-                           color_continuous_scale='Viridis')
-            fig.update_layout(
-                xaxis_tickangle=45,
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(size=12),
-                margin=dict(t=50, l=50, r=50, b=50)
-            )
-            st.plotly_chart(fig, width='stretch', key="employee_heatmap_chart")
-        else:
-            st.info("No hours data available for heatmap visualization.")
+        # Use utility function to create the chart
+        fig = create_employee_heatmap_chart(employees_df)
+        st.plotly_chart(fig, width='stretch', key="employee_heatmap_chart")
 
     def _create_lcat_cost_analysis_content(self):
         """Create content for LCAT cost analysis section"""
         employees_df = st.session_state.employees
-        lcat_revenue = employees_df.groupby('LCAT').agg({
-            col: 'sum' for col in employees_df.columns if col.startswith('Revenue_')
-        }).sum(axis=1).reset_index()
-        lcat_revenue.columns = ['LCAT', 'Total_Revenue']
         
-        if not lcat_revenue.empty:
-            fig = px.bar(lcat_revenue, x='LCAT', y='Total_Revenue',
-                        title='Total Revenue by Labor Category',
-                        color_discrete_sequence=['#2E5BBA'])
-            fig.update_layout(
-                xaxis_tickangle=45,
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(size=12),
-                margin=dict(t=50, l=50, r=50, b=50)
-            )
-            st.plotly_chart(fig, width='stretch', key="lcat_cost_chart")
-        else:
-            st.info("No LCAT data available for cost analysis.")
+        # Use utility function to create the chart
+        fig = create_lcat_cost_analysis_chart(employees_df)
+        st.plotly_chart(fig, width='stretch', key="lcat_cost_chart")
 
     def _create_burn_rate_content(self):
         """Create content for burn rate analysis section"""
         employees_df = st.session_state.employees
-        params = st.session_state.project_params
-        actual_hours = params['actual_hours']
-        eac_hours = params['eac_hours']
+        subcontractors_df = st.session_state.subcontractors
         
-        # Calculate cumulative hours and costs over time
-        cumulative_hours = []
-        cumulative_costs = []
-        periods = []
-        
-        running_hours = 0
-        running_costs = 0
-        
-        for period in st.session_state.time_periods:
-            hours_col = f'Hours_{period}'
-            revenue_col = f'Revenue_{period}'
-            
-            if hours_col in employees_df.columns:
-                period_hours = employees_df[hours_col].sum()
-                period_revenue = employees_df[revenue_col].sum()
-                
-                running_hours += period_hours
-                running_costs += period_revenue
-                
-                periods.append(period)
-                cumulative_hours.append(running_hours)
-                cumulative_costs.append(running_costs)
-        
-        if periods:
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-            
-            fig.add_trace(
-                go.Scatter(x=periods, y=cumulative_hours, name="Cumulative Hours"),
-                secondary_y=False,
-            )
-            
-            fig.add_trace(
-                go.Scatter(x=periods, y=cumulative_costs, name="Cumulative Costs"),
-                secondary_y=True,
-            )
-            
-            fig.update_xaxes(title_text="Period", tickangle=45)
-            fig.update_yaxes(title_text="Hours", secondary_y=False)
-            fig.update_yaxes(title_text="Costs ($)", secondary_y=True)
-            fig.update_layout(
-                title_text="Cumulative Hours and Costs",
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(size=12),
-                margin=dict(t=50, l=50, r=50, b=50)
-            )
-            
-            st.plotly_chart(fig, width='stretch', key="burn_rate_chart")
-        else:
-            st.info("No time period data available for burn rate analysis.")
+        # Use utility function to create the chart
+        fig = create_burn_rate_chart(employees_df, subcontractors_df)
+        st.plotly_chart(fig, width='stretch', key="burn_rate_chart")
 
     def create_tasks_tab(self):
         """Create task management tab with modular design"""
