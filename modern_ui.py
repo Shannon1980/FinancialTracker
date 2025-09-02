@@ -198,37 +198,129 @@ class ModernUI:
             outline: none;
         }
         
-        /* Button Improvements */
-        .stButton > button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            padding: var(--spacing-sm) var(--spacing-lg);
-            font-size: 1rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
+        /* QuickBooks Design System - Buttons */
+        :root {
+            --qb-blue: #365ebf;          /* Intuit Blue */
+            --qb-gray: #5D686F;          /* Secondary Gray */
+            --qb-teal: #00857a;          /* Complementary Teal */
         }
-        
-        .stButton > button:hover {
-            background: #0056b3;
+
+        /* Primary Button (QB Blue) */
+        .stButton > button[data-testid="baseButton-primary"],
+        .stDownloadButton > button[data-testid="baseButton-primary"],
+        .stLinkButton > a[data-testid="baseLinkButton-primary"] {
+            background: var(--qb-blue);
+            color: #ffffff;
+            border: 1px solid var(--qb-blue);
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            line-height: 20px;
+            min-height: 44px; /* Accessibility touch target */
+            font-weight: 600;
+            transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+        }
+
+        .stButton > button[data-testid="baseButton-primary"]:hover,
+        .stDownloadButton > button[data-testid="baseButton-primary"]:hover,
+        .stLinkButton > a[data-testid="baseLinkButton-primary"]:hover {
+            background: #2f53a6;
+            box-shadow: 0 2px 6px rgba(54, 94, 191, 0.25);
             transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
         }
-        
-        .stButton > button:active {
+
+        .stButton > button[data-testid="baseButton-primary"]:active,
+        .stDownloadButton > button[data-testid="baseButton-primary"]:active {
+            background: #28488f;
             transform: translateY(0);
         }
-        
-        /* Success Button */
-        .stButton > button[data-testid="baseButton-secondary"] {
-            background: var(--success-color);
+
+        .stButton > button[data-testid="baseButton-primary"]:focus-visible,
+        .stDownloadButton > button[data-testid="baseButton-primary"]:focus-visible {
+            outline: 3px solid rgba(54, 94, 191, 0.35);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 3px rgba(54, 94, 191, 0.25);
         }
-        
-        .stButton > button[data-testid="baseButton-secondary"]:hover {
-            background: #059669;
+
+        .stButton > button[data-testid="baseButton-primary"][disabled] {
+            background: #9AA7B2;
+            border-color: #9AA7B2;
+            opacity: 0.6;
+            cursor: not-allowed;
         }
+
+        /* Secondary Button (Outlined QB Blue) */
+        .stButton > button[data-testid="baseButton-secondary"],
+        .stDownloadButton > button[data-testid="baseButton-secondary"],
+        .stLinkButton > a[data-testid="baseLinkButton-secondary"] {
+            background: #ffffff;
+            color: var(--qb-blue);
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            line-height: 20px;
+            min-height: 44px;
+            font-weight: 600;
+            transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .stButton > button[data-testid="baseButton-secondary"]:hover,
+        .stDownloadButton > button[data-testid="baseButton-secondary"]:hover {
+            background: #F5F7FA;
+            border-color: #94A3B8;
+        }
+
+        .stButton > button[data-testid="baseButton-secondary"]:active {
+            background: #EEF2F7;
+            border-color: #94A3B8;
+        }
+
+        .stButton > button[data-testid="baseButton-secondary"]:focus-visible {
+            outline: 3px solid rgba(54, 94, 191, 0.35);
+            outline-offset: 2px;
+        }
+
+        .stButton > button[data-testid="baseButton-secondary"][disabled] {
+            color: #9AA7B2;
+            border-color: #E2E8F0;
+            background: #F8FAFC;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Tertiary/Subtle Button (Text with underline on hover) */
+        .qb-tertiary-btn {
+            background: transparent;
+            color: var(--qb-blue);
+            border: none;
+            padding: 8px 4px;
+            font-size: 16px;
+            min-height: 44px;
+            border-radius: 6px;
+        }
+
+        .qb-tertiary-btn:hover { text-decoration: underline; background: #F5F7FA; }
+        .qb-tertiary-btn:focus-visible { outline: 3px solid rgba(54, 94, 191, 0.35); outline-offset: 2px; }
+        .qb-tertiary-btn[disabled] { color: #9AA7B2; opacity: 0.6; cursor: not-allowed; }
+
+        /* QB Containers */
+        .qb-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px; /* 4px grid */
+            padding: 16px; /* 4px grid */
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+        }
+
+        .qb-card--elevated { box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1); }
+
+        .qb-card__header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #E5E7EB;
+        }
+
+        .qb-container { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; }
         
         /* Alert Components */
         .alert {
