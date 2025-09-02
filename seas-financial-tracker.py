@@ -38,22 +38,18 @@ load_css()
 # Additional aggressive CSS injection to fix white-on-white text
 st.markdown("""
 <style>
-/* ULTRA-AGGRESSIVE WHITE-ON-WHITE TEXT FIXES */
-/* Force black text on ALL elements */
-* {
+/* TARGETED WHITE-ON-WHITE TEXT FIXES */
+/* Force black text on text elements only */
+p, span, h1, h2, h3, h4, h5, h6, 
+label, td, th, li, a, strong, em {
     color: #000000 !important;
 }
 
-/* Override any white text */
-*[style*="color: white"],
-*[style*="color: #ffffff"],
-*[style*="color: #fff"] {
+/* Override any white text on light backgrounds */
+*[style*="color: white"][style*="background-color: white"],
+*[style*="color: #ffffff"][style*="background-color: #ffffff"],
+*[style*="color: #fff"][style*="background-color: #fff"] {
     color: #000000 !important;
-}
-
-/* Force white backgrounds for all elements */
-* {
-    background-color: #ffffff !important;
 }
 
 /* Only allow white text on dark backgrounds */
@@ -65,25 +61,14 @@ button[style*="background-color: #004085"],
     color: #ffffff !important;
 }
 
-/* Override Streamlit's default styles */
-.stApp, .stApp * {
-    color: #000000 !important;
-    background-color: #ffffff !important;
-}
-
-/* Force black text on all text elements */
-p, span, div, h1, h2, h3, h4, h5, h6, 
-label, td, th, li, a, strong, em {
-    color: #000000 !important;
-    background-color: #ffffff !important;
-}
-
-/* Ensure employee information is visible */
+/* Ensure Streamlit elements are visible and have proper contrast */
 .stDataFrame, .stDataFrame *,
 .stTable, .stTable *,
 .stMetric, .stMetric *,
 .stColumns, .stColumns *,
-.stMarkdown, .stMarkdown * {
+.stMarkdown, .stMarkdown *,
+.stProgress, .stProgress *,
+.stPlotlyChart, .stPlotlyChart * {
     color: #000000 !important;
     background-color: #ffffff !important;
     visibility: visible !important;
@@ -95,11 +80,95 @@ label, td, th, li, a, strong, em {
 [data-testid="stTable"],
 [data-testid="stMetric"],
 [data-testid="stColumns"],
-[data-testid="stMarkdown"] {
+[data-testid="stMarkdown"],
+[data-testid="stProgress"],
+[data-testid="stPlotlyChart"] {
     color: #000000 !important;
     background-color: #ffffff !important;
     visibility: visible !important;
     display: block !important;
+}
+
+/* Enhanced section contrast and visibility */
+.section-container {
+    background-color: #f8f9fa !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    margin: 1rem 0 !important;
+}
+
+.section-header {
+    background-color: #e3f2fd !important;
+    border-bottom: 2px solid #0073E6 !important;
+    padding: 0.75rem !important;
+    margin: -1rem -1rem 1rem -1rem !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.section-content {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    padding: 0.5rem !important;
+}
+
+/* Different section types with distinct colors */
+.info-section {
+    border-left: 4px solid #0073E6 !important;
+    background-color: #f0f8ff !important;
+}
+
+.success-section {
+    border-left: 4px solid #28a745 !important;
+    background-color: #f0fff4 !important;
+}
+
+.warning-section {
+    border-left: 4px solid #ffc107 !important;
+    background-color: #fffbf0 !important;
+}
+
+.danger-section {
+    border-left: 4px solid #dc3545 !important;
+    background-color: #fff5f5 !important;
+}
+
+/* Metric cards with better contrast */
+.metric-card {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.metric-title {
+    color: #495057 !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+}
+
+.metric-value {
+    color: #000000 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+}
+
+/* Progress bars with better visibility */
+.stProgress > div > div > div {
+    background-color: #0073E6 !important;
+}
+
+.stProgress > div > div {
+    background-color: #e9ecef !important;
+}
+
+/* Charts and visualizations */
+.stPlotlyChart {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1502,39 +1571,42 @@ class SEASFinancialTracker:
     def create_overview_tab(self):
         """Create overview dashboard with enhanced modular design"""
         
-        # Enhanced section with card styling
+        # Project Metrics with enhanced section styling
         st.markdown("""
-        <div class="qb-section">
-            <div class="qb-section-header">
-                <h2 class="qb-section-title">📊 Project Metrics</h2>
+        <div class="section-container info-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">📊 Project Metrics</h2>
             </div>
-        </div>
+            <div class="section-content">
         """, unsafe_allow_html=True)
         self._create_project_metrics_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Financial Summary with enhanced styling
         st.markdown("""
-        <div class="qb-section">
-            <div class="qb-section-header">
-                <h2 class="qb-section-title">💰 Financial Summary</h2>
+        <div class="section-container success-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">💰 Financial Summary</h2>
             </div>
-        </div>
+            <div class="section-content">
         """, unsafe_allow_html=True)
         self._create_financial_summary_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Cost Analysis with enhanced styling
         st.markdown("""
-        <div class="qb-section">
-            <div class="qb-section-header">
-                <h2 class="qb-section-title">📈 Cost Analysis</h2>
+        <div class="section-container warning-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">📈 Cost Analysis</h2>
             </div>
-        </div>
+            <div class="section-content">
         """, unsafe_allow_html=True)
         self._create_cost_analysis_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
 
 
@@ -1561,38 +1633,80 @@ class SEASFinancialTracker:
         """Create direct labor management tab with modular design"""
         
         # Section 1: Employee Summary
-        st.markdown("## 📊 Employee Summary")
+        st.markdown("""
+        <div class="section-container info-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">📊 Employee Summary</h2>
+            </div>
+            <div class="section-content">
+        """, unsafe_allow_html=True)
         self._create_employee_summary_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Section 2: Template Download
-        st.markdown("## 📋 Download Templates")
+        st.markdown("""
+        <div class="section-container success-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">📋 Download Templates</h2>
+            </div>
+            <div class="section-content">
+        """, unsafe_allow_html=True)
         self._create_template_download_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Section 3: Data Upload
-        st.markdown("## 📁 Data Upload")
+        st.markdown("""
+        <div class="section-container warning-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">📁 Data Upload</h2>
+            </div>
+            <div class="section-content">
+        """, unsafe_allow_html=True)
         self._create_upload_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Section 4: Employee Management
-        st.markdown("## 👥 Employee Management")
+        st.markdown("""
+        <div class="section-container info-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">👥 Employee Management</h2>
+            </div>
+            <div class="section-content">
+        """, unsafe_allow_html=True)
         self._create_employee_management_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Section 5: Employee Detail View
-        st.markdown("## 👁️ Employee Detail View")
+        st.markdown("""
+        <div class="section-container success-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">👁️ Employee Detail View</h2>
+            </div>
+            <div class="section-content">
+        """, unsafe_allow_html=True)
         self._create_employee_detail_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Section 6: Editable Employee Profiles
-        st.markdown("## ✏️ Editable Employee Profiles")
+        st.markdown("""
+        <div class="section-container warning-section">
+            <div class="section-header">
+                <h2 style="color: #000000; margin: 0;">✏️ Editable Employee Profiles</h2>
+            </div>
+            <div class="section-content">
+        """, unsafe_allow_html=True)
         self._create_editable_employee_profile_content()
+        st.markdown("</div></div>", unsafe_allow_html=True)
         
         # Update calculations
         self.update_employee_calculations()

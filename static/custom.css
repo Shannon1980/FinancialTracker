@@ -1654,16 +1654,14 @@ input, textarea, select {
   color: #ffffff !important;
 }
 
-/* ULTRA-AGGRESSIVE WHITE-ON-WHITE FIXES */
-/* Override ALL possible white text scenarios */
-html, body, div, span, p, h1, h2, h3, h4, h5, h6, 
+/* TARGETED WHITE-ON-WHITE FIXES */
+/* Override text elements only - don't force backgrounds on all elements */
+p, span, h1, h2, h3, h4, h5, h6, 
 a, strong, em, small, mark, del, ins, sub, sup,
 ul, ol, li, dl, dt, dd, blockquote, pre, code,
 table, thead, tbody, tfoot, tr, th, td,
-form, fieldset, legend, label, input, textarea, select, button,
-section, article, aside, nav, header, footer, main {
+form, fieldset, legend, label, input, textarea, select, button {
   color: #000000 !important;
-  background-color: #ffffff !important;
 }
 
 /* Force black text on ALL Streamlit elements */
@@ -1724,4 +1722,110 @@ button[style*="background-color: #004085"],
 .main-header *,
 [class*="header"] {
   color: #ffffff !important;
+}
+
+/* Enhanced section contrast and visibility */
+.section-container {
+  background-color: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 8px !important;
+  padding: 1rem !important;
+  margin: 1rem 0 !important;
+}
+
+.section-header {
+  background-color: #e3f2fd !important;
+  border-bottom: 2px solid #0073E6 !important;
+  padding: 0.75rem !important;
+  margin: -1rem -1rem 1rem -1rem !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.section-content {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  padding: 0.5rem !important;
+}
+
+/* Different section types with distinct colors */
+.info-section {
+  border-left: 4px solid #0073E6 !important;
+  background-color: #f0f8ff !important;
+}
+
+.success-section {
+  border-left: 4px solid #28a745 !important;
+  background-color: #f0fff4 !important;
+}
+
+.warning-section {
+  border-left: 4px solid #ffc107 !important;
+  background-color: #fffbf0 !important;
+}
+
+.danger-section {
+  border-left: 4px solid #dc3545 !important;
+  background-color: #fff5f5 !important;
+}
+
+/* Metric cards with better contrast */
+.metric-card {
+  background-color: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 8px !important;
+  padding: 1rem !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.metric-title {
+  color: #495057 !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+}
+
+.metric-value {
+  color: #000000 !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+/* Progress bars with better visibility */
+.stProgress > div > div > div {
+  background-color: #0073E6 !important;
+}
+
+.stProgress > div > div {
+  background-color: #e9ecef !important;
+}
+
+/* Charts and visualizations */
+.stPlotlyChart {
+  background-color: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 8px !important;
+  padding: 1rem !important;
+}
+
+/* Ensure all content is visible */
+.stDataFrame, .stTable, .stMetric, .stProgress, .stPlotlyChart {
+  visibility: visible !important;
+  display: block !important;
+  opacity: 1 !important;
+}
+
+/* Tab content visibility */
+.stTabs [data-baseweb="tab-panel"] {
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Sidebar content visibility */
+.stSidebar .stMarkdown,
+.stSidebar .stSelectbox,
+.stSidebar .stTextInput,
+.stSidebar .stNumberInput {
+  visibility: visible !important;
+  display: block !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
 }
