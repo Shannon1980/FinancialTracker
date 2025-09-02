@@ -39,8 +39,8 @@ The app will automatically:
 
 ### Step 4: Access Your App
 
-Your app will be available at:
-`https://seas-financial-tracker.streamlit.app`
+Your app is now live at:
+`https://projectfintracker.streamlit.app/`
 
 ## 🔧 Troubleshooting
 
